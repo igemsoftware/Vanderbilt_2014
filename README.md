@@ -28,6 +28,7 @@ merge automatic annotation and version control technologies for the greater good
     * [reference](http://en.wikipedia.org/wiki/Genome_project#Genome_annotation)
     * more:
         * http://www.hsls.pitt.edu/obrc/index.php?page=genome_browsers_annotation_analysis (like a million items)
+        * ensembl is only for eukaryotic cells and is therefore useless
         * https://www.basys.ca/
     * ideas for integrating annotation:
         * delimit with newlines all recognized codon sequences
