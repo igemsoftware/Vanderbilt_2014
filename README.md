@@ -23,7 +23,7 @@ merge automatic annotation and version control technologies for the greater good
 * they'll just need to add modifications back into the original codebase, which is actually totally great
 * the automatic annotation engine might also be licensed, but there are few more restrictive than the gpl, so it's highly likely they'll be fine
 
-##### current next steps
+### current next steps
 1. need automatic annotation engine (currently focusing just on prokaryotes, or if required even just E.coli/plasmids. we need to get this out /fast/)
     * [reference](http://en.wikipedia.org/wiki/Genome_project#Genome_annotation)
     * more:
