@@ -5,7 +5,7 @@ track changes as a genome evolves over time
 
 merge automatic annotation and version control technologies for the greater good
 
-(this repository will eventually be deleted and reborn as a git fork)
+(this repository will eventually be deleted and reborn as a fork of the git git repository)
 
 # MVP
 1. (user) easy, standardized, useful collaborative tracking of changes
