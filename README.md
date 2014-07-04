@@ -23,7 +23,7 @@ merge automatic annotation and version control technologies for the greater good
 * they'll just need to add modifications back into the original codebase, which is actually totally great
 * the automatic annotation engine might also be licensed, but there are few more restrictive than the gpl, so it's highly likely they'll be fine
 
-### current next steps
+## current next steps
 1. need automatic annotation engine (currently focusing just on prokaryotes, or if required even just E.coli/plasmids. we need to get this out /fast/)
     * [reference](http://en.wikipedia.org/wiki/Genome_project#Genome_annotation)
     * more:
@@ -47,13 +47,13 @@ merge automatic annotation and version control technologies for the greater good
             * well....................maybe we can, if we cache the auto-annotation procedure so that it runs a very small number of times, and only lengthy when the file is first added
     2. should keep in mind the ability to work with git gui, too; no need to remake yet another wheel and biologists don't like command lines
 
-##### thought process:
+## thought process:
 1. stick this onto git somehow. we're not going to reinvent an incredibly well-crafted wheel.
 2. git is great at line-based differentation. git is not great at dealing with a single very long string i.e. DNA data.
 3. we need some way to differentiate between different logical parts of DNA so we can diff at the finest possible granularity.
 4. wait...................AUTOMATIC ANNOTATION!!! extend this idea to split DNA semantically as best as possible
 
-##### questions/notes:
+## questions/notes:
 * do we need to fundamentally modify git itself, or can we just wrap git with a few scripts and therefore just use the copy of git already installed?
 * do we assume the user will track only a single file at a time? because plasmid files are typically monolithic and don't rely upon one another? does that matter?
 * do we attempt to diff by character as well, if a user wishes to make a line-item mutation?
