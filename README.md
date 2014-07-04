@@ -36,8 +36,7 @@ merge automatic annotation and version control technologies for the greater good
         * need method of merging single-character (or multiple-character!) mutations without freaking out
     * 'BLAST' is method of determining DNA sequence similarity to existing sequences, used in most auto-annotation programs
     1. [NCBI Prokaryotic Genome Annotation Pipeline](http://www.ncbi.nlm.nih.gov/genome/annotation_prok/)
-        * not usable for our purposes (not exportable), but documentation as to how it's done is available, and may be useful
-    2. 
+        * not usable for our purposes (not exportable), but documentation as to how it's done is available, and may be useful 
 2. need to develop method of integration with git
     1. can add a hook onto the diff method, and all other appropriate methods, which converts file into delimited format according to annotation
         * would need to ensure that files are kept the same on disk so that ApE/whatever can access them easily and biologists aren't confused
