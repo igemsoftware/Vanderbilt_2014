@@ -3,6 +3,13 @@ darwin
 
 track changes as a genome evolves over time
 
+### MVP
+1. (user) easy, standardized, useful collaborative tracking of changes
+2. (user) entire history and changelog easily transferable from place to place
+3. (vendor) diffs compressed immensely compared to naive methods
+4. (vendor) security increased through hash-checking and decentralized control
+    * decentralized: if a single server with data is compromised, other mirrors can convene and determine which is truly correct. like bitcoin's model.
+
 ####current thought process:
 
 1. stick this onto git somehow. we're not going to reinvent an incredibly well-crafted wheel.
@@ -17,9 +24,3 @@ track changes as a genome evolves over time
 * which filetypes do we support?
 * will automatic annotation become incredibly cumbersome to use?
 
-### MVP
-1. (user) easy, standardized, useful collaborative tracking of changes
-2. (user) entire history and changelog easily transferable from place to place
-3. (vendor) diffs compressed immensely compared to naive methods
-4. (vendor) security increased through hash-checking and decentralized control
-    * decentralized: if a single server with data is compromised, other mirrors can convene and determine which is truly correct. like bitcoin's model.
