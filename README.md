@@ -54,6 +54,7 @@ merge automatic annotation and version control technologies for the greater good
 
 ## questions/notes:
 * do we need to fundamentally modify git itself, or can we just wrap git with a few scripts and therefore just use the copy of git already installed?
+    * this would mean we wouldn't need to release under the GPL; we'll have to see where that goes
 * do we assume the user will track only a single file at a time? because plasmid files are typically monolithic and don't rely upon one another? does that matter?
 * do we attempt to diff by character as well, if a user wishes to make a line-item mutation?
 * which filetypes do we support?
