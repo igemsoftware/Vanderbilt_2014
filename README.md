@@ -3,6 +3,8 @@ darwin
 
 track changes as a genome evolves over time
 
+simply merge automatic annotation and version control technologies for the greater good
+
 ### MVP
 1. (user) easy, standardized, useful collaborative tracking of changes
 2. (user) entire history and changelog easily transferable from place to place
