@@ -1,11 +1,12 @@
 darwin
 ======
 
-track changes as a genome evolves over time
+track changes as a genome evolves over time (hence the name)
 
-merge automatic annotation and version control technologies for the greater good
-
-(this repository will eventually be deleted and reborn as a fork of the git git repository)
+##### intent:
+* merge automatic annotation and version control technologies
+	* this was benchling's pitch but they're not open source
+* if putting in some interim layer above git turns out to work really well, this could be extensible to essentially any data, not just DNA
 
 # MVP
 1. (user) easy, standardized, useful collaborative tracking of changes
@@ -13,15 +14,18 @@ merge automatic annotation and version control technologies for the greater good
 3. (vendor) diffs compressed immensely compared to naive methods
 4. (vendor) security increased through hash-checking and decentralized control
     * decentralized: if a single server with data is compromised, other mirrors can convene and determine which is truly correct; like bitcoin's model.
+* it's not like git, because it's specially made for genomic data (git is not granular enough)
+* it's not like existing tools, because they don't have the kind of itemized change tracking that git does (existing tools are too granular) (or just nonfree)
+
 
 ## licensing (THIS IS REALLY IMPORTANT IF WE WANT THIS TO EVER GET OFF THE GROUND)
 * [reference](http://www.gnu.org/licenses/gpl.html)
 * git is licensed under the GPL v2 (and other compatible licenses but mostly that)
-* therefore this software must also be licensed under the gpl v2
-* however, "executing the software on a computer" does not comprise distribution; otherwise no business would be able to use any gpl tools
-* so if some corporation wishes to use this software commercially, they're fine, as long as they don't modify it on their own system and offer that version to consumers
-* they'll just need to add modifications back into the original codebase, which is actually totally great
-* the automatic annotation engine might also be licensed, but there are few more restrictive than the gpl, so it's highly likely they'll be fine
+* however, if this software does not modify the git code, but merely creates some layer to call git on (unmodified, without dynamically sharing data), then we're in the clear
+* consider merits of gpl, though:
+	* so if some corporation wishes to use this software commercially, they're fine, as long as they don't modify it on their own system and offer that version to consumers
+	* they'll just need to add modifications back into the original codebase, which is actually totally great
+	* the automatic annotation engine might also be licensed
 
 ## current next steps
 1. need automatic annotation engine (currently focusing just on prokaryotes, or if required even just E.coli/plasmids. we need to get this out /fast/)
@@ -29,14 +33,13 @@ merge automatic annotation and version control technologies for the greater good
     * more:
         * http://www.hsls.pitt.edu/obrc/index.php?page=genome_browsers_annotation_analysis (like a million items)
         * ensembl is only for eukaryotic cells and is therefore useless
-        * https://www.basys.ca/
     * ideas for integrating annotation:
         * delimit with newlines all recognized codon sequences
         * have unrecognized or junk contiguous sequences on a newline
         * need method of merging single-character (or multiple-character!) mutations without freaking out
     * 'BLAST' is method of determining DNA sequence similarity to existing sequences, used in most auto-annotation programs
-    1. [NCBI Prokaryotic Genome Annotation Pipeline](http://www.ncbi.nlm.nih.gov/genome/annotation_prok/)
-        * not usable for our purposes (not exportable), but documentation as to how it's done is available, and may be useful 
+    * [NCBI Prokaryotic Genome Annotation Pipeline](http://www.ncbi.nlm.nih.gov/genome/annotation_prok/)
+        * not usable for our purposes (not exportable), but documentation as to how it's done is available, and may be useful
 2. need to develop method of integration with git
     1. can add a hook onto the diff method, and all other appropriate methods, which converts file into delimited format according to annotation
         * would need to ensure that files are kept the same on disk so that ApE/whatever can access them easily and biologists aren't confused
@@ -45,6 +48,9 @@ merge automatic annotation and version control technologies for the greater good
         * we CANNOT use something that goes out to the web to check up on data; if necessary we'll keep all the annotation data locally and update it when the application is updated
             * well....................maybe we can, if we cache the auto-annotation procedure so that it runs a very small number of times, and only lengthy when the file is first added
     2. should keep in mind the ability to work with git gui, too; no need to remake yet another wheel and biologists don't like command lines
+    3. each individual line is gonna be insanely long (gfp is 238 amino acids, for example, in a single ORF) compared to standard diff, even with annotation and split by ORF
+		* potential methods then include marking each individual character change
+		* this could potentially get very slow very quickly when attempting to apply diffs
 
 ## thought process:
 1. stick this onto git somehow. we're not going to reinvent an incredibly well-crafted wheel.
