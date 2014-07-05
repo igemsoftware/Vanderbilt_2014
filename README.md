@@ -28,6 +28,18 @@ track changes as a genome evolves over time (hence the name)
 		2. the best way to handle individual character replacements
 	* method of detecting DNA region and not any metadata (should be just "find where AGCT starts" but may require more thought)
 	* consider that since DNA data is only AGCT, there can be an *immense* amount of compression possible for diffing
+		* in addition, each section can be further compressed into amino acid codes, making lines and diffs 3x smaller
+		* although silent mutations *do* matter (http://en.wikipedia.org/wiki/Synonymous_mutation); would need some small extra value to distinguish between these
+		* make a MASSIVE table to decode the entire DNA data from as few bits as possible
+		* consider making huffman code from relative frequencies of amino acids (nucleotides are p close to 25/25/25/25, but aminos are most def **not**)
+			* http://www.tiem.utk.edu/~gross/bioed/webmodules/aminoacid.htm for more infos on the above
+	* insertions and deletions within a gene (or any strip of DNA) called 'indels;' there may already exist methods to deal with them
+	* adding functionality for new filetypes is actually incredibly easy as long as it has that DNA data (which is the reason why this needs to exist)
+		* there can be a 'sequence recognizer' function to recognize when the long-form DNA sequence has been encountered, and begin the create-diff process
+		* weird filetypes that don't just dump the sequence data into a single section might be weird, and have to be handled specially
+	* if we're targeting labs or governments, they're **not** gonna wanna use a DVCS like git; luckily, this should be independent of VCS used, and work with SVN just fine
+		* this could be a cool marketing method: "if you want the best of security and control, use svn; if you're a college team who wants flexibility, use git"
+
 2. need to develop method of integration with git
     1. can add a hook onto the diff method, and all other appropriate methods, which converts file into delimited format according to annotation
         * would need to ensure that files are kept the same on disk so that ApE/whatever can access them easily and biologists aren't confused
@@ -37,7 +49,10 @@ track changes as a genome evolves over time (hence the name)
 		* potential methods then include marking each individual character change
 		* this could potentially get very slow very quickly when attempting to apply diffs
 	4. file formats:
-		* (from http://benchling.com/demo): Genbank, FASTA, ApE, SnapGene, DNAStrider, SeqBuilder, pDRAW	
+		* (from http://benchling.com/demo): Genbank, FASTA, ApE, SnapGene, DNAStrider, SeqBuilder, pDRAW
+	5. have .darwin directory for project, then for each "commit"
+		1. create temporary file compressing the line-delimited/compressed DNA info in .darwin folder
+		2. .darwin folder CONTAINS A .GIT FOLDER (or svn or w/e) WHICH ACTUALLY PERFORMS THE DIFF **THIS IS GENIUS**
 
 ## thought process:
 1. stick this onto git somehow. we're not going to reinvent an incredibly well-crafted wheel.
