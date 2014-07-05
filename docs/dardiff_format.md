@@ -14,11 +14,14 @@ However, in addition to that level of delimiting, with DNA data even ORFs can be
 	* incredibly simple to code, and simple computationally
 	* find start and stop codons appropriate for organism (usually very similar and for MVP can be restricted to the common ones)
 	* ORFs can sometimes be very small and completely useless, so most tools to find ORFs provide an option to only find ORFS above some minimum threshold length
-# **PROBLEM** : why not just have the VCSFMT'd file have each DNA character delimited by newlines? how do we make this more efficient?
+# **PROBLEM** : why not just have the VCSFMT'd file have each DNA character delimited by newlines? how do we make this more efficient? can we?
+	* edge cases that matter are:
+		* adding/removing a new ORF (tons of new chars, therefore tons of new lines to diff)
+		* adding an entirely new plasmid/genome file
 2. other heuristics to provide more granular control
 ### Nucleotide Compression and by-character differentiation
 ## Greater Significance
 This project could conceivably be used as a starting point for many novel applications of typical version control; as such, great care should be taken to decouple VCSFMT from the integration into CVS. In addition, it may be helpful to consider splitting the two into entirely separate command-line utilities, if that helps with GPL licensing issues.
 # integrate file into VCS
 ## create temp file
-
+The VCSFMT file should be able to completely recreate the original file in its entirety, ideally without any whitespace issues (but lol)
