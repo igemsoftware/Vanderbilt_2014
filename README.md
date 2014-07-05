@@ -1,7 +1,7 @@
 darwin
 ======
 
-track changes as a genome evolves over time (hence the name)
+	* track changes as a genome evolves over time (hence the name)
 
 ##### intent:
 * merge automatic annotation and version control technologies
