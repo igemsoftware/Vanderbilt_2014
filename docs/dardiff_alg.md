@@ -42,13 +42,21 @@ DNADNADNADNADNADNADNADNADNA
 * this may have to take the form of an extra git commit?
 * that way that character substitutions line only contains the substitutions with respect to the previous darwin commit
 * don't ever apply the character substitutions; just keep them in history at bottom, continually appending as commits build up; when some limit is reached, make highly compressed version of exact file, signed with hash of commit, then use that for more recent history instead of applying every charsub line from beginning
-* and added lines of ORFs of course, those need to be taken care of
-
+	* to clarify that; after some limit is reached, compress the current VCSFMT file (from which the entire history can be reconstructed) and take the current genbank file as the initial commit (not really, just as an analogy), and do diffs from that
+	* this way the VCSFMT avoids carrying buttloads of info from way back when without massive compression
 * OH YEAH AND COMPRESS EVERYTHING TO SINGLE-LETTER AMINO ACIDS
 
 -------------------------------
 
 ###NOTES ON VCSFMT
 
-**STILL NEED TO HAVE WAY TO COMPRESS INITIAL POSSIBLY MASSIVE COMMIT FOR TRANSMITTING OVER BANDWIDTH**
-**STILL NEED TO FIXED HOW ORFS CAN CHANGE AS LETTERS/LINES ARE ADDED/REMOVED**
+#### NEED WAY TO COMPRESS INITIAL POSSIBLY MASSIVE COMMIT FOR TRANSMITTING OVER BANDWIDTH (THIS IS TRIVIAL)
+
+**STILL NEED METHOD OF DEALING WITH LONG SEQUENCE BEING ADDED THAT /DOESN'T/ CHANGE ORF**
+
+#### HOW ORFS CAN CHANGE AS LETTERS/LINES ARE ADDED/REMOVED
+
+* when new sequence added such that orf changes (say, AUGXXX... appended to front of previous orf):
+	* [[COMMIT HASH]][[ORFADDEDCODE]]AUGXXX...
+	* continue sequence until end of line, then go onto previous line
+	* ORFADDEDCODE will be a 8-bit sequence, perhaps the same as the delimiting byte 0xFF introduced earlier
