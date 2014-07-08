@@ -25,3 +25,13 @@ This project could conceivably be used as a starting point for many novel applic
 # integrate file into VCS
 ## create temp file
 The VCSFMT file should be able to completely recreate the original file in its entirety, ideally without any whitespace issues (but lol)
+
+
+#Problem: deal with insertion of new long lines and single-character changes
+###Long line insertions: just split by ORF!
+* but then changing individual characters requires inserting/deleting a whole new line: suboptimal
+###Single character insertions: just have every character on a new line!
+* but then adding long lines makes for a MASSIVE diff with a new line for each character inserted!
+###Additional Problem: standard diff may put things in place, but out of order!
+#Solution
+* need (possibly dynamic, but decidable) representation of input that produces the smallest possible [[CORRECT]] diffs in all of the above situations
