@@ -1,6 +1,6 @@
 dardiff_format
 ==============
-* description of the heuristic algorithm used to delimit and compress DNA/cDNA files for use by a VCS (version control system)
+* discussion of the development of the heuristic algorithm used to delimit and compress DNA/cDNA files for use by a VCS (version control system)
 * called dardiff because it's short for 'darwin diff' and 'windiff' was already taken
 # create VCS-formatted file (VCSFMT)
 
@@ -41,7 +41,7 @@ The VCSFMT file should be able to completely recreate the original file in its e
 ###Single character insertions: just have every character on a new line!
 * but then adding long lines makes for a MASSIVE diff with a new line for each character inserted!
 
-###Additional Problem: standard diff may put things in place, but out of order!
+###Additional Problem: in a merge, standard diff may put things in place, but out of order!
 
 #Solution
 * need (possibly dynamic, but decidable) representation of input that produces the smallest possible (CORRECT) diffs in all of the above situations
