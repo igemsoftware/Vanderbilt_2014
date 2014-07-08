@@ -58,5 +58,5 @@ DNADNADNADNADNADNADNADNADNA
 
 * when new sequence added such that orf changes (say, AUGXXX... appended to front of previous orf):
 	* [[COMMIT HASH]][[ORFADDEDCODE]]AUGXXX...
-	* continue sequence until end of line, then go onto previous line
+	* continue sequence until end of line, then go onto next line (the one that previously existed), which is recognized by comparing it against the previous VCSFMT file
 	* ORFADDEDCODE will be a 8-bit sequence, perhaps the same as the delimiting byte 0xFF introduced earlier
