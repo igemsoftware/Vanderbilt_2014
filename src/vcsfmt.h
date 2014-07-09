@@ -18,16 +18,20 @@ typedef struct{
 //returns -1 if failed, otherwise returns size in bytes of produced file
 int vcsfmt(char * filename, size_t block_size);	// if filetype supported, produces vcsfmt file of same name
 
-FILE * open_file(char* filename); // open file, return pointer
+inline FILE * open_file(char* filename); // open file, return pointer
 
-void read_block(FILE * input_file, string_with_size * input_str_with_size); // read block_size bytes from file into output_str
+inline void read_block(FILE * input_file, string_with_size * input_str_with_size); // read block_size bytes from file into output_str
 // modifies input_str_wih_size.cur_size to be number of bytes read from file
 
-string_with_size * process_block(string_with_size * active_str_with_size); // perform some processing on block
-
-FILE * create_outfile(char * filename); // create file, return pointer
-
-void append_to_outfile(FILE * output_file, string_with_size * output_str_with_size); // write bytes to file, returns bytes written
+inline size_t process_and_write_block(FILE* output_file, string_with_size * input_block_with_size, bool * is_within_orf, char* previous_two_bases);
+// perform some processing on block and write to file
 // modifies output_str_wih_size.cur_size to be number of bytes written to file
+// returns number of bytes written to file
+
+inline size_t handle_previous_two_bases(string_with_size * input_block_with_size, size_t current_index, bool * is_within_orf);
+
+inline size_t get_end_of_line(string_with_size * input_block_with_size, size_t current_index, bool * is_within_orf);
+
+inline FILE * create_outfile(char * filename); // create file, return pointer
 
 #endif /*___VCS_FMT_H___*/
