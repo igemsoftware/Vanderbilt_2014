@@ -3,6 +3,8 @@ darwin
 
 * track changes as a genome evolves over time (hence the name)
 
+To build, cd to 'src' and run 'cmake .', then 'make'. Should be cross-platform enough to build on Windows too.
+
 ##### intent:
 * merge automatic annotation and version control technologies
     * this was benchling's pitch but they're not open source and idk if they're doing anything smart like this with the VCS
