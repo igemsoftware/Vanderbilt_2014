@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 2.8) # because cmake told me to; don't know what 
 file(GLOB sources *.h *.c)
 add_definitions(-DDEBUG)
 add_definitions(-DECOLI)				# support only E. coli
-add_definitions(-DPOPULAR_CODONS) # only use most popular start codons
-set(CLANG_COMPILE_FLAGS "-O0 -ggdb")
+add_definitions(-DSINGLE_START_CODON) # only use most popular start codons
+set(CLANG_COMPILE_FLAGS "-O0 -ggdb -Wall -Wextra -Werror -pedantic -std=c99")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CLANG_COMPILE_FLAGS}" )
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 add_executable(main ${sources})

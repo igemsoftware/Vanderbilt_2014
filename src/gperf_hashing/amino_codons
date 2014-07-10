@@ -1,0 +1,86 @@
+# http://www.cbs.dtu.dk/courses/27619/codon.html
+# isoleucine
+ATT
+ATC
+ATA
+# leucine
+CTT
+CTC
+CTA
+CTG
+TTA
+TTG
+# valine
+GTT
+GTC
+GTA
+GTG
+# phenylalanine
+TTT
+TTC
+# methionine (start codon)
+ATG
+# cysteine
+TGT
+TGC
+# alanine
+GCT
+GCC
+GCA
+GCG
+# glycine
+GGT
+GGC
+GGA
+GGG
+# proline
+CCT
+CCC
+CCA
+CCG
+# threonine
+ACT
+ACC
+ACA
+ACG
+# serine
+TCT
+TCC
+TCA
+TCG
+AGT
+AGC
+# tyrosine
+TAT
+TAC
+# tryptophan
+TGG
+# glutamine
+CAA
+CAG
+# asparagine
+AAT
+AAC
+# histidine
+CAT
+CAC
+# glutamic acid
+GAA
+GAG
+# aspartic acid
+GAT
+GAC
+# lysine
+AAA
+AAG
+# arginine
+CGT
+CGC
+CGA
+CGG
+AGA
+AGG
+# stop codons
+TAA
+TAG
+TGA

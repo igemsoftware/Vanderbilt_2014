@@ -1,6 +1,8 @@
 #ifndef ___UTILITIES_H___
 #define ___UTILITIES_H___
 
+#define PRINT_ERROR(str) fprintf(stderr,"%s",str)
+
 #define PRINT_ERROR_AND_RETURN_NULL_IF_NULL(ptr,str)			\
 	if (NULL == ptr){																				\
 	fprintf(stderr,"%s",str);																\
@@ -12,8 +14,5 @@
 	fprintf(stderr,"%s",str);															\
 	return -1;																						\
 	}
-
-
-#define PRINT_ERROR(str) fprintf(stderr,"%s",str)
 
 #endif /*___UTILITIES_H___*/

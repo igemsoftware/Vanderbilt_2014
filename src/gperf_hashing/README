@@ -1,0 +1,1 @@
+The GNU gperf utility was used from the input file "amino_codons" to produce a perfect hash. This is a battle-tested utility to produce these kinds of hash tables. However, no specific optimization options were used, and as a result, this is a prime opportunity for further optimization of the output if necessary.
