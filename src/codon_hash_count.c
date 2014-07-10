@@ -1,4 +1,4 @@
-// slightly modified from default gperf output
+// modified from default gperf output
 // 1) added __attribute__ ((unused)) to 'len' in function 'hash'
 // 2) added ifdef guards
 // 3) changed names of functions to 'in_codon_set' and 'codon_hash'
@@ -7,6 +7,7 @@
 // 6) added #include <string.h>
 // 7) moved wordlist outside of in_codon_set, to the header, and made it non-static
 // 8) removed 'register' from 'register const char *s wordlist[key]' at bottom
+// 9) removed #defines, moved to header for accesibility by other functions
 
 #include <string.h>							// for strncmp
 
@@ -42,14 +43,6 @@
 /* The character set is not based on ISO-646.  */
 error "gperf generated tables don't work with this execution character set. Please report a bug to <bug-gnu-gperf@gnu.org>."
 #endif
-
-
-#define TOTAL_KEYWORDS 64
-#define MIN_WORD_LENGTH 3
-#define MAX_WORD_LENGTH 3
-#define MIN_HASH_VALUE 4
-#define MAX_HASH_VALUE 177
-/* maximum key range = 174, duplicates = 0 */
 
 #ifdef __GNUC__
 __inline

@@ -15,4 +15,16 @@
 	return -1;																						\
 	}
 
+#define PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NEG_ONE(val,str)	\
+	if (-1 == val){																						\
+	fprintf(stderr,"%s",str);																	\
+	return -1;																								\
+	}
+
+#define PRINT_ERROR_AND_RETURN_NULL_IF_NEG_ONE(val,str)	\
+	if (-1 == val){																				\
+	fprintf(stderr,"%s",str);															\
+	return NULL;																					\
+	}
+
 #endif /*___UTILITIES_H___*/

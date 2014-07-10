@@ -7,8 +7,14 @@
 #include "sequence_heuristics.h" // for codon sequence data
 
 #define BLOCK_SIZE 8190 				// used in file I/O
+// we need to take in DNA blocks as multiples of 3 characters, and someone told me it should be close to a multiple of 2
 
-int vcsfmt(char * filename){	
+int vcsfmt(char * filename){
+	int create_escapes_result = create_special_char_escapes();
+	PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NEG_ONE(create_escapes_result,"Could not find enough empty space for escape characters.\n");
+	
+	pre_format_file(filename);
+	
 	FILE * input_file = open_file(filename);
 	PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NULL(input_file,"Error in creating input file.\n");
 
@@ -105,7 +111,7 @@ int vcsfmt(char * filename){
 	}
 }
 
-dna_reading_indices format_file(char * filename __attribute__ ((unused))){
+dna_reading_indices pre_format_file(char * filename __attribute__ ((unused))){
 	// does nothing right now
 	dna_reading_indices active_dna_reading_indices;
 	active_dna_reading_indices.begin_index = 0;
@@ -138,12 +144,12 @@ void process_block(string_with_size * input_block_with_size, string_with_size * 
 		}
 
 		// hash input codon to make byte
-		output_byte = get_byte_from_codon(current_codon); // '\0' if not a real codon
-// #if defined DEBUG
-// 		fwrite(current_codon,sizeof(char),CODON_LENGTH,stdout);
-// 		printf(" : ");
-// 		printf("%c\n",output_byte);
-// #endif		
+		output_byte = escape_special_chars(get_byte_from_codon(current_codon)); // '\0' if not a real codon
+#if defined DEBUG
+		fwrite(current_codon,sizeof(char),CODON_LENGTH,stdout);
+		printf(" : ");
+		printf("%c\n",output_byte);
+#endif		
 		// check if well-formed
 		if (output_byte != '\0'){		// branch predictions should be good on this one
 			if (*is_within_orf){			// branching is iffier here though
@@ -188,25 +194,37 @@ void process_block(string_with_size * input_block_with_size, string_with_size * 
 	output_block_with_size->cur_size = bytes_written;
 
 #if defined DEBUG
-	fprintf(stderr,"block cur_size: ");
+	// input block
+	fprintf(stderr,"block IN cur_size: ");
+	fprintf(stderr,"%zu",input_block_with_size->cur_size);
+	fprintf(stderr,"\nblock IN full_size: ");
+	fprintf(stderr,"%zu\n",input_block_with_size->full_size);
+	// output block
+	fprintf(stderr,"block OUT cur_size: ");
 	fprintf(stderr,"%zu",output_block_with_size->cur_size);
-	fprintf(stderr,"\nblock full_size: ");
+	fprintf(stderr,"\nblock OUT full_size: ");
 	fprintf(stderr,"%zu",output_block_with_size->full_size);
 	fprintf(stderr,"\n---------------\n");
 #endif
 }
 
 void write_block(FILE * output_file, string_with_size * output_block_with_size){
-	output_block_with_size->cur_size = fwrite(output_block_with_size, sizeof(char), output_block_with_size->cur_size,output_file);
+	output_block_with_size->cur_size = fwrite(output_block_with_size->string,
+																						sizeof(char),
+																						output_block_with_size->cur_size,
+																						output_file);
 }
 
 FILE * create_outfile(char* filename){
-	FILE * output_file = fopen(filename,"w");
+	FILE * output_file = fopen(filename,"wb");
 	return output_file;
 }
 
 #define BINBLOCK_SIZE 2730			// 1/3 of BLOCK_SIZE, so that we don't overflow when expanding, counting newlines
 int de_vcsfmt(char * filename){
+	int create_escapes_result = create_special_char_escapes();
+	PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NEG_ONE(create_escapes_result,"Could not find enough empty space for escape characters.\n");
+	
 	FILE * input_file = open_file(filename);
 	PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NULL(input_file,"Error in creating input file.\n");
 
@@ -310,11 +328,18 @@ void de_process_block(string_with_size * input_block_with_size, string_with_size
 		current_byte = input_block_with_size->string[bytes_read];
 		if (current_byte != '\n'){
 			// de-hash
-			output_codon = get_codon_from_byte(current_byte);
+			output_codon = get_codon_from_byte(de_escape_special_chars(current_byte));
+			if (strcmp(output_codon,"") == 0){
+				printf("BLANK\n");
+			}
 #if defined DEBUG
-			fwrite(output_codon,sizeof(char),CODON_LENGTH,stdout);
+			printf("%c",current_byte);
 			printf(" : ");
-			printf("%c\n",current_byte);
+			for (size_t i = 0; i < CODON_LENGTH; ++i){
+				// fwrite(output_codon,sizeof(char),CODON_LENGTH,stdout);
+				printf("%c",output_codon[i]);
+			}
+			printf("\n%zu\n",bytes_written);
 #endif
 			for (size_t base_index = 0; base_index < CODON_LENGTH; ++base_index){
 				output_block_with_size->string[bytes_written + base_index] = output_codon[base_index];
@@ -333,4 +358,49 @@ void de_process_block(string_with_size * input_block_with_size, string_with_size
 	fprintf(stderr,"\n---------------\n");
 #endif
 
+}
+
+// CHARACTER ESCAPING
+char special_chars[NUM_SPECIAL_CHARS] = {'\r','\n'}; // do not add '\0' to this list, it is used to indicate a byte was not found in get_byte_from_codon
+
+int create_special_char_escapes(){
+	bool found_space = true;
+	for (size_t special_char_index = 0; found_space && special_char_index < NUM_SPECIAL_CHARS; ++special_char_index){
+		// start from previously found highest index of hash array which was NOT found to contain strings in the hash (is an empty string "")
+		// iterate through indices until finding next unoccupied space in hash array
+		// if go all the way through and do not find one, exit
+		found_space = false;
+		for (size_t wordlist_index = special_char_index; !found_space && wordlist_index < MAX_HASH_VALUE; ++wordlist_index){
+			if (strcmp(wordlist[wordlist_index], "") == 0){
+				found_space = true;
+				special_char_escapes[special_char_index] = (char) wordlist_index;
+			}
+		}
+	}
+	if (found_space){							// if found space for all special_chars
+		return 0;										// success
+	}
+	else{
+		return -1;									// failure
+	}
+}
+
+char escape_special_chars(char input_byte){
+	char return_byte = input_byte;
+	for (size_t escape_char_index = 0; escape_char_index < NUM_SPECIAL_CHARS; ++escape_char_index){
+		if (input_byte == special_chars[escape_char_index]){
+			return_byte = special_char_escapes[escape_char_index];
+		}
+	}
+	return return_byte;
+}
+
+char de_escape_special_chars(char input_byte){
+	char return_byte = input_byte;
+	for (size_t de_escape_char_index = 0; de_escape_char_index < NUM_SPECIAL_CHARS; ++de_escape_char_index){
+		if (input_byte == special_char_escapes[de_escape_char_index]){
+			return_byte = special_chars[de_escape_char_index];
+		}
+	}
+	return return_byte;
 }
