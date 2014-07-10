@@ -27,7 +27,7 @@ typedef struct{
 #define MIN_ORF_LENGTH 60				// convert this to program option at some point
 
 #define BLOCK_SIZE 8190 				// used in file I/O
-// we need to take in DNA blocks as multiples of 3 characters, and someone told me it should be close to a multiple of 2
+// we need to take in DNA blocks as multiples of 3 characters, and someone told me it should be close to a multiple of 2; hence 8190
 //returns -1 if failed, otherwise returns size in bytes of produced file
 int vcsfmt(char * filename);	// if filetype supported, produces vcsfmt file of same name
 

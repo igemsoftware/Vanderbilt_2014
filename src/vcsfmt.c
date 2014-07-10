@@ -378,6 +378,9 @@ int create_special_char_escapes(){
 		// if go all the way through and do not find one, exit
 		found_space = false;
 		for (size_t wordlist_index = special_char_index; !found_space && wordlist_index < MAX_HASH_VALUE; ++wordlist_index){
+			if (wordlist_index == 0){	// diff tools often check if there are any null bytes in the first sev eral thousand bytes of a file in order to determine whether it is binary
+				++wordlist_index;				// this means no escape character gets sent to 0x00, and avoids that
+			}
 			if (strcmp(wordlist[wordlist_index], "") == 0){
 				found_space = true;
 				special_char_escapes[special_char_index] = (char) wordlist_index;
