@@ -9,9 +9,6 @@
 
 // TODO: change compiler directives to program inputs as functionality expands
 
-#include <limits.h>						// for CHAR_BIT
-#include <math.h>							// for pow
-
 #include "codon_hash_count.h"		// for hash
 
 #define CODON_LENGTH 3					// codon length, in bases
@@ -73,7 +70,7 @@ const char * stop_codons[NUMBER_OF_STOP_CODONS] = {
 	"TGA"
 };
 
-// OPTIMIZATION: make this inline if clang doesn't do it already
+// OPTIMIZATION: make this inline if compiler doesn't do it already
 // encode each codon into different byte with perfect hash
 // for compression and identification of synonymic codons
 // precondition: codon MUST be three characters from A/C/G/T
@@ -87,16 +84,8 @@ char get_byte_from_codon(char * codon){
 	}
 }
 
-size_t mod_positive_result (int numerator, size_t divisor){ // only works for divisor > 0
-	int result = numerator % divisor;
-	if (result < 0){
-		result += divisor;
-	}
-	return result;
-}
-
 const char * get_codon_from_byte(char byte){
-	return wordlist[(size_t) (mod_positive_result(byte,(size_t) pow(2,sizeof(char) * CHAR_BIT)))]; // mod 256
+	return wordlist[(unsigned char) byte]; // the cast to unsigned char is required so that it doesn't go to a negative, which causes segfaults due to reaching beyond array bounds
 }
 
 #endif /*___SEQUENCE_HEURISTICS_H___*/

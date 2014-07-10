@@ -6,9 +6,6 @@
 #include "utilities.h"					// for compiler macros
 #include "sequence_heuristics.h" // for codon sequence data
 
-#define BLOCK_SIZE 8190 				// used in file I/O
-// we need to take in DNA blocks as multiples of 3 characters, and someone told me it should be close to a multiple of 2
-
 int vcsfmt(char * filename){
 	int create_escapes_result = create_special_char_escapes();
 	PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NEG_ONE(create_escapes_result,"Could not find enough empty space for escape characters.\n");
@@ -49,6 +46,8 @@ int vcsfmt(char * filename){
 
 	bool * is_within_orf = (bool*) malloc(sizeof(bool));
 	*is_within_orf = false;				// file begins outside of orf
+	size_t * cur_orf_pos = (size_t *) malloc(sizeof(size_t));
+	*cur_orf_pos = 0;
 
 	// perform block processing
 	while (!feof(input_file) && !ferror(input_file) && !ferror(output_file)){
@@ -59,7 +58,8 @@ int vcsfmt(char * filename){
 		// process block
 		process_block(input_stream_block,
 									output_stream_block,
-									is_within_orf);
+									is_within_orf,
+									cur_orf_pos);
 		// write block
 		write_block(output_file, output_stream_block);
 		cur_bytes_written = output_stream_block->cur_size;
@@ -111,116 +111,6 @@ int vcsfmt(char * filename){
 	}
 }
 
-dna_reading_indices pre_format_file(char * filename __attribute__ ((unused))){
-	// does nothing right now
-	dna_reading_indices active_dna_reading_indices;
-	active_dna_reading_indices.begin_index = 0;
-	active_dna_reading_indices.end_index = 0;
-	return active_dna_reading_indices;
-}
-
-FILE * open_file(char * filename){
-	FILE * input_file = fopen(filename,"r");
-	// reject if incorrect filetype
-	return input_file;
-}
-
-void read_block(FILE * input_file, string_with_size * input_str_with_size){
-	input_str_with_size->cur_size = fread(input_str_with_size->string,sizeof(char),input_str_with_size->full_size,input_file);
-}
-
-void process_block(string_with_size * input_block_with_size, string_with_size * output_block_with_size, bool * is_within_orf){
-
-	// OPTIMIZATION: make this static
-	char current_codon[CODON_LENGTH];
-  char output_byte;							// output of hash
-	size_t bytes_written = 0;
-	bool matched_key_codon = false; // used in orf delimiting
-
-	for (size_t codon_index = 0; codon_index < input_block_with_size->cur_size; codon_index += CODON_LENGTH){
-		// copy over bases
-		for (size_t base_index = 0; base_index < CODON_LENGTH; ++base_index){
-			current_codon[base_index] = toupper(input_block_with_size->string[codon_index + base_index]); // toupper to get rid of the lowercase dna which sometimes appears
-		}
-
-		// hash input codon to make byte
-		output_byte = escape_special_chars(get_byte_from_codon(current_codon)); // '\0' if not a real codon
-#if defined DEBUG
-		fwrite(current_codon,sizeof(char),CODON_LENGTH,stdout);
-		printf(" : ");
-		printf("%c\n",output_byte);
-#endif		
-		// check if well-formed
-		if (output_byte != '\0'){		// branch predictions should be good on this one
-			if (*is_within_orf){			// branching is iffier here though
-				// OPTIMIZATION: could hash start/stop codons as well
-				for (size_t stop_codon_index = 0; stop_codon_index < NUMBER_OF_STOP_CODONS; ++stop_codon_index){
-					if (strncmp(current_codon,stop_codons[stop_codon_index],CODON_LENGTH) == 0){
-						matched_key_codon = true;
-						output_block_with_size->string[bytes_written] = output_byte;
-						++bytes_written;
-						output_block_with_size->string[bytes_written] = '\n'; // newline delimiting
-						*is_within_orf = false;																// NOTE THE DIFFERENCE HERE FROM BELOW
-					}
-				}
-				if (!matched_key_codon){
-					output_block_with_size->string[bytes_written] = output_byte;
-				}
-			}
-			else{
-				for (size_t start_codon_index = 0; start_codon_index < NUMBER_OF_START_CODONS; ++ start_codon_index){
-					if (strncmp(current_codon,start_codons[start_codon_index],CODON_LENGTH) == 0){
-						matched_key_codon = true;
-						output_block_with_size->string[bytes_written] = output_byte;
-						++bytes_written;
-						output_block_with_size->string[bytes_written] = '\n'; // newline delimiting
-						*is_within_orf = true;																// NOTE THE DIFFERENCE HERE FROM ABOVE
-					}
-				}
-				if (!matched_key_codon){
-					output_block_with_size->string[bytes_written] = output_byte;
-				}
-			}
-			matched_key_codon = false;
-			++bytes_written;
-		}
-		else{												// if non-codon found, assume end of dna encoding and exit
-			output_block_with_size->cur_size = bytes_written;
-			printf("%s\n","end of dna found. exiting.");
-		}
-	
-	}
-
-	output_block_with_size->cur_size = bytes_written;
-
-#if defined DEBUG
-	// input block
-	fprintf(stderr,"block IN cur_size: ");
-	fprintf(stderr,"%zu",input_block_with_size->cur_size);
-	fprintf(stderr,"\nblock IN full_size: ");
-	fprintf(stderr,"%zu\n",input_block_with_size->full_size);
-	// output block
-	fprintf(stderr,"block OUT cur_size: ");
-	fprintf(stderr,"%zu",output_block_with_size->cur_size);
-	fprintf(stderr,"\nblock OUT full_size: ");
-	fprintf(stderr,"%zu",output_block_with_size->full_size);
-	fprintf(stderr,"\n---------------\n");
-#endif
-}
-
-void write_block(FILE * output_file, string_with_size * output_block_with_size){
-	output_block_with_size->cur_size = fwrite(output_block_with_size->string,
-																						sizeof(char),
-																						output_block_with_size->cur_size,
-																						output_file);
-}
-
-FILE * create_outfile(char* filename){
-	FILE * output_file = fopen(filename,"wb");
-	return output_file;
-}
-
-#define BINBLOCK_SIZE 2730			// 1/3 of BLOCK_SIZE, so that we don't overflow when expanding, counting newlines
 int de_vcsfmt(char * filename){
 	int create_escapes_result = create_special_char_escapes();
 	PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NEG_ONE(create_escapes_result,"Could not find enough empty space for escape characters.\n");
@@ -316,6 +206,110 @@ int de_vcsfmt(char * filename){
 	}
 }
 
+
+dna_reading_indices pre_format_file(char * filename __attribute__ ((unused))){
+	// does nothing right now
+	dna_reading_indices active_dna_reading_indices;
+	active_dna_reading_indices.begin_index = 0;
+	active_dna_reading_indices.end_index = 0;
+	return active_dna_reading_indices;
+}
+
+FILE * open_file(char * filename){
+	FILE * input_file = fopen(filename,"r");
+	// reject if incorrect filetype
+	return input_file;
+}
+
+void read_block(FILE * input_file, string_with_size * input_str_with_size){
+	input_str_with_size->cur_size = fread(input_str_with_size->string,sizeof(char),input_str_with_size->full_size,input_file);
+}
+
+void process_block(string_with_size * input_block_with_size, string_with_size * output_block_with_size, bool * is_within_orf, size_t * cur_orf_pos){
+
+	// OPTIMIZATION: make this static
+	char current_codon[CODON_LENGTH];
+  char output_byte;							// output of hash
+	size_t bytes_written = 0;
+	bool matched_key_codon = false; // used in orf delimiting
+
+	for (size_t codon_index = 0; codon_index < input_block_with_size->cur_size; codon_index += CODON_LENGTH){
+		// copy over bases
+		for (size_t base_index = 0; base_index < CODON_LENGTH; ++base_index){
+			current_codon[base_index] = toupper(input_block_with_size->string[codon_index + base_index]); // toupper to get rid of the lowercase dna which sometimes appears
+		}
+
+		// hash input codon to make byte
+		output_byte = escape_special_chars(get_byte_from_codon(current_codon)); // '\0' if not a real codon
+#if defined DEBUG
+		fwrite(current_codon,sizeof(char),CODON_LENGTH,stdout);
+		printf(" : ");
+		printf("%c\n",output_byte);
+#endif		
+		// check if well-formed
+		if (output_byte != '\0'){		// branch predictions should be good on this one
+			if (*is_within_orf){			// branching is iffier here though
+				// OPTIMIZATION: could hash start/stop codons as well
+				for (size_t stop_codon_index = 0; stop_codon_index < NUMBER_OF_STOP_CODONS; ++stop_codon_index){
+					if (*cur_orf_pos >= MIN_ORF_LENGTH){
+						if (strncmp(current_codon,stop_codons[stop_codon_index],CODON_LENGTH) == 0){
+							matched_key_codon = true;
+							output_block_with_size->string[bytes_written] = output_byte;
+							++bytes_written;
+							output_block_with_size->string[bytes_written] = '\n'; // newline delimiting
+							*is_within_orf = false;																// NOTE THE DIFFERENCE HERE FROM BELOW
+							*cur_orf_pos = 0;
+						}
+					}
+					else{
+						++*cur_orf_pos;
+					}
+				}
+				if (!matched_key_codon){
+					output_block_with_size->string[bytes_written] = output_byte;
+				}
+			}
+			else{
+				for (size_t start_codon_index = 0; start_codon_index < NUMBER_OF_START_CODONS; ++ start_codon_index){
+					if (strncmp(current_codon,start_codons[start_codon_index],CODON_LENGTH) == 0){
+						matched_key_codon = true;
+						output_block_with_size->string[bytes_written] = output_byte;
+						++bytes_written;
+						output_block_with_size->string[bytes_written] = '\n'; // newline delimiting
+						*is_within_orf = true;																// NOTE THE DIFFERENCE HERE FROM ABOVE
+					}
+				}
+				if (!matched_key_codon){
+					output_block_with_size->string[bytes_written] = output_byte;
+				}
+			}
+			matched_key_codon = false;
+			++bytes_written;
+		}
+		else{												// if non-codon found, assume end of dna encoding and exit
+			output_block_with_size->cur_size = bytes_written;
+			printf("%s\n","end of dna found. exiting.");
+		}
+	
+	}
+
+	output_block_with_size->cur_size = bytes_written;
+
+#if defined DEBUG
+	// input block
+	fprintf(stderr,"block IN cur_size: ");
+	fprintf(stderr,"%zu",input_block_with_size->cur_size);
+	fprintf(stderr,"\nblock IN full_size: ");
+	fprintf(stderr,"%zu\n",input_block_with_size->full_size);
+	// output block
+	fprintf(stderr,"block OUT cur_size: ");
+	fprintf(stderr,"%zu",output_block_with_size->cur_size);
+	fprintf(stderr,"\nblock OUT full_size: ");
+	fprintf(stderr,"%zu",output_block_with_size->full_size);
+	fprintf(stderr,"\n---------------\n");
+#endif
+}
+
 void de_process_block(string_with_size * input_block_with_size, string_with_size * output_block_with_size){
 
 	// OPTIMIZATION: make this static
@@ -358,6 +352,19 @@ void de_process_block(string_with_size * input_block_with_size, string_with_size
 	fprintf(stderr,"\n---------------\n");
 #endif
 
+}
+
+
+void write_block(FILE * output_file, string_with_size * output_block_with_size){
+	output_block_with_size->cur_size = fwrite(output_block_with_size->string,
+																						sizeof(char),
+																						output_block_with_size->cur_size,
+																						output_file);
+}
+
+FILE * create_outfile(char* filename){
+	FILE * output_file = fopen(filename,"wb");
+	return output_file;
 }
 
 // CHARACTER ESCAPING
