@@ -9,6 +9,9 @@
 
 // TODO: change compiler directives to program inputs as functionality expands
 
+#include <limits.h>						// for CHAR_BIT
+#include <math.h>							// for pow
+
 #include "codon_hash_count.h"		// for hash
 
 #define CODON_LENGTH 3					// codon length, in bases
@@ -84,8 +87,16 @@ char get_byte_from_codon(char * codon){
 	}
 }
 
+size_t mod_positive_result (int numerator, size_t divisor){ // only works for divisor > 0
+	int result = numerator % divisor;
+	if (result < 0){
+		result += divisor;
+	}
+	return result;
+}
+
 const char * get_codon_from_byte(char byte){
-	return wordlist[(size_t) byte];
+	return wordlist[(size_t) (mod_positive_result(byte,(size_t) pow(2,sizeof(char) * CHAR_BIT)))]; // mod 256
 }
 
 #endif /*___SEQUENCE_HEURISTICS_H___*/

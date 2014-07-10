@@ -343,8 +343,8 @@ void de_process_block(string_with_size * input_block_with_size, string_with_size
 #endif
 			for (size_t base_index = 0; base_index < CODON_LENGTH; ++base_index){
 				output_block_with_size->string[bytes_written + base_index] = output_codon[base_index];
-				++bytes_written;
 			}
+			bytes_written += CODON_LENGTH;
 		}
 		++bytes_read;
 	}
