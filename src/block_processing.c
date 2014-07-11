@@ -1,6 +1,7 @@
 #include "block_processing.h"		// required
 
-#define MIN_ORF_LENGTH 60				// convert this to program option at some point
+// only look for orfs above 60 bases long
+#define MIN_ORF_LENGTH 60	// convert this to program option at some point, not compile-time definition
 
 void hash_and_delimit_block_by_line(string_with_size * input_block_with_size, string_with_size * output_block_with_size, bool * is_within_orf, size_t * cur_orf_pos){
 	// OPTIMIZATION: make this static
@@ -117,8 +118,8 @@ void unhash_and_remove_newlines(string_with_size * input_block_with_size, string
 #endif
 }
 
+bool special_char_escapes_created = false;
 
-// CHARACTER ESCAPING
 #define NUM_SPECIAL_CHARS 2
 char special_chars[NUM_SPECIAL_CHARS] = {'\r','\n'}; // do not add '\0' to this list, it is used to indicate a byte was not found in get_byte_from_codon
 
@@ -132,7 +133,7 @@ int create_special_char_escapes(){
 		// if go all the way through and do not find one, exit
 		found_space = false;
 		for (size_t wordlist_index = special_char_index; !found_space && wordlist_index < MAX_HASH_VALUE; ++wordlist_index){
-			if (wordlist_index == 0){	// diff tools often check if there are any null bytes in the first sev eral thousand bytes of a file in order to determine whether it is binary
+			if (wordlist_index == 0){	// diff tools often check if there are any null bytes in the first several thousand bytes of a file in order to determine whether it is binary
 				++wordlist_index;				// this means no escape character gets sent to 0x00, and avoids that
 			}
 			if (strcmp(wordlist[wordlist_index], "") == 0){
@@ -142,6 +143,7 @@ int create_special_char_escapes(){
 		}
 	}
 	if (found_space){							// if found space for all special_chars
+		special_char_escapes_created = true;
 		return 0;										// success
 	}
 	else{
@@ -150,21 +152,35 @@ int create_special_char_escapes(){
 }
 
 char escape_special_chars(char input_byte){
-	char return_byte = input_byte;
-	for (size_t escape_char_index = 0; escape_char_index < NUM_SPECIAL_CHARS; ++escape_char_index){
-		if (input_byte == special_chars[escape_char_index]){
-			return_byte = special_char_escapes[escape_char_index];
+	if (special_char_escapes_created){ // branch predictions should be good on this
+		char return_byte = input_byte;
+		for (size_t escape_char_index = 0; escape_char_index < NUM_SPECIAL_CHARS; ++escape_char_index){
+			if (input_byte == special_chars[escape_char_index]){
+				return_byte = special_char_escapes[escape_char_index];
+			}
 		}
+		return return_byte;
 	}
-	return return_byte;
+	else{
+		int result = create_special_char_escapes();
+		PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NEG_ONE(result,"special chars not successfully created. output will be incorrect and unusable.\n"); // if not neg one, goes to next line
+		return escape_special_chars(input_byte); // special_char_escapes_created set to true now, so only recurses once
+	}
 }
 
 char de_escape_special_chars(char input_byte){
-	char return_byte = input_byte;
-	for (size_t de_escape_char_index = 0; de_escape_char_index < NUM_SPECIAL_CHARS; ++de_escape_char_index){
-		if (input_byte == special_char_escapes[de_escape_char_index]){
-			return_byte = special_chars[de_escape_char_index];
+	if (special_char_escapes_created){ // branch predictions should be good on this
+		char return_byte = input_byte;
+		for (size_t de_escape_char_index = 0; de_escape_char_index < NUM_SPECIAL_CHARS; ++de_escape_char_index){
+			if (input_byte == special_char_escapes[de_escape_char_index]){
+				return_byte = special_chars[de_escape_char_index];
+			}
 		}
+		return return_byte;
 	}
-	return return_byte;
+	else{
+		int result = create_special_char_escapes();
+		PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NEG_ONE(result,"special chars not successfully created. output will be incorrect and unusable.\n"); // if not neg one, goes to next line
+		return de_escape_special_chars(input_byte); // special_char_escapes_created set to true now, so only recurses once
+	}
 }

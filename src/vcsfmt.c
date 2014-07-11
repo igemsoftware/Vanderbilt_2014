@@ -1,9 +1,6 @@
 #include "vcsfmt.h"							// required
 
-int vcsfmt(char * filename){
-	int create_escapes_result = create_special_char_escapes();
-	PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NEG_ONE(create_escapes_result,"Could not find enough empty space for escape characters.\n");
-	
+int vcsfmt(char * filename){	
 	pre_format_file(filename);
 	
 	FILE * input_file = open_file(filename);
@@ -105,10 +102,7 @@ int vcsfmt(char * filename){
 	}
 }
 
-int de_vcsfmt(char * filename){
-	int create_escapes_result = create_special_char_escapes();
-	PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NEG_ONE(create_escapes_result,"Could not find enough empty space for escape characters.\n");
-	
+int de_vcsfmt(char * filename){	
 	FILE * input_file = open_file(filename);
 	PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NULL(input_file,"Error in creating input file.\n");
 

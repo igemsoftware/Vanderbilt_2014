@@ -16,5 +16,5 @@ endif()
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMPILE_FLAGS}" )
 	
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
-set(CMAKE_C_COMPILER )
+set(CMAKE_C_COMPILER "/usr/bin/gcc")
 add_executable(main ${sources})
