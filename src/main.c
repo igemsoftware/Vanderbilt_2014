@@ -1,6 +1,5 @@
 #include <stdio.h>							// for printf
 
-#include "utilities.h"
 #include "vcsfmt.h"							// for cat_file
 
 int main(){

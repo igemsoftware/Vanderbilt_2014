@@ -9,7 +9,7 @@
 #define MAX_HASH_VALUE 177
 /* maximum key range = 174, duplicates = 0 */
 
-unsigned int codon_hash(const char * str, unsigned int len);
+unsigned int codon_hash (const char * str, unsigned int len);
 
 const char * in_codon_set (const char * str, unsigned int len);
 
