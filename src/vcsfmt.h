@@ -25,13 +25,19 @@ int de_vcsfmt(char * filename);	// produces original file
 // returns indices of of bytes in file where dna exists, ensures DNA is divisible by 3
 dna_reading_indices pre_format_file(char * filename);
 
+// adds any required formatting to file after reconstituting from .vcsfmt
+void post_format_file(char * filename);
+
 // open file, return pointer
 FILE * open_file(char* filename);
 
 // read block_size bytes from file into output_str
 // modifies input_str_wih_size->cur_size to be number of bytes read from file
 inline void read_block(FILE * input_file, string_with_size * input_str_with_size){
-	input_str_with_size->cur_size = fread(input_str_with_size->string,sizeof(char),input_str_with_size->full_size,input_file);
+	input_str_with_size->cur_size = fread(input_str_with_size->string,
+																				sizeof(char),
+																				input_str_with_size->full_size,
+																				input_file);
 }
 
 // perform some processing on block and write to file

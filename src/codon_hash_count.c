@@ -8,6 +8,7 @@
 // 7) moved wordlist outside of in_codon_set, to the header, and made it non-static
 // 8) removed 'register' from 'register const char *s wordlist[key]' at bottom
 // 9) removed #defines, moved to header for accesibility by other functions
+// 10) added register back, moved definitions to inline in header codon_hash_count.h
 
 #include <string.h>							// for strncmp
 
@@ -44,49 +45,7 @@
 error "gperf generated tables don't work with this execution character set. Please report a bug to <bug-gnu-gperf@gnu.org>."
 #endif
 
-#ifdef __GNUC__
-__inline
-#else
-#ifdef __cplusplus
-inline
-#endif
-#endif
-/*ARGSUSED*/
-unsigned int
-codon_hash (const char * str, unsigned int len __attribute__ ((unused)))
-{
-  unsigned char asso_values[] =
-    {
-      178, 178, 178, 178, 178, 178, 178, 178, 178, 178,
-      178, 178, 178, 178, 178, 178, 178, 178, 178, 178,
-      178, 178, 178, 178, 178, 178, 178, 178, 178, 178,
-      178, 178, 178, 178, 178, 178, 178, 178, 178, 178,
-      178, 178, 178, 178, 178, 178, 178, 178, 178, 178,
-      178, 178, 178, 178, 178, 178, 178, 178, 178, 178,
-      178, 178, 178, 178, 178,   4, 127,  10,  90,   2,
-      178,  40,  45,   5, 178, 178, 178, 178, 178, 178,
-      178, 178, 178, 178,  25,   0,   0, 178, 178, 178,
-      178, 178, 178, 178, 178, 178, 178, 178, 178, 178,
-      178, 178, 178, 178, 178, 178, 178, 178, 178, 178,
-      178, 178, 178, 178, 178, 178, 178, 178, 178, 178,
-      178, 178, 178, 178, 178, 178, 178, 178, 178, 178,
-      178, 178, 178, 178, 178, 178, 178, 178, 178, 178,
-      178, 178, 178, 178, 178, 178, 178, 178, 178, 178,
-      178, 178, 178, 178, 178, 178, 178, 178, 178, 178,
-      178, 178, 178, 178, 178, 178, 178, 178, 178, 178,
-      178, 178, 178, 178, 178, 178, 178, 178, 178, 178,
-      178, 178, 178, 178, 178, 178, 178, 178, 178, 178,
-      178, 178, 178, 178, 178, 178, 178, 178, 178, 178,
-      178, 178, 178, 178, 178, 178, 178, 178, 178, 178,
-      178, 178, 178, 178, 178, 178, 178, 178, 178, 178,
-      178, 178, 178, 178, 178, 178, 178, 178, 178, 178,
-      178, 178, 178, 178, 178, 178, 178, 178, 178, 178,
-      178, 178, 178, 178, 178, 178, 178, 178, 178, 178,
-      178, 178, 178, 178, 178, 178, 178, 178
-    };
-  return asso_values[(unsigned char)str[2]+1] + asso_values[(unsigned char)str[1]+2] + asso_values[(unsigned char)str[0]];
-}
-
+extern inline unsigned int codon_hash (register const char * str, register unsigned int len);
 
 const char * wordlist[] =
 {
@@ -202,28 +161,4 @@ const char * wordlist[] =
 	"GAA"
 };
 
-
-#ifdef __GNUC__
-__inline
-#if defined __GNUC_STDC_INLINE__ || defined __GNUC_GNU_INLINE__
-__attribute__ ((__gnu_inline__))
-#endif
-#endif
-
-const char *
-in_codon_set (const char * str, unsigned int len)
-{
-  if (len <= MAX_WORD_LENGTH && len >= MIN_WORD_LENGTH)
-    {
-      register int key = codon_hash (str, len);
-
-      if (key <= MAX_HASH_VALUE && key >= 0)
-        {
-          const char *s = wordlist[key];
-
-          if (*str == *s && !strncmp (str + 1, s + 1, len - 1) && s[len] == '\0')
-            return s;
-        }
-    }
-  return 0;
-}
+extern inline const char * in_codon_set (register const char * str, register unsigned int len);

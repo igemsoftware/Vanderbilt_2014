@@ -190,17 +190,23 @@ int de_vcsfmt(char * filename){
 		return -1;
 	}
 	else{
+		// apply final formatting
+		post_format_file(filename);
 		return total_bytes_written;
 	}
 }
 
-
-dna_reading_indices pre_format_file(char * filename __attribute__ ((unused))){
+dna_reading_indices pre_format_file(char * filename){
 	// does nothing right now
 	dna_reading_indices active_dna_reading_indices;
-	active_dna_reading_indices.begin_index = 0;
+	active_dna_reading_indices.begin_index = (size_t) filename[0];
 	active_dna_reading_indices.end_index = 0;
 	return active_dna_reading_indices;
+}
+
+void post_format_file(char * filename){
+	// does nothing right now
+	printf("%s\n",filename);
 }
 
 FILE * open_file(char * filename){

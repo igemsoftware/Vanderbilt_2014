@@ -1,13 +1,10 @@
 # keep random downloaded info out of it
 infos/
-# keep CMakeLists.txt, but remove everything else
-CMakeFiles/
-CMakeCache.txt
-cmake_install.cmake
-Makefile
 # keep large files meant for testing out of it
 mvp_testing/
 # don't add binary executable and associated object files
 bin/
 # generated files from processing, wherever they may be
 *.vcsfmt
+# generated files from scons
+.sconsign.dblite

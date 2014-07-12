@@ -1,6 +1,6 @@
 #include <stdio.h>							// for printf
 
-#include "vcsfmt.h"							// for cat_file
+#include "vcsfmt.h"							// for file processing and I/O
 
 int main(){
 	int result_of_vcsfmt = vcsfmt("500_lines_of_dna_minus_lines.fasta");

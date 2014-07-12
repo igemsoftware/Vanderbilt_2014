@@ -7,7 +7,7 @@
 // certain special characters such as \r and \n are used to delimit lines in the resulting vcsfmt file
 // but the hash for codons may produce unsigned ints corresponding to those ascii codes
 // so we must make sure to divert them to an unused space in the wordlist array
-// initialization in block_processing.c because the C language is dumb
+// initialization is in block_processing.c because the C language is dumb
 extern char special_chars[]; // do not add '\0' to this list, it is used to indicate a byte was not found in get_byte_from_codon
 
 // initialized by create_array_for_special_chars()
