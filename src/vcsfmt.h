@@ -21,21 +21,36 @@ int vcsfmt(char * filename);	// if filetype supported, produces vcsfmt file of s
 //returns -1 if failed, otherwise returns size in bytes of produced file
 int de_vcsfmt(char * filename);	// produces original file
 
-dna_reading_indices pre_format_file(char * filename); // remove newlines, play with other metadata before going into dna; produces file in .darwin folder
+// remove newlines, play with other metadata before going into dna; produces file in .darwin folder
 // returns indices of of bytes in file where dna exists, ensures DNA is divisible by 3
+dna_reading_indices pre_format_file(char * filename);
 
-FILE * open_file(char* filename); // open file, return pointer
+// open file, return pointer
+FILE * open_file(char* filename);
 
-void read_block(FILE * input_file, string_with_size * input_str_with_size); // read block_size bytes from file into output_str
+// read block_size bytes from file into output_str
 // modifies input_str_wih_size->cur_size to be number of bytes read from file
+inline void read_block(FILE * input_file, string_with_size * input_str_with_size){
+	input_str_with_size->cur_size = fread(input_str_with_size->string,sizeof(char),input_str_with_size->full_size,input_file);
+}
 
-void process_block(string_with_size * input_block_with_size, string_with_size * output_block_with_size, bool * is_within_orf, size_t * cur_orf_pos);
 // perform some processing on block and write to file
 // modifies output_str_wih_size->cur_size to be number of bytes written to file
+inline void process_block(string_with_size * input_block_with_size, string_with_size * output_block_with_size, bool * is_within_orf, size_t * cur_orf_pos){
+	hash_and_delimit_block_by_line(input_block_with_size, output_block_with_size, is_within_orf, cur_orf_pos);
+}
 
-void de_process_block(string_with_size * input_block_with_size, string_with_size * output_block_with_size); // inverse of above
+// inverse of above
+inline void de_process_block(string_with_size * input_block_with_size, string_with_size * output_block_with_size){
+	unhash_and_remove_newlines(input_block_with_size, output_block_with_size);
+}
 
-void write_block(FILE * output_file, string_with_size * output_block_with_size);
+inline void write_block(FILE * output_file, string_with_size * output_block_with_size){
+	output_block_with_size->cur_size = fwrite(output_block_with_size->string,
+																						sizeof(char),
+																						output_block_with_size->cur_size,
+																						output_file);
+}
 
 FILE * create_outfile(char * filename); // create file, return pointer
 

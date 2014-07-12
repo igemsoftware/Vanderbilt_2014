@@ -209,25 +209,13 @@ FILE * open_file(char * filename){
 	return input_file;
 }
 
-void read_block(FILE * input_file, string_with_size * input_str_with_size){
-	input_str_with_size->cur_size = fread(input_str_with_size->string,sizeof(char),input_str_with_size->full_size,input_file);
-}
+extern inline void read_block(FILE * input_file, string_with_size * input_str_with_size);
 
-void process_block(string_with_size * input_block_with_size, string_with_size * output_block_with_size, bool * is_within_orf, size_t * cur_orf_pos){
-	hash_and_delimit_block_by_line(input_block_with_size, output_block_with_size, is_within_orf, cur_orf_pos);
-}
+extern inline void process_block(string_with_size * input_block_with_size, string_with_size * output_block_with_size, bool * is_within_orf, size_t * cur_orf_pos);
 
-void de_process_block(string_with_size * input_block_with_size, string_with_size * output_block_with_size){
-	unhash_and_remove_newlines(input_block_with_size, output_block_with_size);
-}
+extern inline void de_process_block(string_with_size * input_block_with_size, string_with_size * output_block_with_size);
 
-
-void write_block(FILE * output_file, string_with_size * output_block_with_size){
-	output_block_with_size->cur_size = fwrite(output_block_with_size->string,
-																						sizeof(char),
-																						output_block_with_size->cur_size,
-																						output_file);
-}
+extern inline void write_block(FILE * output_file, string_with_size * output_block_with_size);
 
 FILE * create_outfile(char* filename){
 	FILE * output_file = fopen(filename,"wb");

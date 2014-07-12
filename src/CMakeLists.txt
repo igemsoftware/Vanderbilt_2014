@@ -3,6 +3,8 @@ file(GLOB sources *.h *.c)
 
 set(DEBUG "TRUE")								# for this file only
 add_definitions(-DDEBUG)				# for conditional compilation
+# set(RELEASE "TRUE")
+# add_definitions(-DRELEASE)
 add_definitions(-DECOLI)				# support only E. coli
 add_definitions(-DSINGLE_START_CODON) # only use most popular start codons
 
@@ -11,7 +13,7 @@ set(COMPILE_FLAGS "-Wall -Wextra -Werror -pedantic -std=c99")
 if(DEBUG)
 	set(COMPILE_FLAGS "${COMPILE_FLAGS} -O0 -ggdb -g3")
 elseif(RELEASE)
-	set(COMPILE_FLAGS "${COMPILE_FLAGS} -O3")
+	set(COMPILE_FLAGS "${COMPILE_FLAGS} -O3 -finline-functions")
 endif()
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMPILE_FLAGS}" )
 	
