@@ -3,6 +3,16 @@
 
 #include "sequence_heuristics.h" // provide codon sequence data to files
 
+// chosen so that maximum binblock_size is 8192, a power of 2 (heuristic)
+#define BLOCK_SIZE 8058 				// used in file I/O
+
+// only look for orfs above 60 bases long (heuristic)
+#define MIN_ORF_LENGTH 60	// convert this to program option at some point, not compile-time definition
+
+// output block maximum size
+// maximum possible size of output block, assuming every possible 60-char sequence is an orf (which won't happen)
+#define BINBLOCK_SIZE (size_t)((BLOCK_SIZE)*(1 + (double)(1 / MIN_ORF_LENGTH)))
+
 #define NUM_SPECIAL_CHARS 2
 // certain special characters such as \r and \n are used to delimit lines in the resulting vcsfmt file
 // but the hash for codons may produce unsigned ints corresponding to those ascii codes
@@ -85,10 +95,7 @@ inline char de_escape_special_chars(char input_byte){
 
 // heavy lifting
 
-// only look for orfs above 60 bases long
-#define MIN_ORF_LENGTH 60	// convert this to program option at some point, not compile-time definition
-
-inline void hash_and_delimit_block_by_line(string_with_size * input_block_with_size, string_with_size * output_block_with_size, bool * is_within_orf, size_t * cur_orf_pos){
+inline void delimit_block_by_line(string_with_size * input_block_with_size, string_with_size * output_block_with_size, bool * is_within_orf, size_t * cur_orf_pos){
 	// OPTIMIZATION: make this static
 	char current_codon[CODON_LENGTH];
   char output_byte;							// output of hash

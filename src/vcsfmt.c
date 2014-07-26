@@ -43,18 +43,14 @@ int vcsfmt(char * filename){
 	// perform block processing
 	while (!feof(input_file) && !ferror(input_file) && !ferror(output_file)){
 		// read in block
-		read_block(input_file, input_stream_block);
-		cur_bytes_read = input_stream_block->cur_size;
-		total_bytes_read += cur_bytes_read;
-		// process block
-		process_block(input_stream_block,
-									output_stream_block,
-									is_within_orf,
-									cur_orf_pos);
-		// write block
-		write_block(output_file, output_stream_block);
-		cur_bytes_written = output_stream_block->cur_size;
-		total_bytes_written += cur_bytes_written;
+		total_bytes_read += cur_bytes_read =
+			read_block(input_file, input_stream_block)->cur_size;
+		// process and write block
+		total_bytes_written += cur_bytes_written =
+			write_block(output_file, process_block(input_stream_block,
+																						 output_stream_block,
+																						 is_within_orf,
+																						 cur_orf_pos))->cur_size;
 	}
 	// cur_bytes_read and cur_bytes_written are assigned differently,
 	// one as the return value of a function and one as a value within the string_with_size struct,
@@ -138,16 +134,12 @@ int de_vcsfmt(char * filename){
 	// perform block processing
 	while (!feof(input_file) && !ferror(input_file) && !ferror(output_file)){
 		// read in block
-		read_block(input_file, input_stream_block);
-		cur_bytes_read = input_stream_block->cur_size;
-		total_bytes_read += cur_bytes_read;
-		// process block
-		de_process_block(input_stream_block,
-										 output_stream_block);
-		// write block
-		write_block(output_file, output_stream_block);
-		cur_bytes_written = output_stream_block->cur_size;
-		total_bytes_written += cur_bytes_written;
+		total_bytes_read += cur_bytes_read =
+			read_block(input_file, input_stream_block)->cur_size;
+		// process and write block
+		total_bytes_written += cur_bytes_written =
+			write_block(output_file, de_process_block(input_stream_block,
+																								output_stream_block))->cur_size;
 	}
 	// cur_bytes_read and cur_bytes_written are assigned differently,
 	// one as the return value of a function and one as a value within the string_with_size struct,
@@ -215,13 +207,13 @@ FILE * open_file(char * filename){
 	return input_file;
 }
 
-extern inline void read_block(FILE * input_file, string_with_size * input_str_with_size);
+extern inline string_with_size * read_block(FILE * input_file, string_with_size * input_str_with_size);
 
-extern inline void process_block(string_with_size * input_block_with_size, string_with_size * output_block_with_size, bool * is_within_orf, size_t * cur_orf_pos);
+extern inline string_with_size * process_block(string_with_size * input_block_with_size, string_with_size * output_block_with_size, bool * is_within_orf, size_t * cur_orf_pos);
 
-extern inline void de_process_block(string_with_size * input_block_with_size, string_with_size * output_block_with_size);
+extern inline string_with_size * de_process_block(string_with_size * input_block_with_size, string_with_size * output_block_with_size);
 
-extern inline void write_block(FILE * output_file, string_with_size * output_block_with_size);
+extern inline string_with_size * write_block(FILE * output_file, string_with_size * output_block_with_size);
 
 FILE * create_outfile(char* filename){
 	FILE * output_file = fopen(filename,"wb");
