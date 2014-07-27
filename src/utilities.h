@@ -64,6 +64,4 @@ typedef struct{
 	size_t end_index;
 } dna_reading_indices;
 
-#define g_slist_first_INTERNAL(EXPR) g_slist_nth(EXPR,0)
-
 #endif /*___UTILITIES_H___*/

@@ -40,10 +40,16 @@ inline string_with_size * delimit_block_by_line(string_with_size * input_block_w
 					*cur_orf_pos = 0;
 				}
 				else{
-					output_block_with_size_ptr->string[output_block_with_size_ptr->cur_size] =
-						current_codon_frame[0];
-					++*cur_orf_pos;
+					// ORF length must be multiple of CODON_LENGTH (of 3)
+					// we could simply check if current orf length is a multiple of 3, but that becomes very slow at scale
+					// OPTIMIZATION: unroll this loop since CODON_LENGTH is known and universally constant
+					for (size_t base_index = 0; base_index < CODON_LENGTH; ++base_index){
+						output_block_with_size_ptr->string[output_block_with_size_ptr->cur_size + base_index] = current_codon_frame[base_index];
+						current_codon_frame[base_index] = '\0';
+					}
+					*cur_orf_pos += 3;
 					// output_block_with_size_ptr->cur_size INCREMENTED AT END OF LOOP
+					output_block_with_size_ptr->cur_size += 2;
 				}
 			}
 			else{
@@ -77,6 +83,7 @@ inline string_with_size * delimit_block_by_line(string_with_size * input_block_w
 		for (size_t base_index = 0; base_index < CODON_LENGTH - 1; ++base_index){
 			current_codon_frame[base_index] = current_codon_frame[base_index + 1];
 		}
+		current_codon_frame[CODON_LENGTH - 1] = '\0'; // nullify final
 		// leaves first two codons in current_codon_frame pointer for next block to use
 	}
 
@@ -85,8 +92,10 @@ inline string_with_size * delimit_block_by_line(string_with_size * input_block_w
 		// OPTIMIZATION: unroll this loop since CODON_LENGTH is known and universally constant
 		// not really that much of an optimization though since this is a miniscule calculation
 		for (size_t base_index = 0; base_index < CODON_LENGTH - 1; ++base_index){
-			output_block_with_size_ptr->string[output_block_with_size_ptr->cur_size + base_index] =
-				current_codon_frame[base_index];
+			if (output_block_with_size_ptr->string[output_block_with_size_ptr->cur_size + base_index] != '\0'){
+				output_block_with_size_ptr->string[output_block_with_size_ptr->cur_size + base_index] =
+					current_codon_frame[base_index];
+			}
 		}
 		output_block_with_size_ptr->cur_size += CODON_LENGTH - 1;
 	}
