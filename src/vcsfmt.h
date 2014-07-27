@@ -5,23 +5,42 @@
 
 #define OUTPUT_SUFFIX ".vcsfmt"
 
-// 18446744073709551615 is max size of size_t on my system
-// use (size_t) -1 to find max size of size_t on per-system basis
-// TODO: this is important because dna data files on the genome level can get very long
+// gmp bignums used for keeping track of very large scale bytes
+typedef struct{
+	int result;
+	mpz_t bytes_processed;
+} result_bytes_processed;
+// CTOR
+// uses pointers so potentially massive mpz_t doesn't have to be copied by value'
+result_bytes_processed * initialize_result_bytes_processed_ptr(result_bytes_processed * rbp);
+// DTOR
+void free_result_bytes_processed_ptr(result_bytes_processed * rbp);
+// METHODS
+result_bytes_processed * add_to_bytes_processed_ptr(result_bytes_processed * rbp, unsigned long int added_bytes);
+void print_bytes_processed_ptr(result_bytes_processed * rbp, FILE * outstream);
+typedef struct{
+	result_bytes_processed * bytes_read;
+	result_bytes_processed * bytes_written;
+} result_bytes_processed_pair;
+void free_result_bytes_processed_pair(result_bytes_processed_pair rbpp);
 
 //returns -1 if failed, otherwise returns size in bytes of produced file
-int vcsfmt(char * filename);	// if filetype supported, produces vcsfmt file of same name
+result_bytes_processed_pair vcsfmt(char * filename);	// if filetype supported, produces vcsfmt file of same name
 
 // inverse of above
 // returns -1 if failed, otherwise returns size in bytes of produced file
-int de_vcsfmt(char * filename);	// produces original file
+result_bytes_processed_pair de_vcsfmt(char * filename);	// produces original file
 
 // remove newlines, play with other metadata before going into dna; produces file in .darwin folder
 // returns indices of of bytes in file where dna exists, ensures DNA is divisible by 3
 dna_reading_indices pre_format_file(char * filename);
+// above for de_vcsfmt
+dna_reading_indices de_pre_format_file(char * filename);
 
 // adds any required formatting to file after reconstituting from .vcsfmt
 void post_format_file(char * filename);
+// above for de_vcsfmt
+void de_post_format_file(char * filename);
 
 // open file, return pointer
 FILE * open_file(char* filename);

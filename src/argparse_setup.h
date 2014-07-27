@@ -7,7 +7,7 @@ const char * argp_program_bug_address = "<danieldmcclanahan@gmail.com>";
 
 static struct argp_option options[] = {
 	{"preformat_loc",	'p',	"DIR",	0,
-	 "Location of pre-existing .vcsfmt-formatted files for given input files",	0},
+	 "Location of pre-existing .vcsfmt files for given input DNA",	0},
 	{"write",	'w',	0,	0,	"Write output to file(s) instead of stdout",	0},
 	{"compare",	'c',	0,	0,
 	 "If two files given, produce unix diff-compatible comparison .vcsdiff file",	1},
@@ -23,12 +23,23 @@ typedef struct{
 	bool is_write;								// --write option
 	bool is_compare;							// --compare option
 	bool is_verbose;							// --verbose option
-} arguments;
+	bool has_no_args;
+} dardiff_arguments;
+// CTOR
+dardiff_arguments initialize_dardiff_arguments(dardiff_arguments args){
+	args.files = NULL;
+	args.preformat_loc_dir = "";
+	args.is_write = false;
+	args.is_compare = false;
+	args.is_verbose = false;
+	args.has_no_args = false;
+	return args;
+}
 
 static error_t parse_opt (int key, char * arg, struct argp_state * state){
 	/* Get the input argument from argp_parse, which we
 		 know is a pointer to our argument's structure. */
-	arguments * args_ptr = state->input;
+	dardiff_arguments * args_ptr = state->input;
 
 	switch (key){
 	case 'p':
@@ -46,6 +57,8 @@ static error_t parse_opt (int key, char * arg, struct argp_state * state){
 	case ARGP_KEY_ARG:						// file argument
 		args_ptr->files = g_slist_append(args_ptr->files,arg);
 		break;
+	case ARGP_KEY_NO_ARGS:
+		args_ptr->has_no_args = true;
 	default:
 		return ARGP_ERR_UNKNOWN;
 	}

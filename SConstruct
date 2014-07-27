@@ -29,3 +29,5 @@ elif (env.build_mode == 'RELEASE'): # use gcc for robustness and speed of execut
 
 # add glib
 env.ParseConfig('pkg-config --cflags --libs glib-2.0')
+# add gmp
+env.Append(LIBS = ['gmp'])

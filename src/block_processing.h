@@ -1,7 +1,7 @@
 #ifndef ___BLOCK_PROCESSING_H___
 #define ___BLOCK_PROCESSING_H___
 
-#include "sequence_heuristics.h" // provide codon sequence data to files
+#include "sequence_processing.h" // provide codon sequence data to files
 
 // chosen so that maximum binblock_size is 8192, a power of 2 (heuristic)
 #define BLOCK_SIZE 7928 				// used in file I/O

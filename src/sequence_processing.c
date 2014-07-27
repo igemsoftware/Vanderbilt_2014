@@ -1,4 +1,4 @@
-#include "sequence_heuristics.h" // required
+#include "sequence_processing.h" // required
 
 // sources (use actual papers at some point):
 // https://en.wikipedia.org/wiki/Start_codon
@@ -20,19 +20,19 @@ const char * start_codons[NUMBER_OF_START_CODONS] = {
 #elif defined POPULAR_CODONS
 #define NUMBER_OF_START_CODONS 3
 const char * start_codons[NUMBER_OF_START_CODONS] = {
-		"ATG",											// AUG (83% prevalence)
-		"GTG",											// GUG (14% prevalence)
-		"TTG"												// UUG (3% prevalence)
-	};
+	"ATG",											// AUG (83% prevalence)
+	"GTG",											// GUG (14% prevalence)
+	"TTG"												// UUG (3% prevalence)
+};
 #else
 #define NUMBER_OF_START_CODONS 5
 const char * start_codons[NUMBER_OF_START_CODONS] = {
-		"ATG",											// AUG (83% prevalence)
-		"GTG",											// GUG (14% prevalence)
-		"TTG",											// UUG (3% prevalence)
-		"ATT",											// AUU (very small)
-		"CTG"												// CUG (very small)
-	};
+	"ATG",											// AUG (83% prevalence)
+	"GTG",											// GUG (14% prevalence)
+	"TTG",											// UUG (3% prevalence)
+	"ATT",											// AUU (very small)
+	"CTG"												// CUG (very small)
+};
 #endif
 
 #endif

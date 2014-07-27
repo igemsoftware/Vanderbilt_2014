@@ -7,35 +7,62 @@
 #include <string.h>					// for strlen/strcpy/strcat
 #include <ctype.h>					// for toupper
 #include <glib.h>						// for GList
+#include <gmp.h>						// for mpz_t
 
 // MACROS
 
-#define PRINT_ERROR(str) fprintf(stderr,"%s",str)
+#define PRINT_ERROR(str) fprintf(stderr,"%s\n",str)
 
 #define PRINT_ERROR_AND_RETURN_NULL_IF_NULL(ptr,str)			\
 	if (NULL == ptr){																				\
-	fprintf(stderr,"%s",str);																\
+	PRINT_ERROR(str);																				\
 	return NULL;																						\
 	}
 
 #define PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NULL(ptr,str)	\
 	if (NULL == ptr){																			\
-	fprintf(stderr,"%s",str);															\
+	PRINT_ERROR(str);																			\
 	return -1;																						\
 	}
 
 #define PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NEG_ONE(val,str)	\
 	if (-1 == val){																						\
-	fprintf(stderr,"%s",str);																	\
+	PRINT_ERROR(str);																					\
 	return -1;																								\
 	}
 
 #define PRINT_ERROR_AND_RETURN_NULL_IF_NEG_ONE(val,str)	\
 	if (-1 == val){																				\
-	fprintf(stderr,"%s",str);															\
+	PRINT_ERROR(str);																			\
 	return NULL;																					\
 	}
 
+#define PRINT_ERROR_AND_PERFORM_EXPR_IF_NULL(val,str,expr)	\
+	if (NULL == val){																					\
+	PRINT_ERROR(str);																					\
+	expr;																											\
+	}
+
+#define PRINT_ERROR_AND_PERFORM_EXPR_IF_NEG_ONE(val,str,expr)	\
+	if (-1 == val){																							\
+	PRINT_ERROR(str);																						\
+	expr; 																											\
+	}
+
+#define PRINT_ERROR_AND_PERFORM_EXPR_AND_RETURN_IF_NULL(val,str,expr,retval)	\
+	if (NULL == val){ 																													\
+	PRINT_ERROR(str); 																													\
+	expr; 																																			\
+	return retval; 																															\
+	}
+
+#define PRINT_ERROR_AND_PERFORM_EXPR_AND_RETURN_IF_NEG_ONE(val,str,expr,retval)	\
+	if (-1 == val){ 																															\
+	PRINT_ERROR(str); 																														\
+	expr; 																																				\
+	return retval; 																																\
+	}
+	
 
 // STRUCTS
 
