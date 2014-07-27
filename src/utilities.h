@@ -6,6 +6,7 @@
 #include <stdlib.h>					// for malloc
 #include <string.h>					// for strlen/strcpy/strcat
 #include <ctype.h>					// for toupper
+#include <glib.h>						// for GList
 
 // MACROS
 
@@ -62,5 +63,7 @@ typedef struct{
 	size_t begin_index;
 	size_t end_index;
 } dna_reading_indices;
+
+#define g_slist_first_INTERNAL(EXPR) g_slist_nth(EXPR,0)
 
 #endif /*___UTILITIES_H___*/

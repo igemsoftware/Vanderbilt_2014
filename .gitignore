@@ -8,5 +8,5 @@ bin/
 *.vcsfmt
 # generated files from scons
 .sconsign.dblite
-# current name of binary
-main
+# current names of binaries
+dardiff

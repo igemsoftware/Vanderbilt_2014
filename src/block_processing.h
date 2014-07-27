@@ -80,7 +80,7 @@ inline string_with_size * delimit_block_by_line(string_with_size * input_block_w
 		// leaves first two codons in current_codon_frame pointer for next block to use
 	}
 
-	// if this is the last block, eject the last two bases
+	// if this is the last block, eject the last two bases which would have otherwise been saved for next block
 	if (is_final_block){
 		// OPTIMIZATION: unroll this loop since CODON_LENGTH is known and universally constant
 		// not really that much of an optimization though since this is a miniscule calculation
