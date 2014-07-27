@@ -5,8 +5,6 @@
 
 #define OUTPUT_SUFFIX ".vcsfmt"
 
-// OPTIMIZATION: make these functions inline
-
 // 18446744073709551615 is max size of size_t on my system
 // use (size_t) -1 to find max size of size_t on per-system basis
 // TODO: this is important because dna data files on the genome level can get very long
@@ -40,23 +38,25 @@ inline string_with_size * read_block(FILE * input_file, string_with_size * input
 
 // perform some processing on block and write to file
 // modifies output_str_wih_size->cur_size to be number of bytes written to file
-inline string_with_size * process_block(string_with_size * input_block_with_size, string_with_size * output_block_with_size, bool * is_within_orf, size_t * cur_orf_pos){
-	delimit_block_by_line(input_block_with_size, output_block_with_size, is_within_orf, cur_orf_pos);
-	return output_block_with_size;
+inline string_with_size * process_block(string_with_size * input_block_with_size_ptr, string_with_size * output_block_with_size_ptr, bool * is_within_orf, size_t * cur_orf_pos, char * current_codon_frame, bool is_final_block){
+	return delimit_block_by_line(input_block_with_size_ptr,
+															 output_block_with_size_ptr,
+															 is_within_orf, cur_orf_pos,
+															 current_codon_frame,
+															 is_final_block);
 }
 
 // inverse of above
-inline string_with_size * de_process_block(string_with_size * input_block_with_size, string_with_size * output_block_with_size){
-	unhash_and_remove_newlines(input_block_with_size, output_block_with_size);
-	return output_block_with_size;
+inline string_with_size * de_process_block(string_with_size * input_block_with_size_ptr, string_with_size * output_block_with_size_ptr){
+	return remove_newlines(input_block_with_size_ptr, output_block_with_size_ptr);
 }
 
-inline string_with_size * write_block(FILE * output_file, string_with_size * output_block_with_size){
-	output_block_with_size->cur_size = fwrite(output_block_with_size->string,
+inline string_with_size * write_block(FILE * output_file, string_with_size * output_block_with_size_ptr){
+	output_block_with_size_ptr->cur_size = fwrite(output_block_with_size_ptr->string,
 																						sizeof(char),
-																						output_block_with_size->cur_size,
+																						output_block_with_size_ptr->cur_size,
 																						output_file);
-	return output_block_with_size;
+	return output_block_with_size_ptr;
 }
 
 FILE * create_outfile(char * filename); // create file, return pointer

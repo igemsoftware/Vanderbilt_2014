@@ -45,6 +45,19 @@ typedef struct{
 	size_t full_size;							// full size of char * in bytes
 } string_with_size;							// NOT null-terminated by default!
 
+inline string_with_size * make_new_string_with_size_ptr (size_t full_size){
+	string_with_size * sws_to_return = (string_with_size *) malloc(sizeof(string_with_size));
+	sws_to_return->string = (char *) malloc(full_size*(sizeof(char)));
+	sws_to_return->cur_size = 0;
+	sws_to_return->full_size = full_size;
+	return sws_to_return;
+}
+
+inline void free_string_with_size_ptr(string_with_size * sws_to_free){
+	free(sws_to_free->string);
+	free(sws_to_free);
+}
+
 typedef struct{
 	size_t begin_index;
 	size_t end_index;

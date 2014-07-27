@@ -70,20 +70,3 @@ bool is_stop_codon(char * codon){
 	return false;
 }
 
-// OPTIMIZATION: make this inline if compiler doesn't do it already
-// encode each codon into different byte with perfect hash
-// for compression and identification of synonymic codons
-// precondition: codon MUST be three characters from A/C/G/T
-// postcondition: returns null char if not found
-char get_byte_from_codon(char * codon){
-  if (in_codon_set(codon,CODON_LENGTH)){
-		return (char) codon_hash(codon,CODON_LENGTH);
-	}
-	else{
-		return '\0';
-	}
-}
-
-const char * get_codon_from_byte(char byte){
-	return wordlist[(unsigned char) byte]; // the cast to unsigned char is required so that it doesn't go to a negative, which causes segfaults due to reaching beyond array bounds
-}

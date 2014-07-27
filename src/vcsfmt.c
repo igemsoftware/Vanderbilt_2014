@@ -17,17 +17,11 @@ int vcsfmt(char * filename){
 	PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NULL(output_file,"Error in creating output file.\n");
 
 	// allocate mem for input block
-	string_with_size * input_stream_block = (string_with_size *) malloc(sizeof(string_with_size));
-	input_stream_block->string = malloc((BLOCK_SIZE) * sizeof(char));
-	input_stream_block->full_size = BLOCK_SIZE * sizeof(char);
-	input_stream_block->cur_size = 0;		// no data written yet
-	PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NULL(input_stream_block->string,"Stream memory block not successfully allocated.\n");
+	string_with_size * input_block_with_size_ptr = make_new_string_with_size_ptr(BLOCK_SIZE);
+	PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NULL(input_block_with_size_ptr->string,"Stream memory block not successfully allocated.\n");
 	// same for output
-	string_with_size * output_stream_block = (string_with_size *) malloc(sizeof(string_with_size));
-	output_stream_block->string = malloc((BLOCK_SIZE) * sizeof(char));
-	output_stream_block->full_size = BLOCK_SIZE * sizeof(char);
-	output_stream_block->cur_size = 0;		// no data written yet
-	PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NULL(output_stream_block->string,"Stream memory block not successfully allocated.\n");
+	string_with_size * output_block_with_size_ptr = make_new_string_with_size_ptr(BINBLOCK_SIZE);
+	PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NULL(output_block_with_size_ptr->string,"Stream memory block not successfully allocated.\n");
 
 
 	size_t cur_bytes_read = 0;
@@ -35,37 +29,32 @@ int vcsfmt(char * filename){
 	size_t cur_bytes_written = 0;
 	size_t total_bytes_written = 0;
 
-	bool * is_within_orf = (bool*) malloc(sizeof(bool));
-	*is_within_orf = false;				// file begins outside of orf
-	size_t * cur_orf_pos = (size_t *) malloc(sizeof(size_t));
-	*cur_orf_pos = 0;
+	bool is_within_orf = false;	// file begins outside of orf
+	size_t cur_orf_pos = 0;
+	char current_codon_frame[CODON_LENGTH] = {'\0'}; // begins with zero current codons
 
 	// perform block processing
 	while (!feof(input_file) && !ferror(input_file) && !ferror(output_file)){
 		// read in block
 		total_bytes_read += cur_bytes_read =
-			read_block(input_file, input_stream_block)->cur_size;
+			read_block(input_file, input_block_with_size_ptr)->cur_size;
 		// process and write block
 		total_bytes_written += cur_bytes_written =
-			write_block(output_file, process_block(input_stream_block,
-																						 output_stream_block,
-																						 is_within_orf,
-																						 cur_orf_pos))->cur_size;
+			write_block(output_file, process_block(input_block_with_size_ptr,
+																						 output_block_with_size_ptr,
+																						 &is_within_orf,
+																						 &cur_orf_pos,
+																						 current_codon_frame,
+																						 feof(input_file)))->cur_size;
 	}
-	// cur_bytes_read and cur_bytes_written are assigned differently,
-	// one as the return value of a function and one as a value within the string_with_size struct,
-	// because while reading a block is always <= BLOCK_SIZE,
-	// writing can be and usually is > BLOCK_SIZE due to the newlines and other info inserted
 
-	// cleanup mem
-	free(output_file_name);
-	free(input_stream_block->string);
-	free(input_stream_block);
-	free(is_within_orf);
+	// cleanup allocated memory
+	free(output_file_name);	// this is absolutely tiny but there's no reason not to free it
+	free_string_with_size_ptr(input_block_with_size_ptr);
+	free_string_with_size_ptr(output_block_with_size_ptr);
 
-	bool error_occurred = false;
-	
 	// error handling
+	bool error_occurred = false;
 	if (ferror(input_file) && !feof(input_file)){
 		PRINT_ERROR("Error in reading from input file.\n");
 		error_occurred = true;
@@ -113,18 +102,14 @@ int de_vcsfmt(char * filename){
 	PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NULL(output_file,"Error in creating output file.\n");
 
 	// allocate mem for input block
-	string_with_size * input_stream_block = (string_with_size *) malloc(sizeof(string_with_size));
-	input_stream_block->string = malloc((BINBLOCK_SIZE) * sizeof(char));
-	input_stream_block->full_size = BINBLOCK_SIZE * sizeof(char);
-	input_stream_block->cur_size = 0;		// no data written yet
-	PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NULL(input_stream_block->string,"Stream memory block not successfully allocated.\n");
-	// same for output
-	string_with_size * output_stream_block = (string_with_size *) malloc(sizeof(string_with_size));
-	output_stream_block->string = malloc((BLOCK_SIZE) * sizeof(char));
-	output_stream_block->full_size = BLOCK_SIZE * sizeof(char);
-	output_stream_block->cur_size = 0;		// no data written yet
-	PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NULL(output_stream_block->string,"Stream memory block not successfully allocated.\n");
-
+	string_with_size * input_block_with_size_ptr = make_new_string_with_size_ptr(BINBLOCK_SIZE);
+	PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NULL(input_block_with_size_ptr->string,"Stream memory block not successfully allocated.\n");
+	// both are BINBLOCK_SIZE because BINBLOCK_SIZE was calculated to be efficient at file I/O (at 8192 as I write this)
+	// one might think BLOCK_SIZE should be used here, but that would only work if, as in the worst-case scenario,
+	// two newlines are inserted for an ORF for every 60 bases, and would produce a segfault if not
+	// since output is always smaller than input (due to removal of newlines), no segfault occurs
+	string_with_size * output_block_with_size_ptr = make_new_string_with_size_ptr(BINBLOCK_SIZE);
+	PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NULL(output_block_with_size_ptr->string,"Stream memory block not successfully allocated.\n");
 
 	size_t cur_bytes_read = 0;
 	size_t total_bytes_read = 0;
@@ -135,21 +120,17 @@ int de_vcsfmt(char * filename){
 	while (!feof(input_file) && !ferror(input_file) && !ferror(output_file)){
 		// read in block
 		total_bytes_read += cur_bytes_read =
-			read_block(input_file, input_stream_block)->cur_size;
+			read_block(input_file, input_block_with_size_ptr)->cur_size;
 		// process and write block
 		total_bytes_written += cur_bytes_written =
-			write_block(output_file, de_process_block(input_stream_block,
-																								output_stream_block))->cur_size;
+			write_block(output_file, de_process_block(input_block_with_size_ptr,
+																								output_block_with_size_ptr))->cur_size;
 	}
-	// cur_bytes_read and cur_bytes_written are assigned differently,
-	// one as the return value of a function and one as a value within the string_with_size struct,
-	// because while reading a block is always <= BLOCK_SIZE,
-	// writing can be and usually is > BLOCK_SIZE due to the newlines and other info inserted
 
 	// cleanup mem
 	free(output_file_name);
-	free(input_stream_block->string);
-	free(input_stream_block);
+	free_string_with_size_ptr(input_block_with_size_ptr);
+	free_string_with_size_ptr(output_block_with_size_ptr);
 
 	bool error_occurred = false;
 	
@@ -209,11 +190,11 @@ FILE * open_file(char * filename){
 
 extern inline string_with_size * read_block(FILE * input_file, string_with_size * input_str_with_size);
 
-extern inline string_with_size * process_block(string_with_size * input_block_with_size, string_with_size * output_block_with_size, bool * is_within_orf, size_t * cur_orf_pos);
+extern inline string_with_size * process_block(string_with_size * input_block_with_size_ptr, string_with_size * output_block_with_size_ptr, bool * is_within_orf, size_t * cur_orf_pos, char * current_codon_frame, bool is_final_block);
 
-extern inline string_with_size * de_process_block(string_with_size * input_block_with_size, string_with_size * output_block_with_size);
+extern inline string_with_size * de_process_block(string_with_size * input_block_with_size_ptr, string_with_size * output_block_with_size_ptr);
 
-extern inline string_with_size * write_block(FILE * output_file, string_with_size * output_block_with_size);
+extern inline string_with_size * write_block(FILE * output_file, string_with_size * output_block_with_size_ptr);
 
 FILE * create_outfile(char* filename){
 	FILE * output_file = fopen(filename,"wb");
