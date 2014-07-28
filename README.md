@@ -3,7 +3,7 @@ darwin
 
 * track changes as a genome evolves over time (hence the name)
 
-To build, cd to 'src' and run 'cmake .', then 'make'. Should be cross-platform enough to build on Windows too.
+To build, run 'scons' in the root directory; the executable will be placed there when compilation finishes.
 
 ##### intent:
 * merge automatic annotation and version control technologies
