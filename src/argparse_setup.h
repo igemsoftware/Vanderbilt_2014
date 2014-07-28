@@ -1,3 +1,10 @@
+#ifndef ___ARGPARSE_SETUP_H___
+#define ___ARGPARSE_SETUP_H___
+
+/*
+	hosts all required variables and functions to implement argparse
+*/
+
 #include "utilities.h"
 
 // version
@@ -37,10 +44,7 @@ dardiff_arguments initialize_dardiff_arguments(dardiff_arguments args){
 }
 
 static error_t parse_opt (int key, char * arg, struct argp_state * state){
-	/* Get the input argument from argp_parse, which we
-		 know is a pointer to our argument's structure. */
 	dardiff_arguments * args_ptr = state->input;
-
 	switch (key){
 	case 'p':
 		args_ptr->preformat_loc_dir = arg;
@@ -78,3 +82,4 @@ in version control software.";
 
 static struct argp argp = { options, parse_opt, args_doc, doc, 0, 0, 0 };
 
+#endif /*___ARGPARSE_SETUP_H___*/

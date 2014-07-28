@@ -1,6 +1,17 @@
 #ifndef ___UTILITIES_H___
 #define ___UTILITIES_H___
 
+/*
+	preprocessor macros, system headers, and other generic additions to make
+	extending this program easier by cataloging all nonstandard utilities in
+	one spot
+*/
+
+// obviously if a system header needs to be added (changing this filee) then
+// having everything in one file means the whole thing needs to be recompiled
+// however, in a project like this where full compilation takes a single minute
+// this won't be an issue, and the convenience outweights any issues'
+
 #include <stdio.h>					// provide file, print facilities to files
 #include <stdbool.h>				// provide booleans to other files
 #include <stdlib.h>					// for malloc
@@ -90,5 +101,31 @@ typedef struct{
 	size_t begin_index;
 	size_t end_index;
 } dna_reading_indices;
+
+// gmp bignums used for keeping track of large (genome-scale) byte/line numbers
+typedef struct{
+	int result;
+	mpz_t number_processed;
+} result_number_processed;
+// CTOR
+// uses pointers so potentially massive mpz_t doesn't have to be copied by value'
+result_number_processed * initialize_result_number_processed_ptr(result_number_processed * rbp);
+// DTOR
+void free_result_number_processed_ptr(result_number_processed * rbp);
+// METHODS
+inline result_number_processed * add_to_number_processed_ptr(result_number_processed * rbp, unsigned long int added_bytes){
+	mpz_add_ui(rbp->number_processed,rbp->number_processed,added_bytes);
+	return rbp;
+}
+inline result_number_processed * increment_number_processed_ptr(result_number_processed * rbp){
+	add_to_number_processed_ptr(rbp,1);
+	return rbp;
+}
+void print_number_processed_ptr(result_number_processed * rbp, FILE * outstream);
+typedef struct{
+	result_number_processed * bytes_read;
+	result_number_processed * bytes_written;
+} result_number_processed_pair;
+void free_result_number_processed_pair(result_number_processed_pair rbpp);
 
 #endif /*___UTILITIES_H___*/

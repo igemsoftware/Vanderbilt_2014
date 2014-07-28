@@ -1,46 +1,20 @@
 #include "vcsfmt.h"							// required
 
-result_bytes_processed * initialize_result_bytes_processed_ptr(result_bytes_processed * rbp){
-	rbp->result = 0;
-	mpz_init(rbp->bytes_processed); // value set to 0
-	return rbp;
-}
-
-void free_result_bytes_processed_ptr(result_bytes_processed * rbp){
-	mpz_clear(rbp->bytes_processed);
-	free(rbp);
-}
-
-result_bytes_processed * add_to_bytes_processed_ptr(result_bytes_processed * rbp, unsigned long int added_bytes){
-	mpz_add_ui(rbp->bytes_processed,rbp->bytes_processed,added_bytes);
-	return rbp;
-}
-
-void print_bytes_processed_ptr(result_bytes_processed * rbp, FILE * outstream){
-	mpz_out_str(outstream,
-							10,								// base 10
-							rbp->bytes_processed);
-}
-
-void free_result_bytes_processed_pair(result_bytes_processed_pair rbpp){
-	free_result_bytes_processed_ptr(rbpp.bytes_read);
-	free_result_bytes_processed_ptr(rbpp.bytes_written);
-}
 
 
-result_bytes_processed_pair vcsfmt(char * filename){	
+result_number_processed_pair vcsfmt(char * filename){	
 	pre_format_file(filename);
 
 	unsigned long int cur_bytes_read = 0;
 	// alloc'd on heap to avoid stack overflow
 	// TODO: this variable currently unused
-	result_bytes_processed * total_bytes_read = (result_bytes_processed *) malloc(sizeof(result_bytes_processed));
-	initialize_result_bytes_processed_ptr(total_bytes_read); // set to 0
+	result_number_processed * total_bytes_read = (result_number_processed *) malloc(sizeof(result_number_processed));
+	initialize_result_number_processed_ptr(total_bytes_read); // set to 0
 	unsigned long int cur_bytes_written = 0;
-	result_bytes_processed * total_bytes_written = (result_bytes_processed *) malloc(sizeof(result_bytes_processed));
-	initialize_result_bytes_processed_ptr(total_bytes_written); // set to 0
+	result_number_processed * total_bytes_written = (result_number_processed *) malloc(sizeof(result_number_processed));
+	initialize_result_number_processed_ptr(total_bytes_written); // set to 0
 
-	result_bytes_processed_pair returnpair;
+	result_number_processed_pair returnpair;
 	returnpair.bytes_read = total_bytes_read;
 	returnpair.bytes_written = total_bytes_written;
 	
@@ -75,12 +49,12 @@ result_bytes_processed_pair vcsfmt(char * filename){
 	// perform block processing
 	while (!feof(input_file) && !ferror(input_file) && !ferror(output_file)){
 		// read in block and add to bytes processed
-		add_to_bytes_processed_ptr(total_bytes_read,
+		add_to_number_processed_ptr(total_bytes_read,
 															 cur_bytes_read =
 															 read_block(input_file,
 																					input_block_with_size_ptr)->cur_size);
 		// process and write block
-		add_to_bytes_processed_ptr(total_bytes_written,
+		add_to_number_processed_ptr(total_bytes_written,
 															 cur_bytes_written =
 															 write_block(output_file,
 																					 process_block(input_block_with_size_ptr,
@@ -123,19 +97,19 @@ result_bytes_processed_pair vcsfmt(char * filename){
 	return returnpair;
 }
 
-result_bytes_processed_pair de_vcsfmt(char * filename){
+result_number_processed_pair de_vcsfmt(char * filename){
 	de_pre_format_file(filename);
 
 	unsigned long int cur_bytes_read = 0;
 	// alloc'd on heap to avoid stack overflow
 	// TODO: this variable currently unused
-	result_bytes_processed * total_bytes_read = (result_bytes_processed *) malloc(sizeof(result_bytes_processed));
-	initialize_result_bytes_processed_ptr(total_bytes_read); // set to 0
+	result_number_processed * total_bytes_read = (result_number_processed *) malloc(sizeof(result_number_processed));
+	initialize_result_number_processed_ptr(total_bytes_read); // set to 0
 	unsigned long int cur_bytes_written = 0;
-	result_bytes_processed * total_bytes_written = (result_bytes_processed *) malloc(sizeof(result_bytes_processed));
-	initialize_result_bytes_processed_ptr(total_bytes_written); // set to 0
+	result_number_processed * total_bytes_written = (result_number_processed *) malloc(sizeof(result_number_processed));
+	initialize_result_number_processed_ptr(total_bytes_written); // set to 0
 
-	result_bytes_processed_pair returnpair;
+	result_number_processed_pair returnpair;
 	returnpair.bytes_read = total_bytes_read;
 	returnpair.bytes_written = total_bytes_written;
 	
@@ -169,12 +143,12 @@ result_bytes_processed_pair de_vcsfmt(char * filename){
 	// perform block processing
 	while (!feof(input_file) && !ferror(input_file) && !ferror(output_file)){
 		// read in block
-		add_to_bytes_processed_ptr(total_bytes_read,
+		add_to_number_processed_ptr(total_bytes_read,
 															 cur_bytes_read =
 															 read_block(input_file,
 																					input_block_with_size_ptr)->cur_size);
 		// process and write block
-		add_to_bytes_processed_ptr(total_bytes_written,
+		add_to_number_processed_ptr(total_bytes_written,
 															 cur_bytes_written =
 															 write_block(output_file,
 																					 de_process_block(input_block_with_size_ptr,
@@ -232,12 +206,12 @@ dna_reading_indices de_pre_format_file(char * filename){
 
 void post_format_file(char * filename){
 	// does nothing right now
-	printf("%s\n",filename);
+	PRINT_ERROR(filename);
 }
 
 void de_post_format_file(char * filename){
 	// does nothing right now
-	printf("%s\n",filename);
+	PRINT_ERROR(filename);
 }
 
 FILE * open_file(char * filename){

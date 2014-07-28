@@ -1,6 +1,10 @@
 #ifndef ___BLOCK_PROCESSING_H___
 #define ___BLOCK_PROCESSING_H___
 
+/*
+	functions to process strings of dna data in sequential blocks
+*/
+
 #include "sequence_processing.h" // provide codon sequence data to files
 
 // chosen so that maximum binblock_size is 8192, a power of 2 (heuristic)

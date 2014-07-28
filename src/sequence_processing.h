@@ -2,6 +2,10 @@
 #ifndef ___SEQUENCE_PROCESSING_H___
 #define ___SEQUENCE_PROCESSING_H___
 
+/*
+	encapsulates many possibly-changing functions to analyze dna strings
+*/
+
 #include "utilities.h"					// bool, size_t, strncmp
 
 #define CODON_LENGTH 3					// codon length, in bases

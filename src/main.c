@@ -37,27 +37,27 @@ int main(int argc, char ** argv){
 		}
 	}
 
-	result_bytes_processed_pair vcsfmt_results = vcsfmt("500_lines_of_dna_minus_lines.fasta");
+	result_number_processed_pair vcsfmt_results = vcsfmt("500_lines_of_dna_minus_lines.fasta");
   if (vcsfmt_results.bytes_read->result || vcsfmt_results.bytes_written->result){
     PRINT_ERROR("vcsfmt failed.");
   }
   else{
-		print_bytes_processed_ptr(vcsfmt_results.bytes_read,stderr);
+		print_number_processed_ptr(vcsfmt_results.bytes_read,stderr);
 		printf(" bytes read.\n");
-		print_bytes_processed_ptr(vcsfmt_results.bytes_written,stderr);
+		print_number_processed_ptr(vcsfmt_results.bytes_written,stderr);
 		printf(" bytes written.\n");
   }
-	free_result_bytes_processed_pair(vcsfmt_results);
+	free_result_number_processed_pair(vcsfmt_results);
 	
-	result_bytes_processed_pair de_vcsfmt_results = de_vcsfmt("500_lines_of_dna_minus_lines.fasta.vcsfmt");
+	result_number_processed_pair de_vcsfmt_results = de_vcsfmt("500_lines_of_dna_minus_lines.fasta.vcsfmt");
   if (de_vcsfmt_results.bytes_read->result || de_vcsfmt_results.bytes_written->result){
     PRINT_ERROR("de_vcsfmt failed.");
   }
   else{
-		print_bytes_processed_ptr(de_vcsfmt_results.bytes_read,stderr);
+		print_number_processed_ptr(de_vcsfmt_results.bytes_read,stderr);
 		printf(" bytes read.\n");
-		print_bytes_processed_ptr(de_vcsfmt_results.bytes_written,stderr);
+		print_number_processed_ptr(de_vcsfmt_results.bytes_written,stderr);
 		printf(" bytes written.\n");
   }
-	free_result_bytes_processed_pair(vcsfmt_results);
+	free_result_number_processed_pair(de_vcsfmt_results);
 }
