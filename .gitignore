@@ -3,8 +3,6 @@ infos/
 # keep large files meant for testing out of it
 mvp_testing/
 # don't add binary executable and associated object files
-bin/*.h
-bin/*.c
 bin/*.o
 # generated files from processing, wherever they may be
 *.vcsfmt
