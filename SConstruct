@@ -4,7 +4,7 @@ env = Environment()
 env.binary_dir = 'bin'
 env.source_dir = 'src'
 env.executable_dir = "."
-env.executable_name = "dardiff"
+env.executable_name = "dwndiff"
 env.VariantDir(env.binary_dir,env.source_dir,duplicate = 0)  # output to binary folder without copying files
 env.output_executable = env.Program(env.executable_name,Glob(env.binary_dir + '/*.c'))
 
@@ -14,6 +14,7 @@ env.build_mode = 'DEBUG'
 # defines
 env.Append(CPPDEFINES = env.build_mode)
 env.dna_modes = ['ECOLI','SINGLE_START_CODON']
+
 env.Append(CPPDEFINES = env.dna_modes)
 
 # optimization for debug vs release

@@ -10,4 +10,4 @@ bin/*.o
 # generated files from scons
 .sconsign.dblite
 # current names of binaries
-dardiff
+dwndiff

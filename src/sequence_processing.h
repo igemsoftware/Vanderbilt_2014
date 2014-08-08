@@ -11,9 +11,9 @@
 #define CODON_LENGTH 3					// codon length, in bases
 
 extern const char * start_codons[];
-bool is_start_codon(char * codon);
+bool is_start_codon (char * codon);
 
 extern const char * stop_codons[];
-bool is_stop_codon(char * codon);
+bool is_stop_codon (char * codon);
 
 #endif /*___SEQUENCE_PROCESSING_H___*/
