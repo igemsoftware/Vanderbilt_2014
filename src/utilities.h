@@ -86,8 +86,8 @@ typedef struct{
 } string_with_size;			 // NOT null-terminated by default!
 
 inline string_with_size * make_new_string_with_size (size_t size_in_memory){
-	string_with_size * sws_to_return = (string_with_size *) malloc(sizeof(string_with_size));
-	sws_to_return->string = (char *) malloc(size_in_memory * (sizeof(char)));
+	string_with_size * sws_to_return = malloc(sizeof(string_with_size));
+	sws_to_return->string = malloc(size_in_memory * (sizeof(char)));
 	sws_to_return->readable_bytes = 0;
 	sws_to_return->size_in_memory = size_in_memory;
 	return sws_to_return;

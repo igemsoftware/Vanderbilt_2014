@@ -28,6 +28,15 @@ essentially:
 	* because even if it rolls over, the number modulo 2^32 is still a sufficient heuristic for our purposes
 */
 
+/*
+ * have fixed LINE_BLOCK size to work through
+ * check if hash on first line of right side of block equals hashes on any of left side of block
+ * if not, iterate through all and check for similarity w/ levenshtein; if similar, do by-character diff
+ * if a fixed number of blocks have gone through where NO line on right has equaled a hash on the left:
+ 		* then a large number of completely new lines have been introduced, or many lines deleted,
+		and the cmp process is stopped (force-completed)
+ */
+
 typedef struct{
 	mpz_t line_number;
 	unsigned long str_hash;				// used because canonical djb2 uses unsigned long

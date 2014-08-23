@@ -185,4 +185,47 @@ inline string_with_size * write_block (FILE * output_file,
 	return output_block_with_size;
 }
 
+#ifdef CONCURRENT
+typedef struct{
+	FILE * input_file;
+	string_with_size * input_block_with_size;
+	string_with_size * output_block_with_size;
+	bool * is_within_orf;
+	size_t * cur_orf_pos;
+	char * current_codon_frame;
+	bool is_final_block;
+	GAsyncQueue * active_queue;
+	result_bytes_processed * total_bytes_read;
+	volatile bool * is_processing_complete;
+	GMutex * process_complete_mutex;
+} read_and_process_block_args_vcsfmt_CONCURRENT;
+
+typedef struct{
+	FILE * active_file;
+	string_with_size * active_block_with_size;
+	GAsyncQueue * active_queue;
+	result_bytes_processed * total_bytes_written;
+	volatile bool * is_processing_complete;
+	GMutex * process_complete_mutex;
+} read_write_block_args_CONCURRENT;
+
+void read_and_process_block_vcsfmt_CONCURRENT (read_and_process_block_args_vcsfmt_CONCURRENT * args);
+
+void write_block_vcsfmt_CONCURRENT (read_write_block_args_CONCURRENT * args);
+
+inline bool is_processing_complete_vcsfmt_CONCURRENT (read_write_block_args_CONCURRENT * args){
+	if (g_async_queue_length(args->active_queue) != 0){
+		return false;
+	}
+	else{
+		// OPTIMIZATION: make this variable static somehow
+		bool result;
+		g_mutex_lock(args->process_complete_mutex);
+		result = *args->is_processing_complete;
+		g_mutex_unlock(args->process_complete_mutex);
+		return result;
+	}
+}
+#endif
+
 #endif /*___BLOCK_PROCESSING_H___*/

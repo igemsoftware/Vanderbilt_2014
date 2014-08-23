@@ -1,16 +1,13 @@
 #include "vcsfmt.h"							// required
 
-// OPTIMIZATION: parallelize this
 // maintain queue of read-in and processed blocks to be written; read/process and write are done concurrently
 result_bytes_processed_pair vcsfmt (char * filename){	
 	pre_format_file_vcsfmt(filename);
-	unsigned long int cur_bytes_read = 0;
-	// alloc'd on heap to avoid stack overflow
 	// TODO: total_bytes_read currently unused
-	result_bytes_processed * total_bytes_read = (result_bytes_processed *) malloc(sizeof(result_bytes_processed));
+	// TODO: alloc everything on stack instead of heap whenever possible
+	result_bytes_processed * total_bytes_read = malloc(sizeof(result_bytes_processed));
 	initialize_result_bytes_processed(total_bytes_read); // set to 0
-	unsigned long int cur_bytes_written = 0;
-	result_bytes_processed * total_bytes_written = (result_bytes_processed *) malloc(sizeof(result_bytes_processed));
+	result_bytes_processed * total_bytes_written = malloc(sizeof(result_bytes_processed));
 	initialize_result_bytes_processed(total_bytes_written); // set to 0
 
 	result_bytes_processed_pair returnpair;
@@ -24,7 +21,7 @@ result_bytes_processed_pair vcsfmt (char * filename){
 																									returnpair);
 
 	// create filename long enough to concatenate filename and suffix
-	char * output_file_name = (char *) malloc((strlen(filename) +
+	char * output_file_name = malloc((strlen(filename) +
 																						strlen(OUTPUT_SUFFIX) +
 																						1) * sizeof(char));
 	// create output filename
@@ -40,36 +37,82 @@ result_bytes_processed_pair vcsfmt (char * filename){
 
 	// allocate mem for input block
 	string_with_size * input_block_with_size = make_new_string_with_size(BLOCK_SIZE);
+#ifndef CONCURRENT
 	// same for output
-	string_with_size * output_block_with_size = make_new_string_with_size(BINBLOCK_SIZE);
+	string_with_size * output_block_with_size = make_new_string_with_size(BINBLOCK_SIZE);	
+#endif
 
 	bool is_within_orf = false;	// file begins outside of orf
 	size_t cur_orf_pos = 0;
 	char current_codon_frame[CODON_LENGTH] = {'\0'}; // begins with zero current codons
 
-	// perform block processing
+#ifdef CONCURRENT
+	GAsyncQueue * active_queue = g_async_queue_new();
+	bool * is_processing_complete = malloc(sizeof(bool));
+	*is_processing_complete = false;
+	GMutex process_complete_mutex;
+	g_mutex_init(&process_complete_mutex);
+	
+	read_and_process_block_args_vcsfmt_CONCURRENT args_to_block_processing;
+	args_to_block_processing.input_file = input_file;
+	args_to_block_processing.input_block_with_size = input_block_with_size;
+	// output_block_with_size newly allocated each time, therefore not added here
+	args_to_block_processing.is_within_orf = &is_within_orf;
+	args_to_block_processing.cur_orf_pos = &cur_orf_pos;
+	args_to_block_processing.current_codon_frame = current_codon_frame;
+	args_to_block_processing.is_final_block = false;
+	args_to_block_processing.active_queue = active_queue;
+	args_to_block_processing.total_bytes_read = total_bytes_read;
+	args_to_block_processing.is_processing_complete = is_processing_complete;
+	args_to_block_processing.process_complete_mutex = &process_complete_mutex;
+
+	read_write_block_args_CONCURRENT args_to_write_block;
+	args_to_write_block.active_file = output_file;
+	args_to_write_block.active_queue = active_queue;
+	args_to_write_block.total_bytes_written = total_bytes_written;
+	args_to_write_block.is_processing_complete = is_processing_complete;
+	args_to_write_block.process_complete_mutex = &process_complete_mutex;
+
+	GThread * read_and_process_block_thread = g_thread_new("read_and_process_block_thread",
+																												 (GThreadFunc) read_and_process_block_vcsfmt_CONCURRENT,
+																												 &args_to_block_processing);
+	GThread * write_block_thread = g_thread_new("write_block_thread",
+																							(GThreadFunc) write_block_vcsfmt_CONCURRENT,
+																							&args_to_write_block);
+	g_thread_join(write_block_thread); // implicitly frees thread
+#else
+
+	// CORE LOGIC
 	while (!feof(input_file) && !ferror(input_file) && !ferror(output_file)){
 		// read in block and add to bytes processed
 		add_to_bytes_processed(total_bytes_read,
-															 cur_bytes_read =
-															 read_block(input_file,
-																					input_block_with_size)->readable_bytes);
+													 read_block(input_file,
+																			input_block_with_size)->readable_bytes);
 		// process and write block
 		add_to_bytes_processed(total_bytes_written,
-															 cur_bytes_written =
-															 write_block(output_file,
-																					 process_block_vcsfmt(input_block_with_size,
-																												 output_block_with_size,
-																												 &is_within_orf,
-																												 &cur_orf_pos,
-																												 current_codon_frame,
-																												 feof(input_file)))->readable_bytes);
+													 write_block(output_file,
+																			 process_block_vcsfmt(input_block_with_size,
+																														output_block_with_size,
+																														&is_within_orf,
+																														&cur_orf_pos,
+																														current_codon_frame,
+																														feof(input_file)))->readable_bytes);
 	}
-
-	// cleanup allocated memory
+#endif
+	
+	// cleanup allocated memory and open handles
+#ifdef CONCURRENT
+	// TODO: fix mutex and thread memory leaks, if possible
+	g_async_queue_unref(active_queue);
+	free(is_processing_complete);
+	g_mutex_clear(&process_complete_mutex);
+	g_thread_unref(read_and_process_block_thread); // write thread freed by join
+#endif
 	free(output_file_name);	// this is absolutely tiny but there's no reason not to free it
 	free_string_with_size(input_block_with_size);
+#ifndef CONCURRENT
 	free_string_with_size(output_block_with_size);
+#endif
 
 	// error handling
 	if (ferror(input_file) && !feof(input_file)){
@@ -104,10 +147,10 @@ result_bytes_processed_pair de_vcsfmt (char * filename){
 	unsigned long int cur_bytes_read = 0;
 	// alloc'd on heap to avoid stack overflow
 	// TODO: this variable currently unused
-	result_bytes_processed * total_bytes_read = (result_bytes_processed *) malloc(sizeof(result_bytes_processed));
+	result_bytes_processed * total_bytes_read = malloc(sizeof(result_bytes_processed));
 	initialize_result_bytes_processed(total_bytes_read); // set to 0
 	unsigned long int cur_bytes_written = 0;
-	result_bytes_processed * total_bytes_written = (result_bytes_processed *) malloc(sizeof(result_bytes_processed));
+	result_bytes_processed * total_bytes_written = malloc(sizeof(result_bytes_processed));
 	initialize_result_bytes_processed(total_bytes_written); // set to 0
 
 	result_bytes_processed_pair returnpair;
@@ -121,7 +164,7 @@ result_bytes_processed_pair de_vcsfmt (char * filename){
 																									returnpair);
 
 	// create filename long enough to concatenate filename and suffix
-	char * output_file_name = (char *) malloc((strlen(filename) +
+	char * output_file_name = malloc((strlen(filename) +
 																						strlen(OUTPUT_SUFFIX) +
 																						1) * sizeof(char));
 	// create output filename

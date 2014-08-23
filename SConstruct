@@ -10,12 +10,16 @@ env.output_executable = env.Program(env.executable_name,Glob(env.binary_dir + '/
 
 # debug/release
 env.build_mode = 'DEBUG'
+# env.build_mode = 'RELEASE'
+env.Append(CPPDEFINES = env.build_mode)
+
+# TODO: statically link libraries to allow for easier installation to end users
 
 # defines
-env.Append(CPPDEFINES = env.build_mode)
 env.dna_modes = ['ECOLI','SINGLE_START_CODON']
-
 env.Append(CPPDEFINES = env.dna_modes)
+env.process_modes = ['CONCURRENT']
+env.Append(CPPDEFINES = env.process_modes)
 
 # optimization for debug vs release
 if (env.build_mode == 'DEBUG'):     # use clang for better error messages, lower compilation time
@@ -23,7 +27,7 @@ if (env.build_mode == 'DEBUG'):     # use clang for better error messages, lower
     env.Append(CCFLAGS = ['-O0','-ggdb','-g3','-Wall','-Wextra','-Werror'])
     env.Replace(CC = 'clang')
 elif (env.build_mode == 'RELEASE'): # use gcc for robustness and speed of executable for better profiling
-    env.Append(CCFLAGS = ['-Ofast','-finline-functions','-fomit-frame-pointer'])
+    env.Append(CCFLAGS = ['-Ofast','-finline-functions','-fomit-frame-pointer','-funroll-loops'])
     env.Replace(CC = 'gcc')
 
 # add glib
