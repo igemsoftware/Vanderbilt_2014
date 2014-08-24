@@ -30,11 +30,6 @@ extern inline result_bytes_processed * add_to_bytes_processed (result_bytes_proc
 
 extern inline result_bytes_processed * increment_bytes_processed (result_bytes_processed * rbp);
 
-extern inline result_bytes_processed * add_to_lines_processed (result_bytes_processed * rbp,
-																															 unsigned long int added_lines);
-
-extern inline result_bytes_processed * increment_lines_processed (result_bytes_processed * rbp);
-
 void print_bytes_processed (result_bytes_processed * rbp,
 																FILE * outstream){
 	mpz_out_str(outstream,

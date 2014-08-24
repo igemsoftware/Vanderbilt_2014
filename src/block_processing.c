@@ -73,3 +73,7 @@ void write_block_vcsfmt_CONCURRENT (read_write_block_args_CONCURRENT * args){
 
 extern inline bool is_processing_complete_vcsfmt_CONCURRENT (read_write_block_args_CONCURRENT * args);
 #endif
+
+extern inline unsigned long djb2_hash_on_string_index (unsigned long instantaneous_hash,
+																											 char * str,
+																											 size_t cur_index);

@@ -18,27 +18,20 @@ env.Append(CPPDEFINES = env.build_mode)
 # defines
 env.dna_modes = ['ECOLI','SINGLE_START_CODON']
 env.Append(CPPDEFINES = env.dna_modes)
-env.process_modes = ['CONCURRENT']
-env.Append(CPPDEFINES = env.process_modes)
+# env.process_modes = ['CONCURRENT']
+# env.Append(CPPDEFINES = env.process_modes)
 
+# flags
+env.Append(CCFLAGS = ['-std=c11'])
 # optimization for debug vs release
 if (env.build_mode == 'DEBUG'):     # use clang for better error messages, lower compilation time
-    # would be -Og but clang doesn't support that
-    env.Append(CCFLAGS = ['-O0','-ggdb','-g3','-Wall','-Wextra','-Werror'])
-    env.Replace(CC = 'clang')
+    env.Append(CCFLAGS = ['-Og','-ggdb','-g3','-Wall','-Wextra','-Werror'])
 elif (env.build_mode == 'RELEASE'): # use gcc for robustness and speed of executable for better profiling
     env.Append(CCFLAGS = ['-Ofast','-finline-functions','-fomit-frame-pointer','-funroll-loops'])
-    env.Replace(CC = 'gcc')
 
+# compiler
+env.Replace(CC = 'gcc')
 # add glib
 env.ParseConfig('pkg-config --cflags --libs glib-2.0')
 # add gmp
 env.Append(LIBS = ['gmp'])
-
-# add target to remove all files
-cleanTarget = env.Command("",
-                          Glob(env.binary_dir + '/*.c'),
-                          [
-                              Delete("$TARGET")
-                          ])
-Alias('clean',cleanTarget)

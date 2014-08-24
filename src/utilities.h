@@ -78,6 +78,12 @@ FILE * create_file_binary_write (char * filename); // create file, return pointe
 
 // STRUCTS AND FUNCTIONS TO MANIPULATE THEM
 
+// used as generic pair
+typedef struct{
+	void * data;
+	bool * boolean;
+} boolean_and_data;
+
 // used to return a char string, along with size information
 typedef struct{
 	char * string;

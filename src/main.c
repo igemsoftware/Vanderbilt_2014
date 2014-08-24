@@ -47,31 +47,34 @@ int main (int argc, char ** argv){
 		}
 	}
 	
-	result_bytes_processed_pair vcsfmt_results = vcsfmt("500_lines_of_dna_minus_lines.fasta");
-  if (vcsfmt_results.bytes_read->result || vcsfmt_results.bytes_written->result){
-    PRINT_ERROR("vcsfmt failed.");
-  }
-  else{
-		print_bytes_processed(vcsfmt_results.bytes_read,
-															stderr);
-		printf(" bytes read.\n");
-		print_bytes_processed(vcsfmt_results.bytes_written,
-															stderr);
-		printf(" bytes written.\n");
-  }
-	free_result_bytes_processed_pair(vcsfmt_results);
+	// result_bytes_processed_pair vcsfmt_results = vcsfmt("500_lines_of_dna_minus_lines.fasta");
+  // if (vcsfmt_results.bytes_read->result || vcsfmt_results.bytes_written->result){
+  //   PRINT_ERROR("vcsfmt failed.");
+  // }
+  // else{
+	// 	print_bytes_processed(vcsfmt_results.bytes_read,
+	// 														stderr);
+	// 	printf(" bytes read.\n");
+	// 	print_bytes_processed(vcsfmt_results.bytes_written,
+	// 														stderr);
+	// 	printf(" bytes written.\n");
+  // }
+	// free_result_bytes_processed_pair(vcsfmt_results);
 	
-	result_bytes_processed_pair de_vcsfmt_results = de_vcsfmt("500_lines_of_dna_minus_lines.fasta.vcsfmt");
-  if (de_vcsfmt_results.bytes_read->result || de_vcsfmt_results.bytes_written->result){
-    PRINT_ERROR("de_vcsfmt failed.");
-  }
-  else{
-		print_bytes_processed(de_vcsfmt_results.bytes_read,
-															stderr);
-		printf(" bytes read.\n");
-		print_bytes_processed(de_vcsfmt_results.bytes_written,
-															stderr);
-		printf(" bytes written.\n");
-  }
-	free_result_bytes_processed_pair(de_vcsfmt_results);
+	// result_bytes_processed_pair de_vcsfmt_results = de_vcsfmt("500_lines_of_dna_minus_lines.fasta.vcsfmt");
+  // if (de_vcsfmt_results.bytes_read->result || de_vcsfmt_results.bytes_written->result){
+  //   PRINT_ERROR("de_vcsfmt failed.");
+  // }
+  // else{
+	// 	print_bytes_processed(de_vcsfmt_results.bytes_read,
+	// 														stderr);
+	// 	printf(" bytes read.\n");
+	// 	print_bytes_processed(de_vcsfmt_results.bytes_written,
+	// 														stderr);
+	// 	printf(" bytes written.\n");
+  // }
+	// free_result_bytes_processed_pair(de_vcsfmt_results);
+
+	vcscmp("500_lines_of_dna_minus_lines.fasta.vcsfmt1",
+				 "500_lines_of_dna_minus_lines.fasta.vcsfmt2");
 }

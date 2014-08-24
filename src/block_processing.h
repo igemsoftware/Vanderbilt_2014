@@ -7,6 +7,8 @@
 
 #include "sequence_processing.h" // provide codon sequence data to files
 
+// VCSFMT FUNCTIONS
+
 // chosen so that maximum BINBLOCK_SIZE is 8192, a power of 2 (heuristic for fast file I/O)
 #define BLOCK_SIZE 7928 				// used in file I/O
 
@@ -147,9 +149,9 @@ inline string_with_size * remove_newlines (string_with_size * input_block_with_s
 inline string_with_size * read_block (FILE * input_file,
 																			string_with_size * input_string_with_size){
 	input_string_with_size->readable_bytes = fread(input_string_with_size->string,
-																				sizeof(char),
-																				input_string_with_size->size_in_memory,
-																				input_file);
+																								 sizeof(char),
+																								 input_string_with_size->size_in_memory,
+																								 input_file);
 	return input_string_with_size;
 }
 
@@ -227,5 +229,21 @@ inline bool is_processing_complete_vcsfmt_CONCURRENT (read_write_block_args_CONC
 	}
 }
 #endif
+
+
+// VCSCMP FUNCTIONS
+
+// implementation of XOR variant of djb2 string hash
+// http://stackoverflow.com/questions/9616296/whats-the-best-hash-for-utf-8-strings
+#define DJB2_HASH_BEGIN 5381		// initial string hash
+// returns the next hash value
+// OPTIMIZATION: is using the function like this (character-by-character) inefficient?
+#define DJB2_MAGIC_CONSTANT 5
+inline unsigned long djb2_hash_on_string_index (unsigned long instantaneous_hash,
+																								char * str,
+																								size_t cur_index){
+	// same as instantaneous_hash * 33 ^ str[cur_index]
+	return ((instantaneous_hash << DJB2_MAGIC_CONSTANT) + instantaneous_hash) ^ str[cur_index];
+}
 
 #endif /*___BLOCK_PROCESSING_H___*/
