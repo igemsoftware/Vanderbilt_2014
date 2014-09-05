@@ -49,6 +49,7 @@ compare_two_result_bytes_processed vcscmp (char * prev_filename,
 	
 #ifdef CONCURRENT
 	// TODO: make array-based queues atomic and VERIFY WITH TEST CODE
+#error FUNCTIONALITY NOT IMPLEMENTED YET
 #else
 	// OPTIMIZATION: actually implement this
 	// // implement fixed-size array-based queue for speed
@@ -178,11 +179,15 @@ compare_two_result_bytes_processed vcscmp (char * prev_filename,
 																					cur_file_string_ids_queue)){
 						++current_streak_of_newly_added_lines;
 #ifdef DEBUG
-						fprintf(stderr,"NEWLY ADDED LINE AT LINE ");
-						mpz_out_str(stderr,10,lines_processed);
-						fprintf(stderr,"\n");
+						fprintf(stderr,
+										"NEWLY ADDED LINE AT LINE ");
+						mpz_out_str(stderr,
+												10,
+												lines_processed);
+						fprintf(stderr,
+										"\n");
 #else
-#error "FUNCTIONALITY NOT IMPLEMENTED YET"
+#error FUNCTIONALITY NOT IMPLEMENTED YET
 #endif
 					}
 					if (current_streak_of_newly_added_lines > QUEUE_HASH_CRITICAL_SIZE){
@@ -199,11 +204,15 @@ compare_two_result_bytes_processed vcscmp (char * prev_filename,
 																				cur_file_string_ids_queue)){
 					++current_streak_of_newly_added_lines;
 #ifdef DEBUG
-					fprintf(stderr,"NEWLY ADDED LINE AT LINE ");
-					mpz_out_str(stderr,10,lines_processed);
-					fprintf(stderr,"\n");
+					fprintf(stderr,
+									"NEWLY ADDED LINE AT LINE ");
+					mpz_out_str(stderr,
+											10,
+											lines_processed);
+					fprintf(stderr,
+									"\n");
 #else
-#error "FUNCTIONALITY NOT IMPLEMENTED YET"
+#error FUNCTIONALITY NOT IMPLEMENTED YET
 #endif
 				}
 				if (current_streak_of_newly_added_lines > QUEUE_HASH_CRITICAL_SIZE){
@@ -224,9 +233,13 @@ compare_two_result_bytes_processed vcscmp (char * prev_filename,
 																		cur_file_string_ids_queue)){
 			++current_streak_of_newly_added_lines;
 #ifdef DEBUG
-			fprintf(stderr,"NEWLY ADDED LINE AT LINE ");
-			mpz_out_str(stderr,10,lines_processed);
-			fprintf(stderr,"\n");
+			fprintf(stderr,
+							"NEWLY ADDED LINE AT LINE ");
+			mpz_out_str(stderr,
+									10,
+									lines_processed);
+			fprintf(stderr,
+							"\n");
 #else
 #error "FUNCTIONALITY NOT IMPLEMENTED YET"
 #endif
