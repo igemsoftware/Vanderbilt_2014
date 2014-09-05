@@ -13,10 +13,7 @@ BreakBeforeBinaryOperators: true
 BreakBeforeBraces: Attach
 BreakBeforeTernaryOperators: true
 ColumnLimit: 80
-ContinuationIndentWidth: 2 # thinner than IndentWidth for two reasons
-# 1) to distinguish it from other forms of line breaks
-# 2) to make it less likely to continue for more lines
-# 			by reducing width of continuation lines
+ContinuationIndentWidth: 2 # to differentiate from normal lines
 DerivePointerAlignment: false
 IndentCaseLabels: false
 IndentWidth: 1
@@ -26,7 +23,7 @@ Language: Cpp # used for C as well, not just C++
 MaxEmptyLinesToKeep: 1
 PointerAlignment: Middle
 SpaceBeforeAssignmentOperators: true
-SpaceBeforeParens: Always
+SpaceBeforeParens: ControlStatements
 SpaceInEmptyParentheses: false
 SpacesBeforeTrailingComments: 1
 SpacesInCStyleCastParentheses: false
