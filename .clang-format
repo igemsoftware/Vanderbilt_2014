@@ -1,8 +1,37 @@
-BasedOnStyle: LLVM
-UseTab: Never
-IndentWidth: 4
-BreakBeforeBraces: Attach
+# options documented in http://clang.llvm.org/docs/ClangFormatStyleOptions.html
+
+AlignEscapedNewlinesLeft: true
+AlignTrailingComments: true
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowShortBlocksOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: false
+AlwaysBreakAfterDefinitionReturnType: false
+AlwaysBreakBeforeMultilineStrings: false
+BinPackParameters: false
+BreakBeforeBinaryOperators: true
+BreakBeforeBraces: Attach
+BreakBeforeTernaryOperators: true
+ColumnLimit: 80
+ContinuationIndentWidth: 2 # thinner than IndentWidth for two reasons
+# 1) to distinguish it from other forms of line breaks
+# 2) to make it less likely to continue for more lines
+# 			by reducing width of continuation lines
+DerivePointerAlignment: false
 IndentCaseLabels: false
-ColumnLimit: 0
-AccessModifierOffset: -4
+IndentWidth: 1
+IndentWrappedFunctionNames: true
+KeepEmptyLinesAtTheStartOfBlocks: true
+Language: Cpp # used for C as well, not just C++
+MaxEmptyLinesToKeep: 1
+PointerAlignment: Middle
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeParens: Always
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 1
+SpacesInCStyleCastParentheses: false
+SpaceAfterCStyleCast: true
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+TabWidth: 4
+UseTab: Never
