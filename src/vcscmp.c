@@ -19,9 +19,6 @@ void set_bool_if_string_id_match(string_id * prev_string_id,
  }
 }
 
-void test_bool_func(int a, int b, int c) {
-}
-
 extern inline bool is_string_id_in_prev_queue(GQueue * prev_file_queue,
                                               GQueue * cur_file_queue);
 

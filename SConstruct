@@ -25,7 +25,7 @@ env.Append(CPPDEFINES = env.dna_modes)
 env.Append(CCFLAGS = ['-std=c11'])
 # optimization for debug vs release
 if (env.build_mode == 'DEBUG'):     # use clang for better error messages, lower compilation time
-    env.Append(CCFLAGS = ['-Og','-ggdb','-g3','-Wall','-Wextra','-Werror'])
+    env.Append(CCFLAGS = ['-O0','-ggdb','-g3','-Wall','-Wextra','-Werror'])
 elif (env.build_mode == 'RELEASE'): # use gcc for robustness and speed of executable for better profiling
     env.Append(CCFLAGS = ['-Ofast','-finline-functions','-fomit-frame-pointer','-funroll-loops'])
 

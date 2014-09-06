@@ -1,6 +1,7 @@
 # keep random downloaded info out of it
 infos/
 # keep large files meant for testing out of it
+# mvp_testing/
 mvp_testing/
 # don't add binary executable and associated object files
 bin/*.o
