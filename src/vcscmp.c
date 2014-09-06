@@ -19,6 +19,9 @@ void set_bool_if_string_id_match(string_id * prev_string_id,
  }
 }
 
+void test_bool_func(int a, int b, int c) {
+}
+
 extern inline bool is_string_id_in_prev_queue(GQueue * prev_file_queue,
                                               GQueue * cur_file_queue);
 
@@ -120,10 +123,11 @@ compare_two_result_bytes_processed vcscmp(char * prev_filename,
  bool break_out_of_vcscmp = false;
 
  while ((!(feof(prev_file) || ferror(prev_file)) || // until both files EOF
-         !(feof(cur_file) || ferror(cur_file))) && !break_out_of_vcscmp) {
-  if (!(feof(prev_file) || ferror(prev_file))
-      && g_queue_get_length(prev_file_string_ids_queue)
-         < QUEUE_HASH_CRITICAL_SIZE) {
+         !(feof(cur_file) || ferror(cur_file))) &&
+        !break_out_of_vcscmp) {
+  if (!(feof(prev_file) || ferror(prev_file)) &&
+      g_queue_get_length(prev_file_string_ids_queue) <
+        QUEUE_HASH_CRITICAL_SIZE) {
    prev_block = read_block(prev_file, // assignment not necessary, but clearer
                            prev_block);
    // OPTIMIZATION: move this index outside of the for loop
@@ -142,9 +146,9 @@ compare_two_result_bytes_processed vcscmp(char * prev_filename,
     }
    }
   }
-  if (!(feof(cur_file) || ferror(cur_file))
-      && g_queue_get_length(cur_file_string_ids_queue)
-         < QUEUE_HASH_CRITICAL_SIZE) {
+  if (!(feof(cur_file) || ferror(cur_file)) &&
+      g_queue_get_length(cur_file_string_ids_queue) <
+        QUEUE_HASH_CRITICAL_SIZE) {
    cur_block = read_block(cur_file, // assignment not necessary, but clearer
                           cur_block);
    for (size_t cur_block_index = 0; cur_block_index < BINBLOCK_SIZE;
@@ -163,12 +167,13 @@ compare_two_result_bytes_processed vcscmp(char * prev_filename,
    }
   }
 
-  if (g_queue_get_length(prev_file_string_ids_queue) >= QUEUE_HASH_CRITICAL_SIZE
-      && g_queue_get_length(cur_file_string_ids_queue)
-         >= QUEUE_HASH_CRITICAL_SIZE) {
+  if (g_queue_get_length(prev_file_string_ids_queue) >=
+        QUEUE_HASH_CRITICAL_SIZE &&
+      g_queue_get_length(cur_file_string_ids_queue) >=
+        QUEUE_HASH_CRITICAL_SIZE) {
    if (mpz_cmp_ui(lines_processed, LINES_ABOVE_BELOW_TO_SEARCH) < 0) {
-    while (mpz_cmp_ui(lines_processed, LINES_ABOVE_BELOW_TO_SEARCH) < 0
-           && !break_out_of_vcscmp) {
+    while (mpz_cmp_ui(lines_processed, LINES_ABOVE_BELOW_TO_SEARCH) < 0 &&
+           !break_out_of_vcscmp) {
      if (!is_string_id_in_prev_queue(prev_file_string_ids_queue,
                                      cur_file_string_ids_queue)) {
       ++current_streak_of_newly_added_lines;

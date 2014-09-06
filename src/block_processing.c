@@ -59,8 +59,8 @@ void read_and_process_block_vcsfmt_CONCURRENT(
 void write_block_vcsfmt_CONCURRENT(read_write_block_args_CONCURRENT * args) {
  while (!is_processing_complete_vcsfmt_CONCURRENT(args)) {
   g_mutex_unlock(args->process_complete_mutex);
-  args->active_block_with_size
-    = (string_with_size *) g_async_queue_pop(args->active_queue);
+  args->active_block_with_size =
+    (string_with_size *) g_async_queue_pop(args->active_queue);
   add_to_bytes_processed(
     args->total_bytes_written,
     write_block(args->active_file, args->active_block_with_size)
@@ -71,8 +71,8 @@ void write_block_vcsfmt_CONCURRENT(read_write_block_args_CONCURRENT * args) {
  for (size_t queue_size = g_async_queue_length(args->active_queue);
       queue_size != 0;
       --queue_size) {
-  args->active_block_with_size
-    = (string_with_size *) g_async_queue_pop(args->active_queue);
+  args->active_block_with_size =
+    (string_with_size *) g_async_queue_pop(args->active_queue);
   add_to_bytes_processed(
     args->total_bytes_written,
     write_block(args->active_file, args->active_block_with_size)

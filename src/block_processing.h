@@ -42,24 +42,24 @@ inline string_with_size *
       codon_index < input_block_with_size->readable_bytes;
       ++codon_index) {
   // read in next base
-  current_codon_frame[CODON_LENGTH - 1]
-    = input_block_with_size->string[codon_index];
+  current_codon_frame[CODON_LENGTH - 1] =
+    input_block_with_size->string[codon_index];
   // if all three slots are filled
   // since the first base is only null at start/end of ORF or at beginning of
   // run
-  if (current_codon_frame[0]
-      != '\0') {         // branch predictions should be good on this one
+  if (current_codon_frame[0] !=
+      '\0') {            // branch predictions should be good on this one
    if (*is_within_orf) { // same here
-    if (*cur_orf_pos >= MIN_ORF_LENGTH - CODON_LENGTH
-        && is_stop_codon(current_codon_frame)) {
+    if (*cur_orf_pos >= MIN_ORF_LENGTH - CODON_LENGTH &&
+        is_stop_codon(current_codon_frame)) {
      // OPTIMIZATION: unroll this loop since CODON_LENGTH is known and
      // universally constant
      for (size_t base_index = 0; base_index < CODON_LENGTH; ++base_index) {
       output_block_with_size
-        ->string[output_block_with_size->readable_bytes + base_index]
-        = current_codon_frame[base_index];
-      current_codon_frame[base_index]
-        = '\0'; // nullify to read in more characters
+        ->string[output_block_with_size->readable_bytes + base_index] =
+        current_codon_frame[base_index];
+      current_codon_frame[base_index] =
+        '\0'; // nullify to read in more characters
      }
      output_block_with_size
        ->string[output_block_with_size->readable_bytes + CODON_LENGTH] = '\n';
@@ -75,8 +75,8 @@ inline string_with_size *
      // universally constant
      for (size_t base_index = 0; base_index < CODON_LENGTH; ++base_index) {
       output_block_with_size
-        ->string[output_block_with_size->readable_bytes + base_index]
-        = current_codon_frame[base_index];
+        ->string[output_block_with_size->readable_bytes + base_index] =
+        current_codon_frame[base_index];
       current_codon_frame[base_index] = '\0';
      }
      *cur_orf_pos += 3;
@@ -87,15 +87,15 @@ inline string_with_size *
     if (is_start_codon(current_codon_frame)) {
      // OPTIMIZATION: unroll this loop since CODON_LENGTH is known and
      // universally constant
-     output_block_with_size->string[output_block_with_size->readable_bytes]
-       = '\n';
+     output_block_with_size->string[output_block_with_size->readable_bytes] =
+       '\n';
      for (size_t base_index = 0; base_index < CODON_LENGTH; ++base_index) {
       // order reversed; newline inserted BEFORE orf
       output_block_with_size
-        ->string[output_block_with_size->readable_bytes + base_index + 1]
-        = current_codon_frame[base_index];
-      current_codon_frame[base_index]
-        = '\0'; // nullify to read in more characters
+        ->string[output_block_with_size->readable_bytes + base_index + 1] =
+        current_codon_frame[base_index];
+      current_codon_frame[base_index] =
+        '\0'; // nullify to read in more characters
      }
      // output_block_with_size->readable_bytes INCREMENTED AT END OF LOOP
      output_block_with_size->readable_bytes += CODON_LENGTH;
@@ -105,8 +105,8 @@ inline string_with_size *
      *cur_orf_pos = 3;
     } else {
      // output_block_with_size->readable_bytes INCREMENTED AT END OF LOOP
-     output_block_with_size->string[output_block_with_size->readable_bytes]
-       = current_codon_frame[0];
+     output_block_with_size->string[output_block_with_size->readable_bytes] =
+       current_codon_frame[0];
     }
    }
    ++output_block_with_size->readable_bytes;
@@ -134,11 +134,11 @@ inline string_with_size *
   // not really that much of an optimization though since this is a miniscule
   // calculation
   for (size_t base_index = 0; base_index < CODON_LENGTH - 1; ++base_index) {
-   if (output_block_with_size->string[output_block_with_size->readable_bytes
-                                      + base_index] != '\0') {
+   if (output_block_with_size->string[output_block_with_size->readable_bytes +
+                                      base_index] != '\0') {
     output_block_with_size
-      ->string[output_block_with_size->readable_bytes + base_index]
-      = current_codon_frame[base_index];
+      ->string[output_block_with_size->readable_bytes + base_index] =
+      current_codon_frame[base_index];
    }
   }
   output_block_with_size->readable_bytes += CODON_LENGTH - 1;
@@ -154,8 +154,8 @@ inline string_with_size *
  for (size_t bytes_read = 0; bytes_read < input_block_with_size->readable_bytes;
       ++bytes_read) {
   if (input_block_with_size->string[bytes_read] != '\n') {
-   output_block_with_size->string[output_block_with_size->readable_bytes]
-     = input_block_with_size->string[bytes_read];
+   output_block_with_size->string[output_block_with_size->readable_bytes] =
+     input_block_with_size->string[bytes_read];
    ++output_block_with_size->readable_bytes;
   }
  }
@@ -167,11 +167,11 @@ inline string_with_size *
 // file
 inline string_with_size *
   read_block(FILE * input_file, string_with_size * input_string_with_size) {
- input_string_with_size->readable_bytes
-   = fread(input_string_with_size->string,
-           sizeof(char),
-           input_string_with_size->size_in_memory,
-           input_file);
+ input_string_with_size->readable_bytes =
+   fread(input_string_with_size->string,
+         sizeof(char),
+         input_string_with_size->size_in_memory,
+         input_file);
  return input_string_with_size;
 }
 
@@ -202,11 +202,11 @@ inline string_with_size *
 
 inline string_with_size *
   write_block(FILE * output_file, string_with_size * output_block_with_size) {
- output_block_with_size->readable_bytes
-   = fwrite(output_block_with_size->string,
-            sizeof(char),
-            output_block_with_size->readable_bytes,
-            output_file);
+ output_block_with_size->readable_bytes =
+   fwrite(output_block_with_size->string,
+          sizeof(char),
+          output_block_with_size->readable_bytes,
+          output_file);
  return output_block_with_size;
 }
 
@@ -267,8 +267,8 @@ inline unsigned long djb2_hash_on_string_index(unsigned long instantaneous_hash,
                                                char * str,
                                                size_t cur_index) {
  // same as instantaneous_hash * 33 ^ str[cur_index]
- return ((instantaneous_hash << DJB2_MAGIC_CONSTANT) + instantaneous_hash)
-        ^ str[cur_index];
+ return ((instantaneous_hash << DJB2_MAGIC_CONSTANT) + instantaneous_hash) ^
+        str[cur_index];
 }
 
 #endif /*___BLOCK_PROCESSING_H___*/

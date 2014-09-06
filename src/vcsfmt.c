@@ -6,11 +6,11 @@ result_bytes_processed_pair vcsfmt(char * filename) {
  pre_format_file_vcsfmt(filename);
  // TODO: total_bytes_read currently unused
  // TODO: alloc everything on stack instead of heap whenever possible
- result_bytes_processed * total_bytes_read
-   = malloc(sizeof(result_bytes_processed));
+ result_bytes_processed * total_bytes_read =
+   malloc(sizeof(result_bytes_processed));
  initialize_result_bytes_processed(total_bytes_read); // set to 0
- result_bytes_processed * total_bytes_written
-   = malloc(sizeof(result_bytes_processed));
+ result_bytes_processed * total_bytes_written =
+   malloc(sizeof(result_bytes_processed));
  initialize_result_bytes_processed(total_bytes_written); // set to 0
 
  result_bytes_processed_pair returnpair;
@@ -25,8 +25,8 @@ result_bytes_processed_pair vcsfmt(char * filename) {
    returnpair);
 
  // create filename long enough to concatenate filename and suffix
- char * output_file_name
-   = malloc((strlen(filename) + strlen(OUTPUT_SUFFIX) + 1) * sizeof(char));
+ char * output_file_name =
+   malloc((strlen(filename) + strlen(OUTPUT_SUFFIX) + 1) * sizeof(char));
  // create output filename
  strcpy(output_file_name, filename);
  strcat(output_file_name, OUTPUT_SUFFIX);
@@ -38,18 +38,18 @@ result_bytes_processed_pair vcsfmt(char * filename) {
    returnpair);
 
  // allocate mem for input block
- string_with_size * input_block_with_size
-   = make_new_string_with_size(BLOCK_SIZE);
+ string_with_size * input_block_with_size =
+   make_new_string_with_size(BLOCK_SIZE);
 #ifndef CONCURRENT
  // same for output
- string_with_size * output_block_with_size
-   = make_new_string_with_size(BINBLOCK_SIZE);
+ string_with_size * output_block_with_size =
+   make_new_string_with_size(BINBLOCK_SIZE);
 #endif
 
  bool is_within_orf = false; // file begins outside of orf
  size_t cur_orf_pos = 0;
- char current_codon_frame[CODON_LENGTH]
-   = {'\0'}; // begins with zero current codons
+ char current_codon_frame[CODON_LENGTH] = {
+   '\0'}; // begins with zero current codons
 
 #ifdef CONCURRENT
  GAsyncQueue * active_queue = g_async_queue_new();
@@ -78,14 +78,14 @@ result_bytes_processed_pair vcsfmt(char * filename) {
  args_to_write_block.is_processing_complete = is_processing_complete;
  args_to_write_block.process_complete_mutex = &process_complete_mutex;
 
- GThread * read_and_process_block_thread
-   = g_thread_new("read_and_process_block_thread",
-                  (GThreadFunc) read_and_process_block_vcsfmt_CONCURRENT,
-                  &args_to_block_processing);
- GThread * write_block_thread
-   = g_thread_new("write_block_thread",
-                  (GThreadFunc) write_block_vcsfmt_CONCURRENT,
-                  &args_to_write_block);
+ GThread * read_and_process_block_thread =
+   g_thread_new("read_and_process_block_thread",
+                (GThreadFunc) read_and_process_block_vcsfmt_CONCURRENT,
+                &args_to_block_processing);
+ GThread * write_block_thread =
+   g_thread_new("write_block_thread",
+                (GThreadFunc) write_block_vcsfmt_CONCURRENT,
+                &args_to_write_block);
  g_thread_join(write_block_thread); // implicitly frees thread
 #else
 
@@ -153,12 +153,12 @@ result_bytes_processed_pair de_vcsfmt(char * filename) {
  unsigned long int cur_bytes_read = 0;
  // alloc'd on heap to avoid stack overflow
  // TODO: this variable currently unused
- result_bytes_processed * total_bytes_read
-   = malloc(sizeof(result_bytes_processed));
+ result_bytes_processed * total_bytes_read =
+   malloc(sizeof(result_bytes_processed));
  initialize_result_bytes_processed(total_bytes_read); // set to 0
  unsigned long int cur_bytes_written = 0;
- result_bytes_processed * total_bytes_written
-   = malloc(sizeof(result_bytes_processed));
+ result_bytes_processed * total_bytes_written =
+   malloc(sizeof(result_bytes_processed));
  initialize_result_bytes_processed(total_bytes_written); // set to 0
 
  result_bytes_processed_pair returnpair;
@@ -173,8 +173,8 @@ result_bytes_processed_pair de_vcsfmt(char * filename) {
    returnpair);
 
  // create filename long enough to concatenate filename and suffix
- char * output_file_name
-   = malloc((strlen(filename) + strlen(OUTPUT_SUFFIX) + 1) * sizeof(char));
+ char * output_file_name =
+   malloc((strlen(filename) + strlen(OUTPUT_SUFFIX) + 1) * sizeof(char));
  // create output filename
  strcpy(output_file_name, filename);
  strcat(output_file_name, OUTPUT_SUFFIX);
@@ -186,8 +186,8 @@ result_bytes_processed_pair de_vcsfmt(char * filename) {
    returnpair);
 
  // allocate mem for input block
- string_with_size * input_block_with_size
-   = make_new_string_with_size(BINBLOCK_SIZE);
+ string_with_size * input_block_with_size =
+   make_new_string_with_size(BINBLOCK_SIZE);
  // both are BINBLOCK_SIZE because BINBLOCK_SIZE was calculated to be efficient
  // at file I/O (at 8192 as I write this)
  // one might think BLOCK_SIZE should be used here, but that would only work if,
@@ -196,16 +196,16 @@ result_bytes_processed_pair de_vcsfmt(char * filename) {
  // segfault if not
  // since output is always smaller than input (due to removal of newlines), no
  // segfault occurs
- string_with_size * output_block_with_size
-   = make_new_string_with_size(BINBLOCK_SIZE);
+ string_with_size * output_block_with_size =
+   make_new_string_with_size(BINBLOCK_SIZE);
 
  // perform block processing
  while (!feof(input_file) && !ferror(input_file) && !ferror(output_file)) {
   // read in block
   add_to_bytes_processed(
     total_bytes_read,
-    cur_bytes_read
-    = read_block(input_file, input_block_with_size)->readable_bytes);
+    cur_bytes_read =
+      read_block(input_file, input_block_with_size)->readable_bytes);
   // process and write block
   add_to_bytes_processed(
     total_bytes_written,
