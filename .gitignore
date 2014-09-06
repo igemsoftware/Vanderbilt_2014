@@ -2,7 +2,7 @@
 infos/
 # keep large files meant for testing out of it
 # mvp_testing/
-mvp_testing/
+mvp_testing/homo_sapiens_chromosome_7.fasta
 # don't add binary executable and associated object files
 bin/*.o
 # generated files from processing, wherever they may be
