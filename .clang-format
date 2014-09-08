@@ -15,8 +15,10 @@ BreakBeforeTernaryOperators: true
 ColumnLimit: 80
 ContinuationIndentWidth: 2 # to differentiate from normal lines
 DerivePointerAlignment: false
+DisableFormat: false
+ExperimentalAutoDetectBinPacking: false
 IndentCaseLabels: false
-IndentWidth: 1
+IndentWidth: 4 # spaces not tabs
 IndentWrappedFunctionNames: true
 KeepEmptyLinesAtTheStartOfBlocks: true
 Language: Cpp # used for C as well, not just C++
@@ -30,5 +32,5 @@ SpacesInCStyleCastParentheses: false
 SpaceAfterCStyleCast: true
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
-TabWidth: 4
+TabWidth: 40 # kept ridiculously wide so that if tabs are inserted they will be obvious
 UseTab: Never

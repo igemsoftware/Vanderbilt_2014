@@ -50,37 +50,37 @@ sufficient heuristic for our purposes
  */
 
 typedef struct {
- unsigned long str_hash;   // used because canonical djb2 uses unsigned long
- unsigned long str_length; // arbitrary choice of width
+    unsigned long str_hash;   // used because canonical djb2 uses unsigned long
+    unsigned long str_length; // arbitrary choice of width
 } string_id;
 // we do not need to use a bignum for str_length
 // even if the string length rolls over, the length modulo 2^32
 // is still a sufficient heuristic for uniqueness along with the hash
 inline string_id * string_id_set_str_hash(string_id * sid,
                                           unsigned long str_hash) {
- sid->str_hash = str_hash;
- return sid;
+    sid->str_hash = str_hash;
+    return sid;
 }
 inline string_id * string_id_set_str_length(string_id * sid,
                                             unsigned long str_length) {
- sid->str_length = str_length;
- return sid;
+    sid->str_length = str_length;
+    return sid;
 }
 inline string_id * make_string_id(unsigned long str_hash,
                                   unsigned long str_length) {
- return string_id_set_str_length(
-   string_id_set_str_hash(malloc(sizeof(string_id)), str_hash), str_length);
+    return string_id_set_str_length(
+      string_id_set_str_hash(malloc(sizeof(string_id)), str_hash), str_length);
 }
 inline bool string_id_equal(string_id * a, string_id * b) {
- return a->str_hash == b->str_hash && a->str_length == b->str_length;
+    return a->str_hash == b->str_hash && a->str_length == b->str_length;
 }
 
 // modify LINES_ABOVE_BELOW_TO_SEARCH, not QUEUE_HASH_CRITICAL_SIZE which relies
 // on it
 #define LINES_ABOVE_BELOW_TO_SEARCH \
- 5 // lines to search above and below active lines for same hashes
+    5 // lines to search above and below active lines for same hashes
 #define QUEUE_HASH_CRITICAL_SIZE \
- 2 * LINES_ABOVE_BELOW_TO_SEARCH + 1 // size of line block
+    2 * LINES_ABOVE_BELOW_TO_SEARCH + 1 // size of line block
 
 // not inlined since is_string_id_in_prev_file takes its address, which
 // disallows inlining
@@ -89,13 +89,13 @@ void set_bool_if_string_id_match(string_id * prev_string_id,
 
 inline bool is_string_id_in_prev_queue(GQueue * prev_file_queue,
                                        GQueue * cur_file_queue) {
- bool is_string_id_found = false;
- boolean_and_data bool_data_bundle;
- bool_data_bundle.data = g_queue_peek_head(cur_file_queue);
- bool_data_bundle.boolean = &is_string_id_found;
- g_queue_foreach(
-   prev_file_queue, (GFunc) set_bool_if_string_id_match, &bool_data_bundle);
- return is_string_id_found;
+    bool is_string_id_found = false;
+    boolean_and_data bool_data_bundle;
+    bool_data_bundle.data = g_queue_peek_head(cur_file_queue);
+    bool_data_bundle.boolean = &is_string_id_found;
+    g_queue_foreach(
+      prev_file_queue, (GFunc) set_bool_if_string_id_match, &bool_data_bundle);
+    return is_string_id_found;
 }
 
 compare_two_result_bytes_processed vcscmp(char * prev_filename,

@@ -46,21 +46,23 @@ const char * start_codons[NUMBER_OF_START_CODONS] = {"ATG"};
 const char * stop_codons[NUMBER_OF_STOP_CODONS] = {"TAA", "TAG", "TGA"};
 
 bool is_start_codon(char * codon) {
- for (size_t start_codon_index = 0; start_codon_index < NUMBER_OF_START_CODONS;
-      ++start_codon_index) {
-  if (strncmp(codon, start_codons[start_codon_index], CODON_LENGTH) == 0) {
-   return true;
-  }
- }
- return false;
+    for (size_t start_codon_index = 0;
+         start_codon_index < NUMBER_OF_START_CODONS;
+         ++start_codon_index) {
+        if (strncmp(codon, start_codons[start_codon_index], CODON_LENGTH) ==
+            0) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool is_stop_codon(char * codon) {
- for (size_t stop_codon_index = 0; stop_codon_index < NUMBER_OF_STOP_CODONS;
-      ++stop_codon_index) {
-  if (strncmp(codon, stop_codons[stop_codon_index], CODON_LENGTH) == 0) {
-   return true;
-  }
- }
- return false;
+    for (size_t stop_codon_index = 0; stop_codon_index < NUMBER_OF_STOP_CODONS;
+         ++stop_codon_index) {
+        if (strncmp(codon, stop_codons[stop_codon_index], CODON_LENGTH) == 0) {
+            return true;
+        }
+    }
+    return false;
 }
