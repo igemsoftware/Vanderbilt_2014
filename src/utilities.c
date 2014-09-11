@@ -13,6 +13,10 @@ FILE * create_file_binary_write(char * filename) {
 extern inline string_with_size *
   make_new_string_with_size(size_t size_in_memory);
 
+extern inline string_with_size *
+  set_string_with_size_readable_bytes(string_with_size * sws,
+                                      size_t readable_bytes);
+
 extern inline void free_string_with_size(string_with_size * sws_to_free);
 
 result_bytes_processed *

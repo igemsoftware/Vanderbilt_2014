@@ -101,6 +101,13 @@ inline string_with_size * make_new_string_with_size(size_t size_in_memory) {
     return sws_to_return;
 }
 
+inline string_with_size *
+  set_string_with_size_readable_bytes(string_with_size * sws,
+                                      size_t readable_bytes) {
+    sws->readable_bytes = readable_bytes;
+    return sws;
+}
+
 inline void free_string_with_size(string_with_size * sws_to_free) {
     free(sws_to_free->string);
     free(sws_to_free);

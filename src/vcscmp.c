@@ -7,8 +7,13 @@ extern inline string_id * string_id_set_str_hash(string_id * sid,
 extern inline string_id * string_id_set_str_length(string_id * sid,
                                                    unsigned long str_length);
 
+extern inline string_id *
+  string_id_set_first_k_chars(string_id * sid, string_with_size * str_k_chars);
+
 extern inline string_id * make_string_id(unsigned long str_hash,
                                          unsigned long str_length);
+
+extern inline void free_string_id(string_id * sid);
 
 extern inline bool string_id_equal(string_id * a, string_id * b);
 
@@ -52,69 +57,9 @@ compare_two_result_bytes_processed vcscmp(char * prev_filename,
 #error FUNCTIONALITY NOT IMPLEMENTED YET
 #else
     // OPTIMIZATION: actually implement this
-    // // implement fixed-size array-based queue for speed
-    // // written inline instead of in separate function because it is very
-    // small
-    // and simple
-    // string_id prev_string_ids[QUEUE_HASH_CRITICAL_SIZE];
-    // string_id cur_string_ids[QUEUE_HASH_CRITICAL_SIZE];
-    // size_t prev_front = 0;
-    // // location of first element inserted
-    // size_t prev_back = 0;	// one past final element, mod
-    // QUEUE_HASH_CRITICAL_SIZE, therefore 0
-    // size_t prev_string_ids_filled = 0; // fill array up to
-    // QUEUE_HASH_CRITICAL_SIZE before moving start and end marks
-    // size_t cur_front = 0;
-    // size_t cur_back = 0;
-    // size_t cur_string_ids_filled = 0;
-
-    // unsigned long prev_instantaneous_hash = DJB2_HASH_BEGIN;
-    // unsigned long cur_instantaneous_hash = DJB2_HASH_BEGIN;
-
-    // size_t prev_string_index;
-    // size_t cur_string_index;
-
-    // string_with_size * prev_block = make_new_string_with_size(BINBLOCK_SIZE);
-    // string_with_size * cur_block = make_new_string_with_size(BINBLOCK_SIZE);
-
-    // while (!feof(prev_file) &&
-    // 			 !ferror(prev_file)
-    // &&
-    // 			 !feof(cur_file)
-    // &&
-    // 			 !ferror(cur_file)){
-    // 	// read in block from left
-    // 	if (prev_string_ids_filled <
-    // QUEUE_HASH_CRITICAL_SIZE){
-    // 		for
-    // (prev_string_index = 0;
-    // 				 prev_string_index
-    // < BINBLOCK_SIZE;
-    // 				 ++prev_string_index){
-    // 			prev_instantaneous_hash
-    // =
-    // djb2_hash_on_string_index(prev_instantaneous_hash,
-    // 																													)
-    // 		}
-    // 		// add
-    // one and just increment back
-    // 	}
-    // 	else{
-    // 		// add
-    // one and move around queue markers if required
-    // 	}
-    // 	if (cur_string_ids_filled <
-    // QUEUE_HASH_CRITICAL_SIZE){
-    // 		// add
-    // one and just increment back
-    // 	}
-    // 	else{
-    // 		// add
-    // one and move around queue markers if required
-    // 	}
-    // 	// clear out queues
-    // }
-
+    // implement fixed-size array-based queue for speed
+    // written inline instead of in separate function because it is very
+    // small and simple
     GQueue * prev_file_string_ids_queue = g_queue_new();
     GQueue * cur_file_string_ids_queue = g_queue_new();
 
@@ -134,6 +79,7 @@ compare_two_result_bytes_processed vcscmp(char * prev_filename,
 
     bool break_out_of_vcscmp = false;
 
+    // TODO: modify all "while !foef ||/&& !ferror" to just !ferror, i think
     while ((!(feof(prev_file) || ferror(prev_file)) || // until both files EOF
             !(feof(cur_file) || ferror(cur_file))) &&
            !break_out_of_vcscmp) {
@@ -212,8 +158,8 @@ compare_two_result_bytes_processed vcscmp(char * prev_filename,
                         QUEUE_HASH_CRITICAL_SIZE) {
                         break_out_of_vcscmp = true;
                     }
-                    g_queue_pop_head(
-                      cur_file_string_ids_queue); // NOT popping prev queue
+                    free_string_id(g_queue_pop_head(
+                      cur_file_string_ids_queue)); // NOT popping prev queue
                     mpz_add_ui(lines_processed, lines_processed, 1);
                 }
             } else {
@@ -232,15 +178,16 @@ compare_two_result_bytes_processed vcscmp(char * prev_filename,
                     QUEUE_HASH_CRITICAL_SIZE) {
                     break_out_of_vcscmp = true;
                 }
-                g_queue_pop_head(prev_file_string_ids_queue);
-                g_queue_pop_head(cur_file_string_ids_queue);
+                free_string_id(g_queue_pop_head(prev_file_string_ids_queue));
+                free_string_id(g_queue_pop_head(cur_file_string_ids_queue));
                 mpz_add_ui(lines_processed, lines_processed, 1);
             }
         }
     }
 
     // finish off remainder
-    while (!g_queue_is_empty(cur_file_string_ids_queue)) {
+    while (!g_queue_is_empty(cur_file_string_ids_queue) &&
+           !break_out_of_vcscmp) {
         if (!is_string_id_in_prev_queue(prev_file_string_ids_queue,
                                         cur_file_string_ids_queue)) {
             ++current_streak_of_newly_added_lines;
@@ -255,10 +202,13 @@ compare_two_result_bytes_processed vcscmp(char * prev_filename,
         if (current_streak_of_newly_added_lines > QUEUE_HASH_CRITICAL_SIZE) {
             break_out_of_vcscmp = true;
         }
-        g_queue_pop_head(cur_file_string_ids_queue); // NOT popping prev
+        free_string_id(
+          g_queue_pop_head(cur_file_string_ids_queue)); // NOT popping prev
         mpz_add_ui(lines_processed, lines_processed, 1);
     }
 
+    // TODO: free all string_with_size in queue
+    // also free all bignums!!!!
     // free memory and close open handles
     g_queue_free(prev_file_string_ids_queue);
     g_queue_free(cur_file_string_ids_queue);

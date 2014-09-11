@@ -8,7 +8,7 @@
 
 // this file is where the money is
 
-#include "block_processing.h"
+#include "string_processing.h"
 
 // go through both files, producing list of hashes for each line (again, block
 // I/O)
@@ -49,9 +49,13 @@ sufficient heuristic for our purposes
         and the cmp process is stopped (force-completed)
  */
 
+#define LEVENSHTEIN_CHECK_CHARS 80
+// chosen arbitrarily
+
 typedef struct {
     unsigned long str_hash;   // used because canonical djb2 uses unsigned long
     unsigned long str_length; // arbitrary choice of width
+    string_with_size * first_k_chars;
 } string_id;
 // we do not need to use a bignum for str_length
 // even if the string length rolls over, the length modulo 2^32
@@ -66,10 +70,26 @@ inline string_id * string_id_set_str_length(string_id * sid,
     sid->str_length = str_length;
     return sid;
 }
+// OPTIMIZATION: take pointers as arguments instead of straight unsigned longs
+// and string_with_size
+inline string_id * string_id_set_first_k_chars(string_id * sid,
+                                               string_with_size * str_k_chars) {
+    sid->first_k_chars = str_k_chars;
+    return sid;
+}
 inline string_id * make_string_id(unsigned long str_hash,
                                   unsigned long str_length) {
-    return string_id_set_str_length(
-      string_id_set_str_hash(malloc(sizeof(string_id)), str_hash), str_length);
+    return string_id_set_first_k_chars(
+      string_id_set_str_length(
+        string_id_set_str_hash(malloc(sizeof(string_id)), str_hash),
+        str_length),
+      set_string_with_size_readable_bytes(
+        make_new_string_with_size(LEVENSHTEIN_CHECK_CHARS),
+        LEVENSHTEIN_CHECK_CHARS));
+}
+inline void free_string_id(string_id * sid) {
+    free_string_with_size(sid->first_k_chars);
+    free(sid);
 }
 inline bool string_id_equal(string_id * a, string_id * b) {
     return a->str_hash == b->str_hash && a->str_length == b->str_length;
@@ -77,10 +97,10 @@ inline bool string_id_equal(string_id * a, string_id * b) {
 
 // modify LINES_ABOVE_BELOW_TO_SEARCH, not QUEUE_HASH_CRITICAL_SIZE which relies
 // on it
-#define LINES_ABOVE_BELOW_TO_SEARCH \
-    5 // lines to search above and below active lines for same hashes
-#define QUEUE_HASH_CRITICAL_SIZE \
-    2 * LINES_ABOVE_BELOW_TO_SEARCH + 1 // size of line block
+#define LINES_ABOVE_BELOW_TO_SEARCH 5
+// lines to search above and below active lines for same hashes
+#define QUEUE_HASH_CRITICAL_SIZE 2 * LINES_ABOVE_BELOW_TO_SEARCH + 1
+// size of line block
 
 // not inlined since is_string_id_in_prev_file takes its address, which
 // disallows inlining

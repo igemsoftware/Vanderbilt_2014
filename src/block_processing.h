@@ -14,9 +14,9 @@
 #define BLOCK_SIZE 7928 // used in file I/O
 
 // only look for orfs above 60 bases long (heuristic)
-#define MIN_ORF_LENGTH \
-    60 // TODO: convert this to program option at some point, not compile-time
-       // definition
+#define MIN_ORF_LENGTH 60
+// TODO: convert this to program option at some point, not compile-time
+// definition
 
 // output block maximum size
 // maximum possible size of output block, assuming every possible 60-char
