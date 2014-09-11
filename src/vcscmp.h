@@ -52,6 +52,9 @@ sufficient heuristic for our purposes
 #define LEVENSHTEIN_CHECK_CHARS 80
 // chosen arbitrarily
 
+#define LEVENSHTEIN_CHECK_THRESHOLD 20
+// also chosen arbitrarily
+
 typedef struct {
     unsigned long str_hash;   // used because canonical djb2 uses unsigned long
     unsigned long str_length; // arbitrary choice of width
@@ -107,15 +110,33 @@ inline bool string_id_equal(string_id * a, string_id * b) {
 void set_bool_if_string_id_match(string_id * prev_string_id,
                                  boolean_and_data * bool_data_bundle);
 
-inline bool is_string_id_in_prev_queue(GQueue * prev_file_queue,
-                                       GQueue * cur_file_queue) {
+inline bool is_string_id_at_top_in_prev_queue(GQueue * prev_file_queue,
+                                              GQueue * cur_file_queue) {
     bool is_string_id_found = false;
     boolean_and_data bool_data_bundle;
     bool_data_bundle.data = g_queue_peek_head(cur_file_queue);
     bool_data_bundle.boolean = &is_string_id_found;
+    // TODO: don't take address of stack-allocated variable
     g_queue_foreach(
       prev_file_queue, (GFunc) set_bool_if_string_id_match, &bool_data_bundle);
     return is_string_id_found;
+}
+
+// disallows inlining
+void set_int_if_levenshtein_match(string_id * prev_string_id,
+                                  index_and_data * index_data_bundle);
+
+inline int where_is_similar_line_to_string_at_top(GQueue * prev_file_queue,
+                                                  GQueue * cur_file_queue) {
+    int similar_line_index = -1; // default to not found
+    index_and_data index_data_bundle;
+    index_data_bundle.data = g_queue_peek_head(cur_file_queue);
+    index_data_bundle.index = &similar_line_index;
+    // TODO: don't take address of stack-allocated variable
+    g_queue_foreach(prev_file_queue,
+                    (GFunc) set_int_if_levenshtein_match,
+                    &index_data_bundle);
+    return similar_line_index;
 }
 
 compare_two_result_bytes_processed vcscmp(char * prev_filename,

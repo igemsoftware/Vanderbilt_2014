@@ -1,5 +1,4 @@
 #include "vcscmp.h"           // required
-#include "block_processing.h" // for read_block and preprocessor defines
 
 extern inline string_id * string_id_set_str_hash(string_id * sid,
                                                  unsigned long str_hash);
@@ -24,8 +23,21 @@ void set_bool_if_string_id_match(string_id * prev_string_id,
     }
 }
 
-extern inline bool is_string_id_in_prev_queue(GQueue * prev_file_queue,
+extern inline bool is_string_id_at_top_in_prev_queue(GQueue * prev_file_queue,
                                               GQueue * cur_file_queue);
+
+void set_int_if_levenshtein_match(string_id * prev_string_id,
+                                  index_and_data * index_data_bundle) {
+    size_t levenshtein_dist = get_levenshtein_distance(
+      prev_string_id->first_k_chars, index_data_bundle->data->first_k_chars);
+    if (levenshtein_dist <= LEVENSHTEIN_CHECK_THRESHOLD) {
+        *index_and_data->index = ;
+    }
+}
+
+extern inline int
+  where_is_similar_line_to_string_at_top(GQueue * prev_file_queue,
+                                         GQueue * cur_file_queue);
 
 compare_two_result_bytes_processed vcscmp(char * prev_filename,
                                           char * cur_filename) {
@@ -142,7 +154,7 @@ compare_two_result_bytes_processed vcscmp(char * prev_filename,
                 while (mpz_cmp_ui(lines_processed,
                                   LINES_ABOVE_BELOW_TO_SEARCH) < 0 &&
                        !break_out_of_vcscmp) {
-                    if (!is_string_id_in_prev_queue(
+                    if (!is_string_id_at_top_in_prev_queue(
                           prev_file_string_ids_queue,
                           cur_file_string_ids_queue)) {
                         ++current_streak_of_newly_added_lines;
@@ -153,6 +165,7 @@ compare_two_result_bytes_processed vcscmp(char * prev_filename,
 #else
 #error FUNCTIONALITY NOT IMPLEMENTED YET
 #endif
+                        d();
                     }
                     if (current_streak_of_newly_added_lines >
                         QUEUE_HASH_CRITICAL_SIZE) {
@@ -163,8 +176,8 @@ compare_two_result_bytes_processed vcscmp(char * prev_filename,
                     mpz_add_ui(lines_processed, lines_processed, 1);
                 }
             } else {
-                if (!is_string_id_in_prev_queue(prev_file_string_ids_queue,
-                                                cur_file_string_ids_queue)) {
+                if (!is_string_id_at_top_in_prev_queue(
+                      prev_file_string_ids_queue, cur_file_string_ids_queue)) {
                     ++current_streak_of_newly_added_lines;
 #ifdef DEBUG
                     fprintf(stderr, "NEWLY ADDED LINE AT LINE ");
@@ -173,6 +186,7 @@ compare_two_result_bytes_processed vcscmp(char * prev_filename,
 #else
 #error FUNCTIONALITY NOT IMPLEMENTED YET
 #endif
+                    d();
                 }
                 if (current_streak_of_newly_added_lines >
                     QUEUE_HASH_CRITICAL_SIZE) {
@@ -188,7 +202,7 @@ compare_two_result_bytes_processed vcscmp(char * prev_filename,
     // finish off remainder
     while (!g_queue_is_empty(cur_file_string_ids_queue) &&
            !break_out_of_vcscmp) {
-        if (!is_string_id_in_prev_queue(prev_file_string_ids_queue,
+        if (!is_string_id_at_top_in_prev_queue(prev_file_string_ids_queue,
                                         cur_file_string_ids_queue)) {
             ++current_streak_of_newly_added_lines;
 #ifdef DEBUG
@@ -198,6 +212,7 @@ compare_two_result_bytes_processed vcscmp(char * prev_filename,
 #else
 #error "FUNCTIONALITY NOT IMPLEMENTED YET"
 #endif
+            d();
         }
         if (current_streak_of_newly_added_lines > QUEUE_HASH_CRITICAL_SIZE) {
             break_out_of_vcscmp = true;

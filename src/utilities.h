@@ -86,6 +86,11 @@ typedef struct {
     bool * boolean;
 } boolean_and_data;
 
+typedef struct {
+    void * data;
+    int * index;
+} index_and_data;
+
 // used to return a char string, along with size information
 typedef struct {
     char * string;
