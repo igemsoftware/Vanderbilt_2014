@@ -6,7 +6,7 @@
     comparison on .vcsfmt-formatted files
 */
 
-#include "string_processing.h"
+#include "block_processing.h"
 
 // TODO: allow modification of this, find reasoning for choice of value
 #define LEVENSHTEIN_CHECK_CHARS 80
@@ -83,6 +83,28 @@ static inline bool is_string_id_at_top_in_prev_queue(GQueue * prev_file_queue,
 //                     &index_data_bundle);
 //     return similar_line_index;
 // }
+
+static inline void
+  if_new_line_then_add_to_list(GQueue * prev_file_string_ids_queue,
+                               GQueue * cur_file_string_ids_queue,
+                               size_t * ptr_current_streak_of_newly_added_lines,
+                               mpz_t * ptr_lines_processed,
+                               bool * ptr_break_out_of_vcscmp) {
+    if (!is_string_id_at_top_in_prev_queue(prev_file_string_ids_queue,
+                                           cur_file_string_ids_queue)) {
+        ++*ptr_current_streak_of_newly_added_lines;
+#ifdef DEBUG
+        fprintf(stderr, "NEWLY ADDED LINE AT LINE ");
+        mpz_out_str(stderr, 10, *ptr_lines_processed);
+        fprintf(stderr, "\n");
+#else
+#error FUNCTIONALITY NOT IMPLEMENTED YET
+#endif
+    }
+    if (*ptr_current_streak_of_newly_added_lines > QUEUE_HASH_CRITICAL_SIZE) {
+        *ptr_break_out_of_vcscmp = true;
+    }
+}
 
 void vcscmp(char * prev_filename, char * cur_filename);
 

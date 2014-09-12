@@ -65,9 +65,7 @@ void vcscmp(char * prev_filename, char * cur_filename) {
     mpz_t lines_processed;
     mpz_init(lines_processed);
     mpz_add_ui(lines_processed, lines_processed, 1); // start at line 1!
-
     size_t current_streak_of_newly_added_lines = 0;
-
     bool break_out_of_vcscmp = false;
 
     while ((!(feof(prev_file) || ferror(prev_file)) || // until both files EOF
@@ -118,7 +116,6 @@ void vcscmp(char * prev_filename, char * cur_filename) {
                 }
             }
         }
-
         if (g_queue_get_length(prev_file_string_ids_queue) >=
               QUEUE_HASH_CRITICAL_SIZE &&
             g_queue_get_length(cur_file_string_ids_queue) >=
@@ -127,41 +124,22 @@ void vcscmp(char * prev_filename, char * cur_filename) {
                 while (mpz_cmp_ui(lines_processed,
                                   LINES_ABOVE_BELOW_TO_SEARCH) < 0 &&
                        !break_out_of_vcscmp) {
-                    if (!is_string_id_at_top_in_prev_queue(
-                          prev_file_string_ids_queue,
-                          cur_file_string_ids_queue)) {
-                        ++current_streak_of_newly_added_lines;
-#ifdef DEBUG
-                        fprintf(stderr, "NEWLY ADDED LINE AT LINE ");
-                        mpz_out_str(stderr, 10, lines_processed);
-                        fprintf(stderr, "\n");
-#else
-#error FUNCTIONALITY NOT IMPLEMENTED YET
-#endif
-                    }
-                    if (current_streak_of_newly_added_lines >
-                        QUEUE_HASH_CRITICAL_SIZE) {
-                        break_out_of_vcscmp = true;
-                    }
+                    if_new_line_then_add_to_list(
+                      prev_file_string_ids_queue,
+                      cur_file_string_ids_queue,
+                      &current_streak_of_newly_added_lines,
+                      &lines_processed,
+                      &break_out_of_vcscmp);
                     free_string_id(g_queue_pop_head(cur_file_string_ids_queue));
                     mpz_add_ui(lines_processed, lines_processed, 1);
                 }
             } else {
-                if (!is_string_id_at_top_in_prev_queue(
-                      prev_file_string_ids_queue, cur_file_string_ids_queue)) {
-                    ++current_streak_of_newly_added_lines;
-#ifdef DEBUG
-                    fprintf(stderr, "NEWLY ADDED LINE AT LINE ");
-                    mpz_out_str(stderr, 10, lines_processed);
-                    fprintf(stderr, "\n");
-#else
-#error FUNCTIONALITY NOT IMPLEMENTED YET
-#endif
-                }
-                if (current_streak_of_newly_added_lines >
-                    QUEUE_HASH_CRITICAL_SIZE) {
-                    break_out_of_vcscmp = true;
-                }
+                if_new_line_then_add_to_list(
+                  prev_file_string_ids_queue,
+                  cur_file_string_ids_queue,
+                  &current_streak_of_newly_added_lines,
+                  &lines_processed,
+                  &break_out_of_vcscmp);
                 free_string_id(g_queue_pop_head(prev_file_string_ids_queue));
                 free_string_id(g_queue_pop_head(cur_file_string_ids_queue));
                 mpz_add_ui(lines_processed, lines_processed, 1);
@@ -172,20 +150,11 @@ void vcscmp(char * prev_filename, char * cur_filename) {
     // finish off remainder
     while (!g_queue_is_empty(cur_file_string_ids_queue) &&
            !break_out_of_vcscmp) {
-        if (!is_string_id_at_top_in_prev_queue(prev_file_string_ids_queue,
-                                               cur_file_string_ids_queue)) {
-            ++current_streak_of_newly_added_lines;
-#ifdef DEBUG
-            fprintf(stderr, "NEWLY ADDED LINE AT LINE ");
-            mpz_out_str(stderr, 10, lines_processed);
-            fprintf(stderr, "\n");
-#else
-#error "FUNCTIONALITY NOT IMPLEMENTED YET"
-#endif
-        }
-        if (current_streak_of_newly_added_lines > QUEUE_HASH_CRITICAL_SIZE) {
-            break_out_of_vcscmp = true;
-        }
+        if_new_line_then_add_to_list(prev_file_string_ids_queue,
+                                     cur_file_string_ids_queue,
+                                     &current_streak_of_newly_added_lines,
+                                     &lines_processed,
+                                     &break_out_of_vcscmp);
         free_string_id(g_queue_pop_head(cur_file_string_ids_queue));
         mpz_add_ui(lines_processed, lines_processed, 1);
     }

@@ -14,15 +14,4 @@
 void vcsfmt(char * filename);
 void de_vcsfmt(char * filename); // produces original file
 
-
-// remove newlines, play with other metadata before going into dna; produces
-// file in .dwn folder
-void pre_format_file_vcsfmt(char * filename);
-void de_pre_format_file_vcsfmt(char * filename);
-
-// adds any required formatting to file after reconstituting from .vcsfmt
-void post_format_file_vcsfmt(char * filename);
-// above for de_vcsfmt
-void de_post_format_file_vcsfmt(char * filename);
-
 #endif /*___VCS_FMT_H___*/

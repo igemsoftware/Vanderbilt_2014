@@ -1,19 +1,28 @@
 #ifndef ___STRING_PROCESSING_H___
 #define ___STRING_PROCESSING_H___
 
-#include "block_processing.h"
+#include "sequence_processing.h"
 
-/*
-http://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/
-Levenshtein_distance#C
-*/
+// http://stackoverflow.com/questions/9616296/
+// whats-the-best-hash-for-utf-8-strings
+#define DJB2_HASH_BEGIN 5381 // initial string hash
+// returns the next hash value
+#define DJB2_MAGIC_CONSTANT 5
+static inline unsigned long djb2_hash_on_string_index(
+  unsigned long instantaneous_hash, char * str, size_t cur_index) {
+    // same as instantaneous_hash * 33 ^ str[cur_index]
+    return ((instantaneous_hash << DJB2_MAGIC_CONSTANT) + instantaneous_hash) ^
+           str[cur_index];
+    // OPTIMIZATION: is using the function character-by-character inefficient?
+}
 
+
+// http://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/
+// Levenshtein_distance#C
 #define MIN3(a, b, c) \
     ((a) < (b) ? ((a) < (c) ? (a) : (c)) : ((b) < (c) ? (b) : (c)))
-
-// OPTIMIZATION: literally everything in this function
 // precondition: strings are same size
-inline size_t get_levenshtein_distance(string_with_size * prev_string,
+static inline size_t get_levenshtein_distance(string_with_size * prev_string,
                                        string_with_size * cur_string) {
     size_t prev_index, cur_index, lastdiag, olddiag;
     // TODO: convert to static-allocated array of 80 bytes

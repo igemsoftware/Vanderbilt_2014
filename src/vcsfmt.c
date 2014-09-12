@@ -1,13 +1,9 @@
 #include "vcsfmt.h" // required
 
-// maintain queue of read-in and processed blocks to be written; read/process
-// and write are done concurrently
+// VCSFMT
 void vcsfmt(char * filename) {
-    pre_format_file_vcsfmt(filename);
     FILE * input_file = open_file_read(filename);
-    PRINT_ERROR_AND_RETURN_IF_NULL(input_file,
-                                        "Error in creating input file.");
-
+    PRINT_ERROR_AND_RETURN_IF_NULL(input_file, "Error in creating input file.");
     // create output filename
     char * output_file_name =
       malloc((strlen(filename) + strlen(OUTPUT_SUFFIX) + 1) * sizeof(char));
@@ -15,21 +11,16 @@ void vcsfmt(char * filename) {
     strcat(output_file_name, OUTPUT_SUFFIX);
     FILE * output_file = create_file_binary_write(output_file_name);
     PRINT_ERROR_AND_RETURN_IF_NULL(output_file,
-                                        "Error in creating output file.")
-
-    // allocate mem for input block
+                                   "Error in creating output file.");
     string_with_size * input_block_with_size =
       make_new_string_with_size(BLOCK_SIZE);
 #ifndef CONCURRENT
-    // same for output
     string_with_size * output_block_with_size =
       make_new_string_with_size(BINBLOCK_SIZE);
 #endif
-
     bool is_within_orf = false; // file begins outside of orf
     size_t cur_orf_pos = 0;
     char current_codon_frame[CODON_LENGTH] = {'\0'};
-    // begins with zero current codons
 
 #ifdef CONCURRENT
     GAsyncQueue * active_queue = g_async_queue_new();
@@ -38,11 +29,9 @@ void vcsfmt(char * filename) {
     GMutex process_complete_mutex;
     g_mutex_init(&process_complete_mutex);
 
-    read_and_process_block_args_vcsfmt_CONCURRENT args_to_block_processing;
+  concurrent_read_and_process_block_args_vcsfmt args_to_block_processing;
     args_to_block_processing.input_file = input_file;
     args_to_block_processing.input_block_with_size = input_block_with_size;
-    // output_block_with_size newly allocated each time, therefore not added
-    // here
     args_to_block_processing.is_within_orf = &is_within_orf;
     args_to_block_processing.cur_orf_pos = &cur_orf_pos;
     args_to_block_processing.current_codon_frame = current_codon_frame;
@@ -52,7 +41,7 @@ void vcsfmt(char * filename) {
     args_to_block_processing.is_processing_complete = is_processing_complete;
     args_to_block_processing.process_complete_mutex = &process_complete_mutex;
 
-    read_write_block_args_CONCURRENT args_to_write_block;
+    concurrent_read_write_block_args args_to_write_block;
     args_to_write_block.active_file = output_file;
     args_to_write_block.active_queue = active_queue;
     args_to_write_block.total_bytes_written = total_bytes_written;
@@ -61,18 +50,18 @@ void vcsfmt(char * filename) {
 
     GThread * read_and_process_block_thread =
       g_thread_new("read_and_process_block_thread",
-                   (GThreadFunc) read_and_process_block_vcsfmt_CONCURRENT,
+                   (GThreadFunc) concurrent_read_and_process_block,
                    &args_to_block_processing);
     GThread * write_block_thread =
       g_thread_new("write_block_thread",
-                   (GThreadFunc) write_block_vcsfmt_CONCURRENT,
+                   (GThreadFunc) concurrent_write_block_vcsfmt,
                    &args_to_write_block);
     g_thread_join(write_block_thread); // implicitly frees thread
 #else
     while (!feof(input_file) && !ferror(input_file) && !ferror(output_file)) {
         read_block(input_file, input_block_with_size);
         write_block(output_file,
-                    process_block_vcsfmt(input_block_with_size,
+                    process_block(input_block_with_size,
                                          output_block_with_size,
                                          &is_within_orf,
                                          &cur_orf_pos,
@@ -80,7 +69,6 @@ void vcsfmt(char * filename) {
                                          feof(input_file)));
     }
 #endif
-
 // cleanup allocated memory and open handles
 #ifdef CONCURRENT
     // TODO: fix mutex and thread memory leaks
@@ -94,7 +82,6 @@ void vcsfmt(char * filename) {
 #ifndef CONCURRENT
     free_string_with_size(output_block_with_size);
 #endif
-
     // error handling
     if (ferror(input_file) && !feof(input_file)) {
         PRINT_ERROR("Error in reading from input file.");
@@ -105,21 +92,15 @@ void vcsfmt(char * filename) {
     } else {
         PRINT_ERROR("Unknown error in vcsfmt.");
     }
-
     // close open handles
     fclose(input_file);
     fclose(output_file);
-
-    post_format_file_vcsfmt(filename);
 }
 
+// DE_VCSFMT
 void de_vcsfmt(char * filename) {
-    de_pre_format_file_vcsfmt(filename);
-
     FILE * input_file = open_file_read(filename);
-    PRINT_ERROR_AND_RETURN_IF_NULL(input_file,
-                                        "Error in creating input file.");
-
+    PRINT_ERROR_AND_RETURN_IF_NULL(input_file, "Error in creating input file.");
     // create filename long enough to concatenate filename and suffix
     char * output_file_name =
       malloc((strlen(filename) + strlen(OUTPUT_SUFFIX) + 1) * sizeof(char));
@@ -137,7 +118,7 @@ void de_vcsfmt(char * filename) {
     while (!feof(input_file) && !ferror(input_file) && !ferror(output_file)) {
         read_block(input_file, input_block_with_size);
         write_block(output_file,
-                    de_process_block_vcsfmt(input_block_with_size,
+                    de_process_block(input_block_with_size,
                                             output_block_with_size));
     }
 
@@ -145,7 +126,6 @@ void de_vcsfmt(char * filename) {
     free(output_file_name);
     free_string_with_size(input_block_with_size);
     free_string_with_size(output_block_with_size);
-
     if (ferror(input_file) && !feof(input_file)) {
         PRINT_ERROR("Error in reading from input file.");
     } else if (ferror(output_file) && !feof(input_file)) {
@@ -155,27 +135,7 @@ void de_vcsfmt(char * filename) {
     } else {
         PRINT_ERROR("Unknown error in de_vcsfmt");
     }
-
     // close open handles
     fclose(input_file);
     fclose(output_file);
-
-    // apply final formatting
-    de_post_format_file_vcsfmt(filename);
-}
-
-void pre_format_file_vcsfmt(char * filename __attribute__((__unused__))) {
-    PRINT_ERROR("pre_format_file_vcsfmt not implemented yet");
-}
-
-void de_pre_format_file_vcsfmt(char * filename __attribute__((__unused__))) {
-    PRINT_ERROR("de_pre_format_file_vcsfmt not implemented yet");
-}
-
-void post_format_file_vcsfmt(char * filename __attribute__((__unused__))) {
-    PRINT_ERROR("post_format_file_vcsfmt not implemented yet");
-}
-
-void de_post_format_file_vcsfmt(char * filename __attribute__((__unused__))) {
-    PRINT_ERROR("de_post_format_file_vcsfmt not implemented yet");
 }
