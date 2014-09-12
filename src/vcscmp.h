@@ -43,6 +43,17 @@ static inline string_id * make_string_id(unsigned long str_hash,
         make_new_string_with_size(LEVENSHTEIN_CHECK_CHARS),
         LEVENSHTEIN_CHECK_CHARS));
 }
+static inline string_id *
+  make_string_id_given_string_with_size(unsigned long str_hash,
+                                        unsigned long str_length,
+                                        string_with_size * str_k_chars) {
+    return string_id_set_first_k_chars(
+      string_id_set_str_length(
+        string_id_set_str_hash(malloc(sizeof(string_id)), str_hash),
+        str_length),
+      str_k_chars);
+}
+
 static inline void free_string_id(string_id * sid) {
     free_string_with_size(sid->first_k_chars);
     free(sid);
@@ -64,26 +75,19 @@ static inline bool is_string_id_at_top_in_prev_queue(GQueue * prev_file_queue,
     boolean_and_data bool_data_bundle;
     bool_data_bundle.data = g_queue_peek_head(cur_file_queue);
     bool_data_bundle.boolean = &is_string_id_found;
-    // TODO: don't take address of stack-allocated variable
     g_queue_foreach(
       prev_file_queue, (GFunc) set_bool_if_string_id_match, &bool_data_bundle);
     return is_string_id_found;
 }
-// void set_int_if_levenshtein_match(string_id * prev_string_id,
-//                                   index_and_data * index_data_bundle);
-// inline int where_is_similar_line_to_string_at_top(GQueue * prev_file_queue,
-//                                                   GQueue * cur_file_queue) {
-//     int similar_line_index = -1; // default to not found
-//     index_and_data index_data_bundle;
-//     index_data_bundle.data = g_queue_peek_head(cur_file_queue);
-//     index_data_bundle.index = &similar_line_index;
-//     // TODO: don't take address of stack-allocated variable
-//     g_queue_foreach(prev_file_queue,
-//                     (GFunc) set_int_if_levenshtein_match,
-//                     &index_data_bundle);
-//     return similar_line_index;
-// }
-
+void if_close_levenshtein_dist_add_to_list(string_id * prev_string_id,
+                                           string_id * cur_string_id);
+static inline void
+  if_similar_edit_levenshtein_dist_queue_add_to_list(GQueue * prev_file_queue,
+                                                     GQueue * cur_file_queue) {
+    g_queue_foreach(prev_file_queue,
+                    (GFunc) if_close_levenshtein_dist_add_to_list,
+                    g_queue_peek_head(cur_file_queue));
+}
 static inline void
   if_new_line_then_add_to_list(GQueue * prev_file_string_ids_queue,
                                GQueue * cur_file_string_ids_queue,
@@ -100,9 +104,30 @@ static inline void
 #else
 #error FUNCTIONALITY NOT IMPLEMENTED YET
 #endif
+        if_similar_edit_levenshtein_dist_queue_add_to_list(
+          prev_file_string_ids_queue, cur_file_string_ids_queue);
     }
     if (*ptr_current_streak_of_newly_added_lines > QUEUE_HASH_CRITICAL_SIZE) {
         *ptr_break_out_of_vcscmp = true;
+    }
+}
+
+static inline void initialize_string_id(unsigned long * ptr_hash,
+                                        unsigned long * ptr_length,
+                                        string_with_size ** sws) {
+    *ptr_hash = DJB2_HASH_BEGIN;
+    *ptr_length = 0;
+    *sws = make_new_string_with_size(LEVENSHTEIN_CHECK_CHARS);
+}
+
+static inline void if_within_first_section_write_to_string(
+  unsigned long * ptr_instantaneous_length,
+  string_with_size * sws_first_chars,
+  string_with_size * sws_block,
+  size_t * ptr_index) {
+    if (*ptr_instantaneous_length < LEVENSHTEIN_CHECK_CHARS) {
+        sws_first_chars->string[*ptr_instantaneous_length] =
+          sws_block->string[*ptr_index];
     }
 }
 

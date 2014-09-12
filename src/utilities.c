@@ -10,15 +10,6 @@ FILE * create_file_binary_write(char * filename) {
     return output_file;
 }
 
-extern inline string_with_size *
-  make_new_string_with_size(size_t size_in_memory);
-
-extern inline string_with_size *
-  set_string_with_size_readable_bytes(string_with_size * sws,
-                                      size_t readable_bytes);
-
-extern inline void free_string_with_size(string_with_size * sws_to_free);
-
 result_bytes_processed *
   initialize_result_bytes_processed(result_bytes_processed * rbp) {
     rbp->result = 0;
@@ -31,20 +22,11 @@ void free_result_bytes_processed(result_bytes_processed * rbp) {
     free(rbp);
 }
 
-extern inline result_bytes_processed *
-  add_to_bytes_processed(result_bytes_processed * rbp,
-                         unsigned long int added_bytes);
-
-extern inline result_bytes_processed *
-  increment_bytes_processed(result_bytes_processed * rbp);
-
 void print_bytes_processed(result_bytes_processed * rbp, FILE * outstream) {
     mpz_out_str(outstream,
                 10, // base 10
                 rbp->bytes_processed);
 }
-
-extern inline bool is_result_good(result_bytes_processed * rbp);
 
 void free_result_bytes_processed_pair(result_bytes_processed_pair rbpp) {
     free_result_bytes_processed(rbpp.bytes_read);

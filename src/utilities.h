@@ -20,6 +20,12 @@
 
 #define PRINT_ERROR(str) fprintf(stderr, "%s\n", str)
 
+#define PRINT_DIAGNOSTIC_DECIMAL(num) fprintf(stderr, "%d\n", num)
+
+#define PRINT_DIAGNOSTIC_UNSIGNED_LONG(num) fprintf(stderr, "%lu\n", num)
+
+#define PRINT_DIAGNOSTIC_SIZE_T(num) fprintf(stderr, "%zu\n", num)
+
 #define PRINT_ERROR_AND_RETURN(str) \
     PRINT_ERROR(str);               \
     return;
@@ -108,23 +114,21 @@ typedef struct {
     size_t readable_bytes; // current number of useful bytes this is storing
     size_t size_in_memory; // full size of char * in bytes
 } string_with_size;        // NOT null-terminated by default!
-
-inline string_with_size * make_new_string_with_size(size_t size_in_memory) {
+static inline string_with_size *
+  make_new_string_with_size(size_t size_in_memory) {
     string_with_size * sws_to_return = malloc(sizeof(string_with_size));
     sws_to_return->string = malloc(size_in_memory * (sizeof(char)));
     sws_to_return->readable_bytes = 0;
     sws_to_return->size_in_memory = size_in_memory;
     return sws_to_return;
 }
-
-inline string_with_size *
+static inline string_with_size *
   set_string_with_size_readable_bytes(string_with_size * sws,
                                       size_t readable_bytes) {
     sws->readable_bytes = readable_bytes;
     return sws;
 }
-
-inline void free_string_with_size(string_with_size * sws_to_free) {
+static inline void free_string_with_size(string_with_size * sws_to_free) {
     free(sws_to_free->string);
     free(sws_to_free);
 }
@@ -142,18 +146,18 @@ result_bytes_processed *
 // DTOR
 void free_result_bytes_processed(result_bytes_processed * rbp);
 // METHODS
-inline result_bytes_processed *
+static inline result_bytes_processed *
   add_to_bytes_processed(result_bytes_processed * rbp,
                          unsigned long int added_bytes) {
     mpz_add_ui(rbp->bytes_processed, rbp->bytes_processed, added_bytes);
     return rbp;
 }
-inline result_bytes_processed *
+static inline result_bytes_processed *
   increment_bytes_processed(result_bytes_processed * rbp) {
     return add_to_bytes_processed(rbp, 1);
 }
 void print_bytes_processed(result_bytes_processed * rbp, FILE * outstream);
-inline bool is_result_good(result_bytes_processed * rbp) {
+static inline bool is_result_good(result_bytes_processed * rbp) {
     return rbp->result;
 }
 
