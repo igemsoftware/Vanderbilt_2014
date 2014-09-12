@@ -1,4 +1,4 @@
-#include "vcscmp.h"           // required
+#include "vcscmp.h" // required
 
 extern inline string_id * string_id_set_str_hash(string_id * sid,
                                                  unsigned long str_hash);
@@ -24,51 +24,30 @@ void set_bool_if_string_id_match(string_id * prev_string_id,
 }
 
 extern inline bool is_string_id_at_top_in_prev_queue(GQueue * prev_file_queue,
-                                              GQueue * cur_file_queue);
+                                                     GQueue * cur_file_queue);
 
-void set_int_if_levenshtein_match(string_id * prev_string_id,
-                                  index_and_data * index_data_bundle) {
-    size_t levenshtein_dist = get_levenshtein_distance(
-      prev_string_id->first_k_chars, index_data_bundle->data->first_k_chars);
-    if (levenshtein_dist <= LEVENSHTEIN_CHECK_THRESHOLD) {
-        *index_and_data->index = ;
-    }
-}
+// void set_int_if_levenshtein_match(string_id * prev_string_id,
+//                                   index_and_data * index_data_bundle) {
+//     size_t levenshtein_dist = get_levenshtein_distance(
+//       prev_string_id->first_k_chars, index_data_bundle->data->first_k_chars);
+//     if (levenshtein_dist <= LEVENSHTEIN_CHECK_THRESHOLD) {
+//         // *index_and_data->index = ;
+//     }
+// }
 
-extern inline int
-  where_is_similar_line_to_string_at_top(GQueue * prev_file_queue,
-                                         GQueue * cur_file_queue);
+// extern inline int
+//   where_is_similar_line_to_string_at_top(GQueue * prev_file_queue,
+//                                          GQueue * cur_file_queue);
 
-compare_two_result_bytes_processed vcscmp(char * prev_filename,
-                                          char * cur_filename) {
-    // produce two queues of hashes
-    // determine which lines are changes of previous lines
-    // write out lines to file (from left or right as appropriate)
-    // add changes at bottom (as appropriate)
-    compare_two_result_bytes_processed results_for_both_files;
-    // TODO: initialize the result values
-    // TODO: preformat prev file
-    // pre_format_file_vcscmp(prev_filename);
+void vcscmp(char * prev_filename, char * cur_filename) {
     FILE * prev_file = open_file_read(prev_filename);
-    PRINT_ERROR_AND_PERFORM_EXPR_AND_RETURN_IF_NULL(
-      prev_file,
-      "Error in reading prev file.",
-      , // no expr needed
-      results_for_both_files);
-    // TODO: preformat cur file
-    // pre_format_file_vcscmp(cur_filename);
+    PRINT_ERROR_AND_RETURN_IF_NULL(prev_file, "Error in reading prev file.");
     FILE * cur_file = open_file_read(cur_filename);
-    PRINT_ERROR_AND_PERFORM_EXPR_AND_RETURN_IF_NULL(
-      cur_file,
-      "Error in reading cur file.",
-      , // no expr needed
-      results_for_both_files);
-
+    PRINT_ERROR_AND_RETURN_IF_NULL(cur_file, "Error in reading cur file.");
 #ifdef CONCURRENT
-// TODO: make array-based queues atomic and VERIFY WITH TEST CODE
 #error FUNCTIONALITY NOT IMPLEMENTED YET
 #else
-    // OPTIMIZATION: actually implement this
+    // OPTIMIZATION:
     // implement fixed-size array-based queue for speed
     // written inline instead of in separate function because it is very
     // small and simple
@@ -91,16 +70,13 @@ compare_two_result_bytes_processed vcscmp(char * prev_filename,
 
     bool break_out_of_vcscmp = false;
 
-    // TODO: modify all "while !foef ||/&& !ferror" to just !ferror, i think
     while ((!(feof(prev_file) || ferror(prev_file)) || // until both files EOF
             !(feof(cur_file) || ferror(cur_file))) &&
            !break_out_of_vcscmp) {
         if (!(feof(prev_file) || ferror(prev_file)) &&
             g_queue_get_length(prev_file_string_ids_queue) <
               QUEUE_HASH_CRITICAL_SIZE) {
-            prev_block =
-              read_block(prev_file, // assignment not necessary, but clearer
-                         prev_block);
+            read_block(prev_file, prev_block);
             // OPTIMIZATION: move this index outside of the for loop
             for (size_t prev_block_index = 0; prev_block_index < BINBLOCK_SIZE;
                  ++prev_block_index) {
@@ -111,8 +87,7 @@ compare_two_result_bytes_processed vcscmp(char * prev_filename,
                                      prev_file_instantaneous_length));
                     prev_file_instantaneous_hash = DJB2_HASH_BEGIN;
                     prev_file_instantaneous_length = 0;
-                } else { // can do just "else" because previously formatted at
-                         // vcsfmt
+                } else {
                     prev_file_instantaneous_hash =
                       djb2_hash_on_string_index(prev_file_instantaneous_hash,
                                                 prev_block->string,
@@ -124,9 +99,7 @@ compare_two_result_bytes_processed vcscmp(char * prev_filename,
         if (!(feof(cur_file) || ferror(cur_file)) &&
             g_queue_get_length(cur_file_string_ids_queue) <
               QUEUE_HASH_CRITICAL_SIZE) {
-            cur_block =
-              read_block(cur_file, // assignment not necessary, but clearer
-                         cur_block);
+            read_block(cur_file, cur_block);
             for (size_t cur_block_index = 0; cur_block_index < BINBLOCK_SIZE;
                  ++cur_block_index) {
                 if (cur_block->string[cur_block_index] == '\n') {
@@ -165,14 +138,12 @@ compare_two_result_bytes_processed vcscmp(char * prev_filename,
 #else
 #error FUNCTIONALITY NOT IMPLEMENTED YET
 #endif
-                        d();
                     }
                     if (current_streak_of_newly_added_lines >
                         QUEUE_HASH_CRITICAL_SIZE) {
                         break_out_of_vcscmp = true;
                     }
-                    free_string_id(g_queue_pop_head(
-                      cur_file_string_ids_queue)); // NOT popping prev queue
+                    free_string_id(g_queue_pop_head(cur_file_string_ids_queue));
                     mpz_add_ui(lines_processed, lines_processed, 1);
                 }
             } else {
@@ -186,7 +157,6 @@ compare_two_result_bytes_processed vcscmp(char * prev_filename,
 #else
 #error FUNCTIONALITY NOT IMPLEMENTED YET
 #endif
-                    d();
                 }
                 if (current_streak_of_newly_added_lines >
                     QUEUE_HASH_CRITICAL_SIZE) {
@@ -203,7 +173,7 @@ compare_two_result_bytes_processed vcscmp(char * prev_filename,
     while (!g_queue_is_empty(cur_file_string_ids_queue) &&
            !break_out_of_vcscmp) {
         if (!is_string_id_at_top_in_prev_queue(prev_file_string_ids_queue,
-                                        cur_file_string_ids_queue)) {
+                                               cur_file_string_ids_queue)) {
             ++current_streak_of_newly_added_lines;
 #ifdef DEBUG
             fprintf(stderr, "NEWLY ADDED LINE AT LINE ");
@@ -212,13 +182,11 @@ compare_two_result_bytes_processed vcscmp(char * prev_filename,
 #else
 #error "FUNCTIONALITY NOT IMPLEMENTED YET"
 #endif
-            d();
         }
         if (current_streak_of_newly_added_lines > QUEUE_HASH_CRITICAL_SIZE) {
             break_out_of_vcscmp = true;
         }
-        free_string_id(
-          g_queue_pop_head(cur_file_string_ids_queue)); // NOT popping prev
+        free_string_id(g_queue_pop_head(cur_file_string_ids_queue));
         mpz_add_ui(lines_processed, lines_processed, 1);
     }
 
@@ -228,5 +196,4 @@ compare_two_result_bytes_processed vcscmp(char * prev_filename,
     g_queue_free(prev_file_string_ids_queue);
     g_queue_free(cur_file_string_ids_queue);
 #endif
-    return results_for_both_files;
 }

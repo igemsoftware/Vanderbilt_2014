@@ -11,11 +11,12 @@ Levenshtein_distance#C
 #define MIN3(a, b, c) \
     ((a) < (b) ? ((a) < (c) ? (a) : (c)) : ((b) < (c) ? (b) : (c)))
 
-// OPTIMIZATION: everything in this function
+// OPTIMIZATION: literally everything in this function
 // precondition: strings are same size
 inline size_t get_levenshtein_distance(string_with_size * prev_string,
                                        string_with_size * cur_string) {
     size_t prev_index, cur_index, lastdiag, olddiag;
+    // TODO: convert to static-allocated array of 80 bytes
     size_t matrix_column[prev_string->readable_bytes + 1];
     for (prev_index = 1; prev_index <= prev_string->readable_bytes;
          ++prev_index) {

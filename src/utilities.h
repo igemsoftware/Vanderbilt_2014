@@ -20,6 +20,16 @@
 
 #define PRINT_ERROR(str) fprintf(stderr, "%s\n", str)
 
+#define PRINT_ERROR_AND_RETURN(str) \
+    PRINT_ERROR(str);               \
+    return;
+
+#define PRINT_ERROR_AND_RETURN_IF_NULL(ptr, str) \
+    if (NULL == ptr) {                           \
+        PRINT_ERROR(str);                        \
+        return;                                  \
+    }
+
 #define PRINT_ERROR_AND_RETURN_NULL_IF_NULL(ptr, str) \
     if (NULL == ptr) {                                \
         PRINT_ERROR(str);                             \
@@ -91,6 +101,7 @@ typedef struct {
     int * index;
 } index_and_data;
 
+// STRING_WITH_SIZE
 // used to return a char string, along with size information
 typedef struct {
     char * string;
@@ -117,11 +128,6 @@ inline void free_string_with_size(string_with_size * sws_to_free) {
     free(sws_to_free->string);
     free(sws_to_free);
 }
-
-typedef struct {
-    size_t begin_index;
-    size_t end_index;
-} dna_reading_indices;
 
 // gmp bignums used for keeping track of large (genome-scale) byte numbers
 typedef struct {
