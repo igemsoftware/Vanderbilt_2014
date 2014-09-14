@@ -10,7 +10,8 @@
 
 #define OUTPUT_SUFFIX ".vcsfmt"
 
- // if filetype supported, produces vcsfmt file of same name
+// TODO: javadoc
+// if filetype supported, produces vcsfmt file of same name
 void vcsfmt(char * filename);
 void de_vcsfmt(char * filename); // produces original file
 

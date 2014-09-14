@@ -1,7 +1,7 @@
 #include "block_processing.h"
 
 // PROCESS_BLOCK
-string_with_size * process_block(string_with_size * input_block_with_size,
+string_with_size * process_block_vcsfmt(string_with_size * input_block_with_size,
                                  string_with_size * output_block_with_size,
                                  bool * is_within_orf,
                                  size_t * cur_orf_pos,
@@ -102,7 +102,7 @@ string_with_size * process_block(string_with_size * input_block_with_size,
     return output_block_with_size;
 }
 
-string_with_size * de_process_block(string_with_size * input_block_with_size,
+string_with_size * de_process_block_vcsfmt(string_with_size * input_block_with_size,
                                     string_with_size * output_block_with_size) {
     output_block_with_size->readable_bytes = 0;
     for (size_t bytes_read = 0;
@@ -119,7 +119,7 @@ string_with_size * de_process_block(string_with_size * input_block_with_size,
 }
 
 #ifdef CONCURRENT
-void concurrent_read_and_process_block(
+void concurrent_read_and_process_block_vcsfmt(
   concurrent_read_and_process_block_args_vcsfmt * args) {
     while (!feof(args->input_file) && !ferror(args->input_file)) {
         add_to_bytes_processed(
@@ -128,7 +128,7 @@ void concurrent_read_and_process_block(
             ->readable_bytes);
         // OPTIMIZATION: allocate from (possibly self-growing) pool of memory
         args->output_block_with_size = make_new_string_with_size(BINBLOCK_SIZE);
-        process_block(args->input_block_with_size,
+        process_block_vcsfmt(args->input_block_with_size,
                       args->output_block_with_size,
                       args->is_within_orf,
                       args->cur_orf_pos,
@@ -143,7 +143,7 @@ void concurrent_read_and_process_block(
     g_mutex_unlock(args->process_complete_mutex);
 }
 
-void concurrent_write_block_vcsfmt(concurrent_read_write_block_args * args) {
+void concurrent_write_block_vcsfmt(concurrent_read_write_block_args_vcsfmt * args) {
     while (!is_processing_complete_vcsfmt_concurrent(args)) {
         g_mutex_unlock(args->process_complete_mutex);
         args->active_block_with_size =

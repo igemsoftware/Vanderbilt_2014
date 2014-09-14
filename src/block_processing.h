@@ -9,6 +9,7 @@
 
 // chosen so that maximum BINBLOCK_SIZE is 8192, a power of 2 (heuristic for
 // fast file I/O)
+// TODO: rename this to something more indicative of usage
 #define BLOCK_SIZE 7928
 
 // only look for orfs above 60 bases long (heuristic)
@@ -21,9 +22,6 @@
 // sequence is an orf (which won't happen)
 // two newlines per orf in the worst possible case
 #define BINBLOCK_SIZE (size_t)(BLOCK_SIZE * (1 + 2 / (double) MIN_ORF_LENGTH))
-
-FILE * open_file_read(char * filename);
-FILE * create_outfile(char * filename);
 
 static inline string_with_size *
   read_block(FILE * input_file, string_with_size * input_string_with_size) {
@@ -45,18 +43,25 @@ static inline string_with_size *
     return output_block_with_size;
 }
 
-string_with_size * process_block(string_with_size * input_block_with_size,
-                                 string_with_size * output_block_with_size,
-                                 bool * is_within_orf,
-                                 size_t * cur_orf_pos,
-                                 char * current_codon_frame,
-                                 bool is_final_block);
+// TODO: javadoc this
+string_with_size *
+  process_block_vcsfmt(string_with_size * input_block_with_size,
+                       string_with_size * output_block_with_size,
+                       bool * is_within_orf,
+                       size_t * cur_orf_pos,
+                       char * current_codon_frame,
+                       bool is_final_block);
 
-string_with_size * de_process_block(string_with_size * input_block_with_size,
-                                    string_with_size * output_block_with_size);
+// TODO: javadoc this
+string_with_size *
+  de_process_block_vcsfmt(string_with_size * input_block_with_size,
+                          string_with_size * output_block_with_size);
 
 #ifdef CONCURRENT
 // send arguments to queue
+// used as variadic arguments to function
+// concurrent_read_and_process_block_vcsfmt for GThread
+// TODO: obv javadoc
 typedef struct {
     FILE * input_file;
     string_with_size * input_block_with_size;
@@ -70,6 +75,9 @@ typedef struct {
     volatile bool * is_processing_complete;
     GMutex * process_complete_mutex;
 } concurrent_read_and_process_block_args_vcsfmt;
+// used as variadic arguments to function
+// concurrent_read_and_process_block_vcsfmt for GThread
+// TODO: obv javadoc
 typedef struct {
     FILE * active_file;
     string_with_size * active_block_with_size;
@@ -77,15 +85,19 @@ typedef struct {
     result_bytes_processed * total_bytes_written;
     volatile bool * is_processing_complete;
     GMutex * process_complete_mutex;
-} concurrent_read_write_block_args;
+} concurrent_read_write_block_args_vcsfmt;
 
-void concurrent_read_and_process_block(
+// TODO: javadoc
+void concurrent_read_and_process_block_vcsfmt(
   concurrent_read_and_process_block_args_vcsfmt * args);
 
-void concurrent_write_block_vcsfmt(concurrent_read_write_block_args * args);
+// TODO: javadoc
+void concurrent_write_block_vcsfmt(concurrent_read_write_block_args_vcsfmt * args);
 
+// TODO: javadoc
+// cool mutex stuff
 static inline bool is_processing_complete_vcsfmt_concurrent(
-  concurrent_read_write_block_args * args) {
+  concurrent_read_write_block_args_vcsfmt * args) {
     if (g_async_queue_length(args->active_queue) != 0) {
         return false;
     } else {

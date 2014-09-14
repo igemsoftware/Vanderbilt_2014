@@ -91,29 +91,34 @@
 // FUNCTIONS
 
 // open file, return pointer
-FILE * open_file_read(char * filename);
-FILE * create_file_binary_write(char * filename); // create file, return pointer
+/**
+ * @brief:
+ *
+ */
+static inline FILE * open_file_read(char * filename) {
+    FILE * input_file = fopen(filename, "r");
+    return input_file;
+}
+// TODO: mention truncation
+static inline FILE * create_file_binary_write(char * filename) {
+    FILE * output_file = fopen(filename, "wb");
+    return output_file;
+}
+// create file, return pointer
 
 // STRUCTS AND FUNCTIONS TO MANIPULATE THEM
-
-// used as generic pair
-typedef struct {
-    void * data;
-    bool * boolean;
-} boolean_and_data;
-
-typedef struct {
-    void * data;
-    int * index;
-} index_and_data;
-
 // STRING_WITH_SIZE
 // used to return a char string, along with size information
+// TODO: mention that readable_bytes is used by functions like fread because
+// while they will typically fill the entire memory space sometimes they do
+// less, upon reaching EOF or some other
 typedef struct {
     char * string;
     size_t readable_bytes; // current number of useful bytes this is storing
     size_t size_in_memory; // full size of char * in bytes
 } string_with_size;        // NOT null-terminated by default!
+// TODO: javadoc
+// note that sets readable_bytes to 0
 static inline string_with_size *
   make_new_string_with_size(size_t size_in_memory) {
     string_with_size * sws_to_return = malloc(sizeof(string_with_size));
@@ -122,62 +127,17 @@ static inline string_with_size *
     sws_to_return->size_in_memory = size_in_memory;
     return sws_to_return;
 }
+// TODO: javadoc
 static inline string_with_size *
   set_string_with_size_readable_bytes(string_with_size * sws,
                                       size_t readable_bytes) {
     sws->readable_bytes = readable_bytes;
     return sws;
 }
+// TODO: javadoc
 static inline void free_string_with_size(string_with_size * sws_to_free) {
     free(sws_to_free->string);
     free(sws_to_free);
 }
-
-// gmp bignums used for keeping track of large (genome-scale) byte numbers
-typedef struct {
-    int result;
-    mpz_t bytes_processed;
-} result_bytes_processed;
-// CTOR
-// uses pointers so potentially massive mpz_t doesn't have to be copied by
-// value'
-result_bytes_processed *
-  initialize_result_bytes_processed(result_bytes_processed * rbp);
-// DTOR
-void free_result_bytes_processed(result_bytes_processed * rbp);
-// METHODS
-static inline result_bytes_processed *
-  add_to_bytes_processed(result_bytes_processed * rbp,
-                         unsigned long int added_bytes) {
-    mpz_add_ui(rbp->bytes_processed, rbp->bytes_processed, added_bytes);
-    return rbp;
-}
-static inline result_bytes_processed *
-  increment_bytes_processed(result_bytes_processed * rbp) {
-    return add_to_bytes_processed(rbp, 1);
-}
-void print_bytes_processed(result_bytes_processed * rbp, FILE * outstream);
-static inline bool is_result_good(result_bytes_processed * rbp) {
-    return rbp->result;
-}
-
-typedef struct {
-    result_bytes_processed * bytes_read;
-    result_bytes_processed * bytes_written;
-} result_bytes_processed_pair;
-void free_result_bytes_processed_pair(result_bytes_processed_pair rbpp);
-// bool is_bytes_read_good (result_bytes_processed_pair rbpp);
-// bool is_bytes_written_good (result_bytes_processed_pair rbpp);
-// bool are_all_results_good (result_bytes_processed_pair rbpp);
-
-typedef struct {
-    result_bytes_processed_pair prev_file_processed;
-    result_bytes_processed_pair cur_file_processed;
-} compare_two_result_bytes_processed;
-void free_compare_two_result_bytes_processed(
-  compare_two_result_bytes_processed ctrbp);
-// bool is_prev_file_result_good (compare_two_result_bytes_processed ctrbp);
-// bool is_cur_file_result_good (compare_two_result_bytes_processed ctrbp);
-// bool are_both_file_results_good (compare_two_result_bytes_processed ctrbp);
 
 #endif /*___UTILITIES_H___*/

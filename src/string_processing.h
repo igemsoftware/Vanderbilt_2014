@@ -7,6 +7,7 @@
 // whats-the-best-hash-for-utf-8-strings
 #define DJB2_HASH_BEGIN 5381 // initial string hash
 // returns the next hash value
+// TODO: javadoc
 #define DJB2_MAGIC_CONSTANT 5
 static inline unsigned long djb2_hash_on_string_index(
   unsigned long instantaneous_hash, char * str, size_t cur_index) {
@@ -16,14 +17,14 @@ static inline unsigned long djb2_hash_on_string_index(
     // OPTIMIZATION: is using the function character-by-character inefficient?
 }
 
-
+// TODO: javadoc
 // http://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/
 // Levenshtein_distance#C
 #define MIN3(a, b, c) \
     ((a) < (b) ? ((a) < (c) ? (a) : (c)) : ((b) < (c) ? (b) : (c)))
 // precondition: strings are same size
 static inline size_t get_levenshtein_distance(string_with_size * prev_string,
-                                       string_with_size * cur_string) {
+                                              string_with_size * cur_string) {
     size_t prev_index, cur_index, lastdiag, olddiag;
     // TODO: convert to static-allocated array of 80 bytes
     size_t matrix_column[prev_string->readable_bytes + 1];

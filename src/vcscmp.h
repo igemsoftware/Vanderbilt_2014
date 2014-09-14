@@ -13,6 +13,7 @@
 #define LEVENSHTEIN_CHECK_THRESHOLD 20
 
 // STRING_ID
+// TODO: javadoc
 typedef struct {
     unsigned long str_hash;   // used because canonical djb2 uses unsigned long
     unsigned long str_length; // arbitrary choice of width
@@ -53,7 +54,6 @@ static inline string_id *
         str_length),
       str_k_chars);
 }
-
 static inline void free_string_id(string_id * sid) {
     free_string_with_size(sid->first_k_chars);
     free(sid);
@@ -63,12 +63,24 @@ static inline bool string_id_equal(string_id * a, string_id * b) {
 }
 
 // QUEUE_PROCESSING
+/**
+ * @brief:
+ *
+ */
+// TODO: rename struct so intended usage is clear, mention foreach loop
+typedef struct {
+    void * data;
+    bool * boolean;
+} boolean_and_data;
+
+// TODO: javadoc all of this
 // modify LINES_ABOVE_BELOW_TO_SEARCH, not QUEUE_HASH_CRITICAL_SIZE
 #define LINES_ABOVE_BELOW_TO_SEARCH 5
 // size of queue wrt # of lines
 #define QUEUE_HASH_CRITICAL_SIZE 2 * LINES_ABOVE_BELOW_TO_SEARCH + 1
 void set_bool_if_string_id_match(string_id * prev_string_id,
                                  boolean_and_data * bool_data_bundle);
+// basically macros
 static inline bool is_string_id_at_top_in_prev_queue(GQueue * prev_file_queue,
                                                      GQueue * cur_file_queue) {
     bool is_string_id_found = false;
@@ -81,6 +93,7 @@ static inline bool is_string_id_at_top_in_prev_queue(GQueue * prev_file_queue,
 }
 void if_close_levenshtein_dist_add_to_list(string_id * prev_string_id,
                                            string_id * cur_string_id);
+// basically  macros
 static inline void
   if_similar_edit_levenshtein_dist_queue_add_to_list(GQueue * prev_file_queue,
                                                      GQueue * cur_file_queue) {

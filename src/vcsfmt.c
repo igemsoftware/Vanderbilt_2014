@@ -41,7 +41,7 @@ void vcsfmt(char * filename) {
     args_to_block_processing.is_processing_complete = is_processing_complete;
     args_to_block_processing.process_complete_mutex = &process_complete_mutex;
 
-    concurrent_read_write_block_args args_to_write_block;
+    concurrent_read_write_block_args_vcsfmt args_to_write_block;
     args_to_write_block.active_file = output_file;
     args_to_write_block.active_queue = active_queue;
     args_to_write_block.total_bytes_written = total_bytes_written;
@@ -61,7 +61,7 @@ void vcsfmt(char * filename) {
     while (!feof(input_file) && !ferror(input_file) && !ferror(output_file)) {
         read_block(input_file, input_block_with_size);
         write_block(output_file,
-                    process_block(input_block_with_size,
+                    process_block_vcsfmt(input_block_with_size,
                                          output_block_with_size,
                                          &is_within_orf,
                                          &cur_orf_pos,
@@ -118,7 +118,7 @@ void de_vcsfmt(char * filename) {
     while (!feof(input_file) && !ferror(input_file) && !ferror(output_file)) {
         read_block(input_file, input_block_with_size);
         write_block(output_file,
-                    de_process_block(input_block_with_size,
+                    de_process_block_vcsfmt(input_block_with_size,
                                             output_block_with_size));
     }
 

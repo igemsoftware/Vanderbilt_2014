@@ -10,9 +10,10 @@
 
 #define CODON_LENGTH 3 // codon length, in bases
 
+// TODO: javadoc, maybe make inline somehow?
 extern const char * start_codons[];
 bool is_start_codon(char * codon);
-
+// TODO: javadoc
 extern const char * stop_codons[];
 bool is_stop_codon(char * codon);
 
