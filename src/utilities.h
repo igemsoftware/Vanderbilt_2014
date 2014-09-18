@@ -9,83 +9,27 @@
 
 // HEADERS AND LIBRARIES
 
-#include <stdio.h>   // provide file, print facilities to files
-#include <stdbool.h> // provide booleans to other files
+#include <stdio.h>
+#include <stdbool.h>
 #include <stdlib.h>  // for malloc
 #include <string.h>  // for strlen/strcpy/strcat
-#include <glib.h>    // for GSList
-#include <gmp.h>     // for mpz_t
+#include <glib.h>    // for queues, lists, and threads
+#include <gmp.h>     // for bignums
 
 // MACROS
 
-#define PRINT_ERROR(str) fprintf(stderr, "%s\n", str)
+#define PRINT_ERROR_NO_NEWLINE(str) fprintf(stderr, "%s", str)
 
-#define PRINT_DIAGNOSTIC_DECIMAL(num) fprintf(stderr, "%d\n", num)
+#define PRINT_ERROR_WITH_NEWLINE(str) fprintf(stderr, "%s\n", str)
 
-#define PRINT_DIAGNOSTIC_UNSIGNED_LONG(num) fprintf(stderr, "%lu\n", num)
+#define PRINT_ERROR_NEWLINE() fprintf(stderr, "\n")
 
-#define PRINT_DIAGNOSTIC_SIZE_T(num) fprintf(stderr, "%zu\n", num)
-
-#define PRINT_ERROR_AND_RETURN(str) \
-    PRINT_ERROR(str);               \
-    return;
+#define PRINT_ERROR_SIZE_T_NO_NEWLINE(num) fprintf(stderr, "%zu", num)
 
 #define PRINT_ERROR_AND_RETURN_IF_NULL(ptr, str) \
     if (NULL == ptr) {                           \
-        PRINT_ERROR(str);                        \
+        PRINT_ERROR_WITH_NEWLINE(str);           \
         return;                                  \
-    }
-
-#define PRINT_ERROR_AND_RETURN_NULL_IF_NULL(ptr, str) \
-    if (NULL == ptr) {                                \
-        PRINT_ERROR(str);                             \
-        return NULL;                                  \
-    }
-
-#define PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NULL(ptr, str) \
-    if (NULL == ptr) {                                   \
-        PRINT_ERROR(str);                                \
-        return -1;                                       \
-    }
-
-#define PRINT_ERROR_AND_RETURN_NEG_ONE_IF_NEG_ONE(val, str) \
-    if (-1 == val) {                                        \
-        PRINT_ERROR(str);                                   \
-        return -1;                                          \
-    }
-
-#define PRINT_ERROR_AND_RETURN_NULL_IF_NEG_ONE(val, str) \
-    if (-1 == val) {                                     \
-        PRINT_ERROR(str);                                \
-        return NULL;                                     \
-    }
-
-#define PRINT_ERROR_AND_PERFORM_EXPR_IF_NULL(val, str, expr) \
-    if (NULL == val) {                                       \
-        PRINT_ERROR(str);                                    \
-        expr;                                                \
-    }
-
-#define PRINT_ERROR_AND_PERFORM_EXPR_IF_NEG_ONE(val, str, expr) \
-    if (-1 == val) {                                            \
-        PRINT_ERROR(str);                                       \
-        expr;                                                   \
-    }
-
-#define PRINT_ERROR_AND_PERFORM_EXPR_AND_RETURN_IF_NULL( \
-  val, str, expr, retval)                                \
-    if (NULL == val) {                                   \
-        PRINT_ERROR(str);                                \
-        expr;                                            \
-        return retval;                                   \
-    }
-
-#define PRINT_ERROR_AND_PERFORM_EXPR_AND_RETURN_IF_NEG_ONE( \
-  val, str, expr, retval)                                   \
-    if (-1 == val) {                                        \
-        PRINT_ERROR(str);                                   \
-        expr;                                               \
-        return retval;                                      \
     }
 
 // FUNCTIONS

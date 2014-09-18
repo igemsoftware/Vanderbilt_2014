@@ -39,7 +39,7 @@ int main(int argc, char ** argv) {
     // vcsfmt("500_lines_of_dna_minus_lines.fasta");
     // if (vcsfmt_results.bytes_read->result ||
     // vcsfmt_results.bytes_written->result){
-    //   PRINT_ERROR("vcsfmt failed.");
+    //   PRINT_ERROR_WITH_NEWLINE("vcsfmt failed.");
     // }
     // else{
     // 	print_bytes_processed(vcsfmt_results.bytes_read,
@@ -55,7 +55,7 @@ int main(int argc, char ** argv) {
     // de_vcsfmt("500_lines_of_dna_minus_lines.fasta.vcsfmt");
     // if (de_vcsfmt_results.bytes_read->result ||
     // de_vcsfmt_results.bytes_written->result){
-    //   PRINT_ERROR("de_vcsfmt failed.");
+    //   PRINT_ERROR_WITH_NEWLINE("de_vcsfmt failed.");
     // }
     // else{
     // 	print_bytes_processed(de_vcsfmt_results.bytes_read,

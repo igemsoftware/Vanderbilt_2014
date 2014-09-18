@@ -9,7 +9,7 @@
 #include "block_processing.h"
 
 // TODO: allow modification of this, find reasoning for choice of value
-#define LEVENSHTEIN_CHECK_CHARS 80
+#define LEVENSHTEIN_CHECK_CHARS 105
 #define LEVENSHTEIN_CHECK_THRESHOLD 20
 
 // STRING_ID
@@ -111,11 +111,17 @@ static inline void
                                            cur_file_string_ids_queue)) {
         ++*ptr_current_streak_of_newly_added_lines;
 #ifdef DEBUG
-        fprintf(stderr, "NEWLY ADDED LINE AT LINE ");
+        PRINT_ERROR_NO_NEWLINE("NEWLY ADDED LINE AT LINE ");
         mpz_out_str(stderr, 10, *ptr_lines_processed);
-        fprintf(stderr, "\n");
-#else
-#error FUNCTIONALITY NOT IMPLEMENTED YET
+        PRINT_ERROR_NEWLINE();
+        PRINT_ERROR_NO_NEWLINE("PREV_QUEUE SIZE: ");
+        PRINT_ERROR_SIZE_T_NO_NEWLINE(
+          (size_t) g_queue_get_length(prev_file_string_ids_queue));
+        PRINT_ERROR_NEWLINE();
+        PRINT_ERROR_NO_NEWLINE("CUR_QUEUE SIZE: ");
+        PRINT_ERROR_SIZE_T_NO_NEWLINE(
+          (size_t) g_queue_get_length(cur_file_string_ids_queue));
+        PRINT_ERROR_NEWLINE();
 #endif
         if_similar_edit_levenshtein_dist_queue_add_to_list(
           prev_file_string_ids_queue, cur_file_string_ids_queue);
@@ -127,20 +133,92 @@ static inline void
 
 static inline void initialize_string_id(unsigned long * ptr_hash,
                                         unsigned long * ptr_length,
-                                        string_with_size ** sws) {
+                                        string_with_size ** sws,
+                                        bool * ptr_past_k_chars) {
     *ptr_hash = DJB2_HASH_BEGIN;
     *ptr_length = 0;
     *sws = make_new_string_with_size(LEVENSHTEIN_CHECK_CHARS);
+    *ptr_past_k_chars = false;
 }
 
 static inline void if_within_first_section_write_to_string(
-  unsigned long * ptr_instantaneous_length,
+  unsigned long * ptr_line_length,
   string_with_size * sws_first_chars,
   string_with_size * sws_block,
   size_t * ptr_index) {
-    if (*ptr_instantaneous_length < LEVENSHTEIN_CHECK_CHARS) {
-        sws_first_chars->string[*ptr_instantaneous_length] =
+    if (*ptr_line_length < LEVENSHTEIN_CHECK_CHARS) {
+        sws_first_chars->string[*ptr_line_length] =
           sws_block->string[*ptr_index];
+    }
+}
+
+static inline void write_string_and_update_hash_and_line_length(
+  unsigned long * ptr_line_length,
+  string_with_size * sws_first_chars,
+  string_with_size * sws_block,
+  size_t * ptr_index,
+  unsigned long * instantaneous_hash,
+  char * hash_str,
+  bool * ptr_past_k_chars) {
+    if_within_first_section_write_to_string(
+      ptr_line_length, sws_first_chars, sws_block, ptr_index);
+    *instantaneous_hash =
+      djb2_hash_on_string_index(*instantaneous_hash, hash_str, *ptr_index);
+    ++*ptr_line_length;
+    if (*ptr_line_length >= LEVENSHTEIN_CHECK_CHARS && !*ptr_past_k_chars) {
+        *ptr_past_k_chars = true;
+    }
+}
+
+static inline void check_if_past_k_chars_push_tail_and_initialize_string_id(
+  bool * ptr_past_k_chars,
+  unsigned long * ptr_line_length,
+  GQueue * ids_queue,
+  unsigned long * ptr_line_hash,
+  string_with_size ** first_few_chars) {
+    if (*ptr_past_k_chars) {
+        *ptr_line_length = LEVENSHTEIN_CHECK_CHARS;
+    }
+    g_queue_push_tail(ids_queue,
+                      make_string_id_given_string_with_size(
+                        *ptr_line_hash,
+                        *ptr_line_length,
+                        set_string_with_size_readable_bytes(*first_few_chars,
+                                                            *ptr_line_length)));
+    initialize_string_id(
+      ptr_line_hash, ptr_line_length, first_few_chars, ptr_past_k_chars);
+}
+
+static inline void add_blocks_to_queue(FILE * active_file,
+                                       GQueue * ids_queue,
+                                       string_with_size * input_block,
+                                       bool * ptr_past_k_chars,
+                                       unsigned long * ptr_line_length,
+                                       unsigned long * ptr_line_hash,
+                                       string_with_size ** first_few_chars) {
+    if (!(feof(active_file) || ferror(active_file)) &&
+        g_queue_get_length(ids_queue) < QUEUE_HASH_CRITICAL_SIZE) {
+        read_block(active_file, input_block);
+        for (size_t block_index = 0; block_index < BINBLOCK_SIZE;
+             ++block_index) {
+            if (input_block->string[block_index] == '\n') {
+                check_if_past_k_chars_push_tail_and_initialize_string_id(
+                  ptr_past_k_chars,
+                  ptr_line_length,
+                  ids_queue,
+                  ptr_line_hash,
+                  first_few_chars);
+            } else {
+                write_string_and_update_hash_and_line_length(
+                  ptr_line_length,
+                  *first_few_chars,
+                  input_block,
+                  &block_index,
+                  ptr_line_hash,
+                  input_block->string,
+                  ptr_past_k_chars);
+            }
+        }
     }
 }
 

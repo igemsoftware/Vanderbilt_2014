@@ -26,7 +26,7 @@ static inline unsigned long djb2_hash_on_string_index(
 static inline size_t get_levenshtein_distance(string_with_size * prev_string,
                                               string_with_size * cur_string) {
     size_t prev_index, cur_index, lastdiag, olddiag;
-    // TODO: convert to static-allocated array of 80 bytes
+    // TODO: convert to static-allocated array
     size_t matrix_column[prev_string->readable_bytes + 1];
     for (prev_index = 1; prev_index <= prev_string->readable_bytes;
          ++prev_index) {

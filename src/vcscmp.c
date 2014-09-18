@@ -7,14 +7,35 @@ void set_bool_if_string_id_match(string_id * prev_string_id,
     }
 }
 
+#ifdef DEBUG
+static inline void print_string_id_first_k_chars(string_id * sid) {
+    fprintf(
+      stderr, "%.*s", LEVENSHTEIN_CHECK_CHARS, sid->first_k_chars->string);
+}
+#endif
+
 void if_close_levenshtein_dist_add_to_list(string_id * prev_string_id,
                                            string_id * cur_string_id) {
     size_t leven_dist = get_levenshtein_distance(prev_string_id->first_k_chars,
                                                  cur_string_id->first_k_chars);
     if (leven_dist < LEVENSHTEIN_CHECK_THRESHOLD) {
 #ifdef DEBUG
-        PRINT_ERROR("LEVENSHTEIN FOUND");
-        PRINT_DIAGNOSTIC_SIZE_T(leven_dist);
+        PRINT_ERROR_WITH_NEWLINE("LEVENSHTEIN FOUND");
+        PRINT_ERROR_NO_NEWLINE("LEVEN_DIST: ");
+        PRINT_ERROR_SIZE_T_NO_NEWLINE(leven_dist);
+        PRINT_ERROR_NEWLINE();
+        PRINT_ERROR_NO_NEWLINE("PREV_STRING (");
+        PRINT_ERROR_SIZE_T_NO_NEWLINE(
+          prev_string_id->first_k_chars->readable_bytes);
+        PRINT_ERROR_NO_NEWLINE("):\t");
+        print_string_id_first_k_chars(prev_string_id);
+        PRINT_ERROR_NO_NEWLINE("\nCUR_STRING: (");
+        PRINT_ERROR_SIZE_T_NO_NEWLINE(
+          cur_string_id->first_k_chars->readable_bytes);
+        PRINT_ERROR_NO_NEWLINE("):\t");
+        print_string_id_first_k_chars(cur_string_id);
+        PRINT_ERROR_NEWLINE();
+        PRINT_ERROR_WITH_NEWLINE("-----------");
 #endif
     }
 }
@@ -34,15 +55,17 @@ void vcscmp(char * prev_filename, char * cur_filename) {
     string_with_size * prev_block = make_new_string_with_size(BINBLOCK_SIZE);
     string_with_size * cur_block = make_new_string_with_size(BINBLOCK_SIZE);
 
-    string_with_size * prev_first_80_chars =
+    string_with_size * prev_first_few_chars =
       make_new_string_with_size(LEVENSHTEIN_CHECK_CHARS);
-    string_with_size * cur_first_80_chars =
+    string_with_size * cur_first_few_chars =
       make_new_string_with_size(LEVENSHTEIN_CHECK_CHARS);
 
-    unsigned long prev_file_instantaneous_hash = DJB2_HASH_BEGIN;
-    unsigned long prev_file_instantaneous_length = 0;
-    unsigned long cur_file_instantaneous_hash = DJB2_HASH_BEGIN;
-    unsigned long cur_file_instantaneous_length = 0;
+    unsigned long prev_file_line_hash = DJB2_HASH_BEGIN;
+    unsigned long prev_file_line_length = 0;
+    unsigned long cur_file_line_hash = DJB2_HASH_BEGIN;
+    unsigned long cur_file_line_length = 0;
+    bool prev_length_past_k_chars = false;
+    bool cur_length_past_k_chars = false;
 
     mpz_t lines_processed;
     mpz_init(lines_processed);
@@ -53,68 +76,20 @@ void vcscmp(char * prev_filename, char * cur_filename) {
     while ((!(feof(prev_file) || ferror(prev_file)) || // until both files EOF
             !(feof(cur_file) || ferror(cur_file))) &&
            !break_out_of_vcscmp) {
-        if (!(feof(prev_file) || ferror(prev_file)) &&
-            g_queue_get_length(prev_file_string_ids_queue) <
-              QUEUE_HASH_CRITICAL_SIZE) {
-            read_block(prev_file, prev_block);
-            for (size_t prev_block_index = 0; prev_block_index < BINBLOCK_SIZE;
-                 ++prev_block_index) {
-                if (prev_block->string[prev_block_index] == '\n') {
-                    g_queue_push_tail(prev_file_string_ids_queue,
-                                      make_string_id_given_string_with_size(
-                                        prev_file_instantaneous_hash,
-                                        prev_file_instantaneous_length,
-                                        set_string_with_size_readable_bytes(
-                                          prev_first_80_chars,
-                                          prev_file_instantaneous_length)));
-                    initialize_string_id(&prev_file_instantaneous_hash,
-                                         &prev_file_instantaneous_length,
-                                         &prev_first_80_chars);
-                } else {
-                    if_within_first_section_write_to_string(
-                      &prev_file_instantaneous_length,
-                      prev_first_80_chars,
-                      prev_block,
-                      &prev_block_index);
-                    prev_file_instantaneous_hash =
-                      djb2_hash_on_string_index(prev_file_instantaneous_hash,
-                                                prev_block->string,
-                                                prev_block_index);
-                    ++prev_file_instantaneous_length;
-                }
-            }
-        }
-        if (!(feof(cur_file) || ferror(cur_file)) &&
-            g_queue_get_length(cur_file_string_ids_queue) <
-              QUEUE_HASH_CRITICAL_SIZE) {
-            read_block(cur_file, cur_block);
-            for (size_t cur_block_index = 0; cur_block_index < BINBLOCK_SIZE;
-                 ++cur_block_index) {
-                if (cur_block->string[cur_block_index] == '\n') {
-                    g_queue_push_tail(
-                      cur_file_string_ids_queue,
-                      make_string_id_given_string_with_size(
-                        cur_file_instantaneous_hash,
-                        cur_file_instantaneous_length,
-                        set_string_with_size_readable_bytes(
-                          cur_first_80_chars, cur_file_instantaneous_length)));
-                    initialize_string_id(&cur_file_instantaneous_hash,
-                                         &cur_file_instantaneous_length,
-                                         &cur_first_80_chars);
-                } else {
-                    if_within_first_section_write_to_string(
-                      &cur_file_instantaneous_length,
-                      cur_first_80_chars,
-                      cur_block,
-                      &cur_block_index);
-                    cur_file_instantaneous_hash =
-                      djb2_hash_on_string_index(cur_file_instantaneous_hash,
-                                                cur_block->string,
-                                                cur_block_index);
-                    ++cur_file_instantaneous_length;
-                }
-            }
-        }
+        add_blocks_to_queue(prev_file,
+                            prev_file_string_ids_queue,
+                            prev_block,
+                            &prev_length_past_k_chars,
+                            &prev_file_line_length,
+                            &prev_file_line_hash,
+                            &prev_first_few_chars);
+        add_blocks_to_queue(cur_file,
+                            cur_file_string_ids_queue,
+                            cur_block,
+                            &cur_length_past_k_chars,
+                            &cur_file_line_length,
+                            &cur_file_line_hash,
+                            &cur_first_few_chars);
         if (g_queue_get_length(prev_file_string_ids_queue) >=
               QUEUE_HASH_CRITICAL_SIZE &&
             g_queue_get_length(cur_file_string_ids_queue) >=
