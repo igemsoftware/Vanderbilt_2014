@@ -59,7 +59,10 @@ void vcsfmt(char * filename) {
     g_thread_join(write_block_thread); // implicitly frees thread
 #else
     while (!feof(input_file) && !ferror(input_file) && !ferror(output_file)) {
-        read_block(input_file, input_block_with_size);
+        // Read a block
+    	read_block(input_file, input_block_with_size);
+
+        // Remove new lines and
         write_block(output_file,
                     process_block_vcsfmt(input_block_with_size,
                                          output_block_with_size,
@@ -138,4 +141,81 @@ void de_vcsfmt(char * filename) {
     // close open handles
     fclose(input_file);
     fclose(output_file);
+}
+
+string_with_size * fasta_preformat(string_with_size * input,
+									string_with_size * output,
+									string_with_size * metadata,
+									bool * in_comment,
+									int * lines_processed) {
+		// Set the readable bytes of output and metadata to 0
+		output->readable_bytes = 0;
+		metadata->readable_bytes = 0;
+
+		// Loop through all the readable characters in input.
+		for (int i = 0; i < input->readable_bytes; ++i) {
+
+			char current = input->string[i];
+
+			if (current == '\n') {
+				// The character is a line break
+				if (*in_comment) {
+					// If we were in a comment, write the line break to metadata
+					metadata->string[metadata->readable_bytes] = '\n';
+					metadata->readable_bytes++;
+
+					// We're not in a comment anymore.
+					*in_comment = false;
+				}
+
+				// Update the lines processed.
+				(*lines_processed)++;
+			}
+			else if (*in_comment) {
+				// We're in a comment.
+
+				// If a comment from a previous chunk flowed into this one, we need to reannotate that line.
+				if (i == 0) {
+					// Write the annotation to metadata.
+					write_annotation(&(metadata->string[metadata->readable_bytes]), lines_processed);
+				}
+
+				// Write the char to metadata.
+				metadata->string[metadata->readable_bytes] = current;
+			}
+			else if (current == ';' || current == '>') {
+				// We've found a comment.
+
+				// Annotate the line that we found this comment.
+				write_annotation(&(metadata->string[metadata->readable_bytes]), lines_processed);
+
+				// Flag that we're in a comment now.
+				*in_comment = true;
+
+				// Write the char to metadata.
+				metadata->string[metadata->readable_bytes] = current;
+			}
+			else {
+				// Any other characters we're assuming is genetic data.
+				output->string[output->readable_bytes] = current;
+
+				output->readable_bytes++;
+			}
+
+		}
+}
+
+/**
+ * A helper function for preformat that writes a line annotation to a string buffer.
+ *
+ * returns the number of characters written.
+ */
+int write_annotation(char * output, int line_number) {
+		output[0] = '@';
+
+		int written = sprintf(output + 1, "%d", line_number);
+
+		output[written + 1] = '@';
+
+		return written + 2;
 }
