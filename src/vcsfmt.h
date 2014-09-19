@@ -21,8 +21,8 @@ void de_vcsfmt(char * filename); // produces original file
  *
  * Basically removes new lines and meta-data. The meta-data for each block is separated out
  * into a separate structure that is annotated in such a way that the original fasta file can
- * be recovered by calling de_fasta_preformat. The meta data can be written to file directly after
- * the processed data is written to file.
+ * be recovered by calling de_fasta_preformat. The meta-data should be written in between lines
+ * in the processed data.
  *
  * This function is capable of processing large files in chunks. Some parameters, like in_comment,
  * should be passed in to each sequential call so that the function remembers key information about
