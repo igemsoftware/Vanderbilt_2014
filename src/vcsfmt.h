@@ -9,6 +9,7 @@
 #include "block_processing.h" // for block processing methods
 
 #define OUTPUT_SUFFIX ".vcsfmt"
+#define META_SUFFIX	".vcsfmt.meta.tmp"
 
 // TODO: javadoc
 // if filetype supported, produces vcsfmt file of same name
@@ -21,8 +22,8 @@ void de_vcsfmt(char * filename); // produces original file
  *
  * Basically removes new lines and meta-data. The meta-data for each block is separated out
  * into a separate structure that is annotated in such a way that the original fasta file can
- * be recovered by calling de_fasta_preformat. The meta-data should be written in between lines
- * in the processed data.
+ * be recovered by calling de_fasta_preformat. The meta-data returned from each call should be
+ * written to a separate file, which can be appended to the end of the vcsfmt file.
  *
  * This function is capable of processing large files in chunks. Some parameters, like in_comment,
  * should be passed in to each sequential call so that the function remembers key information about
@@ -37,5 +38,12 @@ string_with_size * fasta_preformat(string_with_size * input,
 									string_with_size * metadata,
 									bool * in_comment,
 									int * lines_processed);
+
+/**
+ * A helper function for preformat that writes a line annotation to a string buffer.
+ *
+ * returns the number of characters written.
+ */
+int write_annotation(char * output, int line_number);
 
 #endif /*___VCS_FMT_H___*/
