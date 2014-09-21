@@ -142,31 +142,12 @@ void vcsfmt(char * filename) {
     if (remove(temporary_file_name) != 0)
     	PRINT_ERROR("Could not delete metadata tmp file.");
 
-    // Start writing the header
-    fseek(output_file, 0, SEEK_SET);
-
-    fprintf(output_file, "VCSFMT;");
-
+    // Write the fasta-specific header
     // TODO - put a file type check here (we're not always using fasta)
-    fprintf(output_file, "FASTA;");
+    fasta_write_header(output_file,
+    					input_file,
+    					metadata_bytes);
 
-    // Figure out the line length of the fasta file, to be included in the header.
-    fseek(input_file, 0, SEEK_SET);
-
-    // Find the first line that's not a comment
-    char * line = malloc(200 * sizeof(char));
-    while (!feof(input_file) && !ferror(input_file)) {
-    	fgets(line, 199, input_file);
-    	if (line[0] != ';' && line[0] != '>' && strlen(line) > 0)
-    		break;
-    }
-
-    // Print the line length to the header (minus the newline)
-    fprintf(output_file, "%zd;", strlen(line) - 1);
-    free(line);
-
-    // Print the size of the metadata in bytes to the header
-    fprintf(output_file, "%ld", metadata_bytes);
 
 #endif
 // cleanup allocated memory and open handles
@@ -294,6 +275,35 @@ string_with_size * fasta_preformat(string_with_size * input,
 		}
 
 		return preformatted;
+}
+
+void fasta_write_header(FILE * vcsfmt_file,
+						FILE * fasta_file,
+						long metadata_byte_length) {
+
+		fseek(vcsfmt_file, 0, SEEK_SET);
+
+	    fprintf(vcsfmt_file, "VCSFMT;");
+	    fprintf(vcsfmt_file, "FASTA;");
+
+	    // Figure out the line length of the fasta file, to be included in the header.
+	    fseek(fasta_file, 0, SEEK_SET);
+
+	    // Find the first line that's not a comment
+	    char * line = malloc(200 * sizeof(char));
+	    while (!feof(fasta_file) && !ferror(fasta_file)) {
+	    	fgets(line, 199, fasta_file);
+	    	if (line[0] != ';' && line[0] != '>' && strlen(line) > 0)
+	    		break;
+	    }
+
+	    // Print the line length to the header (minus the newline)
+	    fprintf(vcsfmt_file, "%zd;", strlen(line) - 1);
+	    free(line);
+
+	    // Print the size of the metadata in bytes to the header
+	    fprintf(vcsfmt_file, "%ld", metadata_byte_length);
+
 }
 
 /**

@@ -40,6 +40,14 @@ string_with_size * fasta_preformat(string_with_size * input,
 									int * lines_processed);
 
 /**
+ * Writes a header line to a VCSFMT file, with information needed to reconstruct the FASTA file exactly
+ * from the VCSFMT file.
+ */
+void fasta_write_header(FILE * vcsfmt_file,
+						FILE * fasta_file,
+						long metadata_byte_length);
+
+/**
  * A helper function for preformat that writes a line annotation to a string buffer.
  *
  * returns the number of characters written.
