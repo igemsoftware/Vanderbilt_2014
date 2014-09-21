@@ -119,7 +119,7 @@ void vcsfmt(char * filename) {
 
     // Delete the temp file
     if (remove(temporary_file_name) != 0)
-    	PRINT_ERROR_WITH_NEWLINE("Could not delete metadata tmp file.");
+    	PRINT_ERROR("Could not delete metadata tmp file.");
 
 #endif
 // cleanup allocated memory and open handles

@@ -39,9 +39,6 @@ int main(int argc, char ** argv) {
 
     // de_vcsfmt("500_lines_of_dna_minus_lines.fasta.vcsfmt");
 
-    // vcscmp("500_lines_of_dna_minus_lines.fasta.vcsfmt1",
-    //        "500_lines_of_dna_minus_lines.fasta.vcsfmt2");
-
-    string_with_size * str1 = make_new_string_with_size_given_string("hello");
-    string_with_size * str2 = make_new_string_with_size_given_string("world");
+    vcscmp("500_lines_of_dna_minus_lines.fasta.vcsfmt1",
+           "500_lines_of_dna_minus_lines.fasta.vcsfmt2");
 }
