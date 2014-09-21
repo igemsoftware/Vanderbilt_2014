@@ -20,15 +20,17 @@
 
 #define PRINT_ERROR_NO_NEWLINE(str) fprintf(stderr, "%s", str)
 
-#define PRINT_ERROR_WITH_NEWLINE(str) fprintf(stderr, "%s\n", str)
+#define PRINT_ERROR(str) fprintf(stderr, "%s\n", str)
 
 #define PRINT_ERROR_NEWLINE() fprintf(stderr, "\n")
 
 #define PRINT_ERROR_SIZE_T_NO_NEWLINE(num) fprintf(stderr, "%zu", num)
 
+#define PRINT_ERROR_MPZ_T_NO_NEWLINE(bignum) mpz_out_str(stderr, 10, bignum)
+
 #define PRINT_ERROR_AND_RETURN_IF_NULL(ptr, str) \
     if (NULL == ptr) {                           \
-        PRINT_ERROR_WITH_NEWLINE(str);           \
+        PRINT_ERROR(str);           \
         return;                                  \
     }
 
@@ -71,6 +73,16 @@ static inline string_with_size *
     sws_to_return->size_in_memory = size_in_memory;
     return sws_to_return;
 }
+#ifdef DEBUG
+static inline string_with_size *
+  make_new_string_with_size_given_string(char * null_term_str) {
+    string_with_size * sws_to_return = malloc(sizeof(string_with_size));
+    sws_to_return->string = malloc(sizeof(char) * (strlen(null_term_str) + 1));
+    memcpy(sws_to_return->string, null_term_str, strlen(null_term_str) + 1);
+    sws_to_return->readable_bytes = strlen(null_term_str) + 1;
+    return sws_to_return;
+}
+#endif
 // TODO: javadoc
 static inline string_with_size *
   set_string_with_size_readable_bytes(string_with_size * sws,

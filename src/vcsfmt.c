@@ -84,13 +84,13 @@ void vcsfmt(char * filename) {
 #endif
     // error handling
     if (ferror(input_file) && !feof(input_file)) {
-        PRINT_ERROR_WITH_NEWLINE("Error in reading from input file.");
+        PRINT_ERROR("Error in reading from input file.");
     } else if (ferror(output_file) && !feof(input_file)) {
-        PRINT_ERROR_WITH_NEWLINE("Error in writing to output file.");
+        PRINT_ERROR("Error in writing to output file.");
     } else if (feof(input_file)) {
-        PRINT_ERROR_WITH_NEWLINE("vcsfmt completed successfully.");
+        PRINT_ERROR("vcsfmt completed successfully.");
     } else {
-        PRINT_ERROR_WITH_NEWLINE("Unknown error in vcsfmt.");
+        PRINT_ERROR("Unknown error in vcsfmt.");
     }
     // close open handles
     fclose(input_file);
@@ -127,13 +127,13 @@ void de_vcsfmt(char * filename) {
     free_string_with_size(input_block_with_size);
     free_string_with_size(output_block_with_size);
     if (ferror(input_file) && !feof(input_file)) {
-        PRINT_ERROR_WITH_NEWLINE("Error in reading from input file.");
+        PRINT_ERROR("Error in reading from input file.");
     } else if (ferror(output_file) && !feof(input_file)) {
-        PRINT_ERROR_WITH_NEWLINE("Error in writing to output file.");
+        PRINT_ERROR("Error in writing to output file.");
     } else if (feof(input_file)) {
-        PRINT_ERROR_WITH_NEWLINE("de_vcsfmt completed successfully");
+        PRINT_ERROR("de_vcsfmt completed successfully");
     } else {
-        PRINT_ERROR_WITH_NEWLINE("Unknown error in de_vcsfmt");
+        PRINT_ERROR("Unknown error in de_vcsfmt");
     }
     // close open handles
     fclose(input_file);

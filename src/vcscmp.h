@@ -9,56 +9,73 @@
 #include "block_processing.h"
 
 // TODO: allow modification of this, find reasoning for choice of value
-#define LEVENSHTEIN_CHECK_CHARS 105
+#define LEVENSHTEIN_CHECK_CHARS 80
 #define LEVENSHTEIN_CHECK_THRESHOLD 20
 
 // STRING_ID
 // TODO: javadoc
 typedef struct {
+    mpz_t line_number;
     unsigned long str_hash;   // used because canonical djb2 uses unsigned long
-    unsigned long str_length; // arbitrary choice of width
+    unsigned long str_length; // arbitrary choice of length variable bit width
     string_with_size * first_k_chars;
-} string_id;
-static inline string_id * string_id_set_str_hash(string_id * sid,
-                                                 unsigned long str_hash) {
+    bool is_orf;
+} line_id;
+static inline line_id * line_id_set_is_orf(line_id * sid, bool set_is_orf) {
+    sid->is_orf = set_is_orf;
+    return sid;
+}
+static inline line_id * line_id_set_str_hash(line_id * sid,
+                                             unsigned long str_hash) {
     sid->str_hash = str_hash;
     return sid;
 }
-static inline string_id * string_id_set_str_length(string_id * sid,
-                                                   unsigned long str_length) {
+static inline line_id * line_id_set_str_length(line_id * sid,
+                                               unsigned long str_length) {
     sid->str_length = str_length;
     return sid;
 }
-static inline string_id *
-  string_id_set_first_k_chars(string_id * sid, string_with_size * str_k_chars) {
+static inline line_id * line_id_set_line_number(line_id * sid,
+                                                mpz_t * number_to_set_to) {
+    mpz_set(sid->line_number, *number_to_set_to);
+    return sid;
+}
+static inline line_id * line_id_initialize_line_number(line_id * sid) {
+    mpz_init(sid->line_number); // sets to 0
+    return sid;
+}
+static inline line_id *
+  line_id_set_first_k_chars(line_id * sid, string_with_size * str_k_chars) {
     sid->first_k_chars = str_k_chars;
     return sid;
 }
-static inline string_id * make_string_id(unsigned long str_hash,
-                                         unsigned long str_length) {
-    return string_id_set_first_k_chars(
-      string_id_set_str_length(
-        string_id_set_str_hash(malloc(sizeof(string_id)), str_hash),
+static inline line_id * make_line_id(unsigned long str_hash,
+                                     unsigned long str_length) {
+    return line_id_set_first_k_chars(
+      line_id_set_str_length(
+        line_id_set_str_hash(
+          line_id_initialize_line_number(malloc(sizeof(line_id))), str_hash),
         str_length),
       set_string_with_size_readable_bytes(
         make_new_string_with_size(LEVENSHTEIN_CHECK_CHARS),
         LEVENSHTEIN_CHECK_CHARS));
 }
-static inline string_id *
-  make_string_id_given_string_with_size(unsigned long str_hash,
-                                        unsigned long str_length,
-                                        string_with_size * str_k_chars) {
-    return string_id_set_first_k_chars(
-      string_id_set_str_length(
-        string_id_set_str_hash(malloc(sizeof(string_id)), str_hash),
+static inline line_id *
+  make_line_id_given_string_with_size(unsigned long str_hash,
+                                      unsigned long str_length,
+                                      string_with_size * str_k_chars) {
+    return line_id_set_first_k_chars(
+      line_id_set_str_length(
+        line_id_set_str_hash(
+          line_id_initialize_line_number(malloc(sizeof(line_id))), str_hash),
         str_length),
       str_k_chars);
 }
-static inline void free_string_id(string_id * sid) {
+static inline void free_line_id(line_id * sid) {
     free_string_with_size(sid->first_k_chars);
     free(sid);
 }
-static inline bool string_id_equal(string_id * a, string_id * b) {
+static inline bool line_id_equal(line_id * a, line_id * b) {
     return a->str_hash == b->str_hash && a->str_length == b->str_length;
 }
 
@@ -78,21 +95,84 @@ typedef struct {
 #define LINES_ABOVE_BELOW_TO_SEARCH 5
 // size of queue wrt # of lines
 #define QUEUE_HASH_CRITICAL_SIZE 2 * LINES_ABOVE_BELOW_TO_SEARCH + 1
-void set_bool_if_string_id_match(string_id * prev_string_id,
-                                 boolean_and_data * bool_data_bundle);
+// compiler will emit a non-inline version of this, since a pointer is taken
+// to it when g_queue_foreach is used
+static inline void
+  set_bool_if_line_id_match(line_id * prev_line_id,
+                            boolean_and_data * bool_data_bundle) {
+    if (line_id_equal(prev_line_id, bool_data_bundle->data)) {
+        *bool_data_bundle->boolean = true;
+    }
+}
 // basically macros
-static inline bool is_string_id_at_top_in_prev_queue(GQueue * prev_file_queue,
-                                                     GQueue * cur_file_queue) {
-    bool is_string_id_found = false;
+static inline bool is_line_id_at_top_in_prev_queue(GQueue * prev_file_queue,
+                                                   GQueue * cur_file_queue) {
+    bool is_line_id_found = false;
     boolean_and_data bool_data_bundle;
     bool_data_bundle.data = g_queue_peek_head(cur_file_queue);
-    bool_data_bundle.boolean = &is_string_id_found;
+    bool_data_bundle.boolean = &is_line_id_found;
     g_queue_foreach(
-      prev_file_queue, (GFunc) set_bool_if_string_id_match, &bool_data_bundle);
-    return is_string_id_found;
+      prev_file_queue, (GFunc) set_bool_if_line_id_match, &bool_data_bundle);
+    return is_line_id_found;
 }
-void if_close_levenshtein_dist_add_to_list(string_id * prev_string_id,
-                                           string_id * cur_string_id);
+#ifdef DEBUG
+static inline void print_line_id_first_k_chars(line_id * sid) {
+    fprintf(stderr,
+            "%.*s",
+            (int) sid->first_k_chars->readable_bytes, // int cast required
+            sid->first_k_chars->string);
+}
+#endif
+// compiler will emit a non-inline version of this too, since a pointer is taken
+// to it when g_queue_foreach is used
+static inline void
+  if_close_levenshtein_dist_add_to_list(line_id * prev_line_id,
+                                        line_id * cur_line_id) {
+    if (prev_line_id->is_orf && cur_line_id->is_orf) { // alternative: use &&
+                                                       // instead of ==
+        // however, that makes all the really short non-orfs match by
+        // levenshtein which is annoying
+        // it could actually be quite useful, though, as long as:
+        // TODO: consider instead of absolute levenshtein distance, use
+        // levenshtein dist as proportion of overall string length
+        size_t leven_dist = get_levenshtein_distance(
+          prev_line_id->first_k_chars, cur_line_id->first_k_chars);
+        if (leven_dist < LEVENSHTEIN_CHECK_THRESHOLD) {
+#ifdef DEBUG
+            PRINT_ERROR("CLOSE STRING FOUND BY LEVENSHTEIN EDITS");
+            PRINT_ERROR_NO_NEWLINE("LEVEN_DIST: ");
+            PRINT_ERROR_SIZE_T_NO_NEWLINE(leven_dist);
+            PRINT_ERROR_NEWLINE();
+            PRINT_ERROR_NO_NEWLINE("PREV_STRING (LINE ");
+            PRINT_ERROR_MPZ_T_NO_NEWLINE(prev_line_id->line_number);
+            PRINT_ERROR_NO_NEWLINE(") (CHARS ");
+            PRINT_ERROR_SIZE_T_NO_NEWLINE(
+              prev_line_id->first_k_chars->readable_bytes);
+            PRINT_ERROR_NO_NEWLINE(") (ORF ");
+            if (prev_line_id->is_orf) {
+                PRINT_ERROR_NO_NEWLINE("YES): ");
+            } else {
+                PRINT_ERROR_NO_NEWLINE("NO):  ");
+            }
+            print_line_id_first_k_chars(prev_line_id);
+            PRINT_ERROR_NO_NEWLINE("\nCUR_STRING  (LINE ");
+            PRINT_ERROR_MPZ_T_NO_NEWLINE(cur_line_id->line_number);
+            PRINT_ERROR_NO_NEWLINE(") (CHARS ");
+            PRINT_ERROR_SIZE_T_NO_NEWLINE(
+              cur_line_id->first_k_chars->readable_bytes);
+            PRINT_ERROR_NO_NEWLINE(") (ORF ");
+            if (cur_line_id->is_orf) {
+                PRINT_ERROR_NO_NEWLINE("YES): ");
+            } else {
+                PRINT_ERROR_NO_NEWLINE("NO):  ");
+            }
+            print_line_id_first_k_chars(cur_line_id);
+            PRINT_ERROR_NEWLINE();
+            PRINT_ERROR("-----------");
+#endif
+        }
+    }
+}
 // basically  macros
 static inline void
   if_similar_edit_levenshtein_dist_queue_add_to_list(GQueue * prev_file_queue,
@@ -102,53 +182,58 @@ static inline void
                     g_queue_peek_head(cur_file_queue));
 }
 static inline void
-  if_new_line_then_add_to_list(GQueue * prev_file_string_ids_queue,
-                               GQueue * cur_file_string_ids_queue,
+  if_new_line_then_add_to_list(GQueue * prev_file_line_ids_queue,
+                               GQueue * cur_file_line_ids_queue,
                                size_t * ptr_current_streak_of_newly_added_lines,
                                mpz_t * ptr_lines_processed,
                                bool * ptr_break_out_of_vcscmp) {
-    if (!is_string_id_at_top_in_prev_queue(prev_file_string_ids_queue,
-                                           cur_file_string_ids_queue)) {
+    if (!is_line_id_at_top_in_prev_queue(prev_file_line_ids_queue,
+                                         cur_file_line_ids_queue)) {
         ++*ptr_current_streak_of_newly_added_lines;
 #ifdef DEBUG
         PRINT_ERROR_NO_NEWLINE("NEWLY ADDED LINE AT LINE ");
-        mpz_out_str(stderr, 10, *ptr_lines_processed);
+        PRINT_ERROR_MPZ_T_NO_NEWLINE(*ptr_lines_processed);
+        PRINT_ERROR_NO_NEWLINE(" (CUR: ");
+        if (!((line_id *) g_queue_peek_head(cur_file_line_ids_queue))
+              ->is_orf) {
+            PRINT_ERROR_NO_NEWLINE("NO ");
+        }
+        PRINT_ERROR_NO_NEWLINE("ORF)");
         PRINT_ERROR_NEWLINE();
         PRINT_ERROR_NO_NEWLINE("PREV_QUEUE SIZE: ");
         PRINT_ERROR_SIZE_T_NO_NEWLINE(
-          (size_t) g_queue_get_length(prev_file_string_ids_queue));
+          (size_t) g_queue_get_length(prev_file_line_ids_queue));
         PRINT_ERROR_NEWLINE();
         PRINT_ERROR_NO_NEWLINE("CUR_QUEUE SIZE: ");
         PRINT_ERROR_SIZE_T_NO_NEWLINE(
-          (size_t) g_queue_get_length(cur_file_string_ids_queue));
+          (size_t) g_queue_get_length(cur_file_line_ids_queue));
         PRINT_ERROR_NEWLINE();
 #endif
         if_similar_edit_levenshtein_dist_queue_add_to_list(
-          prev_file_string_ids_queue, cur_file_string_ids_queue);
+          prev_file_line_ids_queue, cur_file_line_ids_queue);
     }
     if (*ptr_current_streak_of_newly_added_lines > QUEUE_HASH_CRITICAL_SIZE) {
         *ptr_break_out_of_vcscmp = true;
     }
 }
 
-static inline void initialize_string_id(unsigned long * ptr_hash,
-                                        unsigned long * ptr_length,
-                                        string_with_size ** sws,
-                                        bool * ptr_past_k_chars) {
+static inline void initialize_line_id(unsigned long * ptr_hash,
+                                      unsigned long * ptr_length,
+                                      string_with_size ** sws,
+                                      bool * ptr_past_k_chars) {
     *ptr_hash = DJB2_HASH_BEGIN;
     *ptr_length = 0;
     *sws = make_new_string_with_size(LEVENSHTEIN_CHECK_CHARS);
     *ptr_past_k_chars = false;
 }
 
-static inline void if_within_first_section_write_to_string(
-  unsigned long * ptr_line_length,
-  string_with_size * sws_first_chars,
-  string_with_size * sws_block,
-  size_t * ptr_index) {
-    if (*ptr_line_length < LEVENSHTEIN_CHECK_CHARS) {
-        sws_first_chars->string[*ptr_line_length] =
-          sws_block->string[*ptr_index];
+static inline void
+  if_within_first_section_write_to_string(unsigned long ptr_line_length,
+                                          string_with_size * sws_first_chars,
+                                          string_with_size * sws_block,
+                                          size_t ptr_index) {
+    if (ptr_line_length < LEVENSHTEIN_CHECK_CHARS) {
+        sws_first_chars->string[ptr_line_length] = sws_block->string[ptr_index];
     }
 }
 
@@ -156,37 +241,84 @@ static inline void write_string_and_update_hash_and_line_length(
   unsigned long * ptr_line_length,
   string_with_size * sws_first_chars,
   string_with_size * sws_block,
-  size_t * ptr_index,
+  size_t ptr_index,
   unsigned long * instantaneous_hash,
   char * hash_str,
   bool * ptr_past_k_chars) {
     if_within_first_section_write_to_string(
-      ptr_line_length, sws_first_chars, sws_block, ptr_index);
+      *ptr_line_length, sws_first_chars, sws_block, ptr_index);
     *instantaneous_hash =
-      djb2_hash_on_string_index(*instantaneous_hash, hash_str, *ptr_index);
+      djb2_hash_on_string_index(*instantaneous_hash, hash_str, ptr_index);
     ++*ptr_line_length;
     if (*ptr_line_length >= LEVENSHTEIN_CHECK_CHARS && !*ptr_past_k_chars) {
         *ptr_past_k_chars = true;
     }
 }
 
-static inline void check_if_past_k_chars_push_tail_and_initialize_string_id(
+static inline void check_if_past_k_chars_push_tail_and_initialize_line_id(
   bool * ptr_past_k_chars,
   unsigned long * ptr_line_length,
   GQueue * ids_queue,
   unsigned long * ptr_line_hash,
-  string_with_size ** first_few_chars) {
+  string_with_size ** first_few_chars,
+  mpz_t * lines_processed,
+  bool is_line_orf) {
     if (*ptr_past_k_chars) {
         *ptr_line_length = LEVENSHTEIN_CHECK_CHARS;
     }
-    g_queue_push_tail(ids_queue,
-                      make_string_id_given_string_with_size(
-                        *ptr_line_hash,
-                        *ptr_line_length,
-                        set_string_with_size_readable_bytes(*first_few_chars,
-                                                            *ptr_line_length)));
-    initialize_string_id(
+    g_queue_push_tail(
+      ids_queue,
+      line_id_set_is_orf(
+        line_id_set_line_number(make_line_id_given_string_with_size(
+                                  *ptr_line_hash,
+                                  *ptr_line_length,
+                                  set_string_with_size_readable_bytes(
+                                    *first_few_chars, *ptr_line_length)),
+                                lines_processed),
+        is_line_orf));
+    initialize_line_id(
       ptr_line_hash, ptr_line_length, first_few_chars, ptr_past_k_chars);
+}
+
+// requires that string be >= CODON_LENGTH chars, which needs to be ironed out
+// requires that file be formatted correctly so that lines of orf and non orf
+// alternate, but vcsfmt already enforces that
+static inline bool is_first_line_orf(string_with_size * first_few_chars) {
+    return is_start_codon(first_few_chars->string);
+}
+
+static inline void
+  react_to_next_character_of_block(string_with_size * input_block,
+                                   size_t block_index,
+                                   mpz_t * lines_processed,
+                                   bool * is_line_orf,
+                                   string_with_size ** first_few_chars,
+                                   bool * ptr_past_k_chars,
+                                   unsigned long * ptr_line_length,
+                                   GQueue * ids_queue,
+                                   unsigned long * ptr_line_hash) {
+    if (input_block->string[block_index] == '\n') {
+        if (mpz_cmp_ui(*lines_processed, 1)) { // if first line
+            *is_line_orf = is_first_line_orf(*first_few_chars);
+        }
+        check_if_past_k_chars_push_tail_and_initialize_line_id(ptr_past_k_chars,
+                                                               ptr_line_length,
+                                                               ids_queue,
+                                                               ptr_line_hash,
+                                                               first_few_chars,
+                                                               lines_processed,
+                                                               *is_line_orf);
+        mpz_add_ui(*lines_processed, *lines_processed, 1); // increment
+        *is_line_orf = !*is_line_orf;                      // flip it
+    } else {
+        write_string_and_update_hash_and_line_length(ptr_line_length,
+                                                     *first_few_chars,
+                                                     input_block,
+                                                     block_index,
+                                                     ptr_line_hash,
+                                                     input_block->string,
+                                                     ptr_past_k_chars);
+    }
 }
 
 static inline void add_blocks_to_queue(FILE * active_file,
@@ -195,29 +327,33 @@ static inline void add_blocks_to_queue(FILE * active_file,
                                        bool * ptr_past_k_chars,
                                        unsigned long * ptr_line_length,
                                        unsigned long * ptr_line_hash,
-                                       string_with_size ** first_few_chars) {
+                                       string_with_size ** first_few_chars,
+                                       mpz_t * lines_processed,
+                                       bool * is_line_orf) {
     if (!(feof(active_file) || ferror(active_file)) &&
         g_queue_get_length(ids_queue) < QUEUE_HASH_CRITICAL_SIZE) {
         read_block(active_file, input_block);
-        for (size_t block_index = 0; block_index < BINBLOCK_SIZE;
+        for (size_t block_index = 0; block_index < input_block->readable_bytes;
              ++block_index) {
-            if (input_block->string[block_index] == '\n') {
-                check_if_past_k_chars_push_tail_and_initialize_string_id(
-                  ptr_past_k_chars,
-                  ptr_line_length,
-                  ids_queue,
-                  ptr_line_hash,
-                  first_few_chars);
-            } else {
-                write_string_and_update_hash_and_line_length(
-                  ptr_line_length,
-                  *first_few_chars,
-                  input_block,
-                  &block_index,
-                  ptr_line_hash,
-                  input_block->string,
-                  ptr_past_k_chars);
-            }
+            react_to_next_character_of_block(input_block,
+                                             block_index,
+                                             lines_processed,
+                                             is_line_orf,
+                                             first_few_chars,
+                                             ptr_past_k_chars,
+                                             ptr_line_length,
+                                             ids_queue,
+                                             ptr_line_hash);
+        }
+        if (feof(active_file) || ferror(active_file)) { // if at end of file
+            check_if_past_k_chars_push_tail_and_initialize_line_id(
+              ptr_past_k_chars,
+              ptr_line_length,
+              ids_queue,
+              ptr_line_hash,
+              first_few_chars,
+              lines_processed,
+              *is_line_orf);
         }
     }
 }

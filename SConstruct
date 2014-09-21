@@ -30,13 +30,15 @@ env.Append(CPPDEFINES = env.dna_modes)
 env.Append(CCFLAGS = ['-std=c11'])
 # optimization for debug vs release
 if (env.build_mode == 'DEBUG'):
+    env.Replace(CC = 'clang')   # i KNOW it's a bad idea to change compilers for
+    # debug and release, but clang is a LOT better at producing errors, and gcc
+    # is better at producing faster code, which is important for this project
     env.Append(CCFLAGS = ['-O0','-ggdb','-g3','-Wall','-Wextra','-Werror'])
 elif (env.build_mode == 'RELEASE'):
+    env.Replace(CC = 'gcc')
     env.Append(CCFLAGS = ['-Ofast','-finline-functions','-fomit-frame-pointer',
                           '-funroll-loops'])
 
-# compiler
-env.Replace(CC = 'gcc')
 # add glib
 env.ParseConfig('pkg-config --cflags --libs glib-2.0')
 # add gmp

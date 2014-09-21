@@ -5,7 +5,7 @@
     hosts all required variables and functions to implement argparse
 */
 
-#include "utilities.h"
+#include "utilities.h"          // for GSList, bool
 
 // version
 const char * argp_program_version = "darwin 0.0";
