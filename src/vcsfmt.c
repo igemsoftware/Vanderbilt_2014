@@ -35,7 +35,7 @@ void vcsfmt(char * filename) {
     		make_new_string_with_size(BLOCK_SIZE);
 
     string_with_size * metadata_block_with_size =
-        		make_new_string_with_size(BLOCK_SIZE);
+        		make_new_string_with_size(BINBLOCK_SIZE);
 
     bool in_comment = false; // file beings outside a comment.
 
@@ -82,6 +82,16 @@ void vcsfmt(char * filename) {
                    &args_to_write_block);
     g_thread_join(write_block_thread); // implicitly frees thread
 #else
+
+    // Allocate a 60 char line for the VCSFMT header.
+    for (int i = 0; i < 60; ++i)
+    	putc(' ', output_file);
+
+    putc('\n', output_file);
+
+    // keep track of how much metadata we have.
+    long metadata_bytes = 0;
+
     while (!feof(input_file) && !ferror(input_file) && !ferror(output_file) && !ferror(temporary_file)) {
         // Read a block
     	read_block(input_file, input_block_with_size);
@@ -105,21 +115,58 @@ void vcsfmt(char * filename) {
 
         // Write the metadata to a temporary file.
         write_block(temporary_file, metadata_block_with_size);
+
+        // Update the number of metadata bytes we've written
+        metadata_bytes += metadata_block_with_size->readable_bytes;
     }
 
-    // Append the metadata file to the vcsfmt file.
-    fclose(temporary_file);
-    temporary_file = fopen(temporary_file_name, "r");
+    // error handling
+    if (ferror(input_file) && !feof(input_file)) {
+        PRINT_ERROR("Error in reading from input file.");
+    } else if (ferror(output_file) && !feof(input_file)) {
+        PRINT_ERROR("Error in writing to output file.");
+    }
 
     // Add an extra newline to output
     fputc('\n', output_file);
 
-    while (!feof(temporary_file) && !ferror(temporary_file) && !ferror(output_file))
-    	fputc(fgetc(temporary_file), output_file);
+    // Append the metadata file to the output file.
+    fclose(temporary_file);
+    temporary_file = fopen(temporary_file_name, "r");
+
+    char c;
+    while ((c = fgetc(temporary_file)) != EOF)
+    	fputc(c, output_file);
 
     // Delete the temp file
     if (remove(temporary_file_name) != 0)
     	PRINT_ERROR("Could not delete metadata tmp file.");
+
+    // Start writing the header
+    fseek(output_file, 0, SEEK_SET);
+
+    fprintf(output_file, "VCSFMT;");
+
+    // TODO - put a file type check here (we're not always using fasta)
+    fprintf(output_file, "FASTA;");
+
+    // Figure out the line length of the fasta file, to be included in the header.
+    fseek(input_file, 0, SEEK_SET);
+
+    // Find the first line that's not a comment
+    char * line = malloc(200 * sizeof(char));
+    while (!feof(input_file) && !ferror(input_file)) {
+    	fgets(line, 199, input_file);
+    	if (line[0] != ';' && line[0] != '>' && strlen(line) > 0)
+    		break;
+    }
+
+    // Print the line length to the header (minus the newline)
+    fprintf(output_file, "%zd;", strlen(line) - 1);
+    free(line);
+
+    // Print the size of the metadata in bytes to the header
+    fprintf(output_file, "%ld", metadata_bytes);
 
 #endif
 // cleanup allocated memory and open handles
@@ -138,16 +185,7 @@ void vcsfmt(char * filename) {
     free_string_with_size(metadata_block_with_size);
 
 #endif
-    // error handling
-    if (ferror(input_file) && !feof(input_file)) {
-        PRINT_ERROR("Error in reading from input file.");
-    } else if (ferror(output_file) && !feof(input_file)) {
-        PRINT_ERROR("Error in writing to output file.");
-    } else if (feof(input_file)) {
-        PRINT_ERROR("vcsfmt completed successfully.");
-    } else {
-        PRINT_ERROR("Unknown error in vcsfmt.");
-    }
+
     // close open handles
     fclose(input_file);
     fclose(output_file);
@@ -235,7 +273,9 @@ string_with_size * fasta_preformat(string_with_size * input,
 				// We've found a comment.
 
 				// Annotate the line that we found this comment.
-				write_annotation(&(metadata->string[metadata->readable_bytes]), *lines_processed);
+				int written = write_annotation(&(metadata->string[metadata->readable_bytes]), *lines_processed);
+
+				metadata->readable_bytes += written;
 
 				// Flag that we're in a comment now.
 				*in_comment = true;
