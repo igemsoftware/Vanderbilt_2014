@@ -1,6 +1,6 @@
 #include "vcscmp.h" // required
 
-void vcscmp(char * prev_filename, char * cur_filename) {
+void vcscmp(const char * prev_filename, const char * cur_filename) {
     FILE * prev_file = open_file_read(prev_filename);
     PRINT_ERROR_AND_RETURN_IF_NULL(prev_file, "Error in reading prev file.");
     FILE * cur_file = open_file_read(cur_filename);

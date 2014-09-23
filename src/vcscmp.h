@@ -358,6 +358,6 @@ static inline void add_blocks_to_queue(FILE * active_file,
     }
 }
 
-void vcscmp(char * prev_filename, char * cur_filename);
+void vcscmp(const char * prev_filename, const char * cur_filename);
 
 #endif /*___VCS_CMP_H___*/

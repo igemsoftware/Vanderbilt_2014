@@ -24,7 +24,7 @@ static struct argp_option options[] = {
    'c',
    0,
    0,
-   "If two files given, produce unix diff-compatible comparison .vcsdiff file",
+   "If two files given, produce unix diff-compatible comparison .vcscmp file",
    1},
   // TODO: make this option produce more information (stderr)
   {"verbose", 'v', 0, 0, "Produce verbose output", 2},
@@ -40,7 +40,8 @@ typedef struct {
     bool has_no_args;
 } dwndiff_arguments;
 // CTOR
-dwndiff_arguments initialize_dwndiff_arguments(dwndiff_arguments args) {
+static inline dwndiff_arguments
+  initialize_dwndiff_arguments(dwndiff_arguments args) {
     args.files = NULL;
     args.preformat_loc_dir = "";
     args.is_write = false;

@@ -13,7 +13,7 @@ static inline unsigned long djb2_hash_on_string_index(
   unsigned long instantaneous_hash, char * str, size_t cur_index) {
     // same as instantaneous_hash * 33 ^ str[cur_index]
     return ((instantaneous_hash << DJB2_MAGIC_CONSTANT) + instantaneous_hash) ^
-           str[cur_index];
+           (unsigned long) str[cur_index];
     // OPTIMIZATION: is using the function character-by-character inefficient?
 }
 

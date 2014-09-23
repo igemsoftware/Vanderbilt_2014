@@ -13,8 +13,18 @@
 #include <stdbool.h>
 #include <stdlib.h>  // for malloc
 #include <string.h>  // for strlen/strcpy/strcat
-#include <glib.h>    // for queues, lists, and threads
 #include <gmp.h>     // for bignums
+
+// because glib doesn't pass some compiler tests under cleanup mode
+#ifdef CLEAN
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpadded"
+#pragma GCC diagnostic ignored "-Wtraditional-conversion"
+#endif
+#include <glib.h>    // for queues, lists, and threads
+#ifdef CLEAN
+#pragma GCC diagnostic pop
+#endif
 
 // MACROS
 
@@ -34,19 +44,20 @@
         return;                                  \
     }
 
-// FUNCTIONS
+  // FUNCTIONS
 
-// open file, return pointer
-/**
- * @brief:
- *
- */
-static inline FILE * open_file_read(char * filename) {
+  // open file, return pointer
+  /**
+   * @brief:
+   *
+   */
+  static inline FILE *
+  open_file_read(const char * filename) {
     FILE * input_file = fopen(filename, "r");
     return input_file;
 }
 // TODO: mention truncation
-static inline FILE * create_file_binary_write(char * filename) {
+static inline FILE * create_file_binary_write(const  char * filename) {
     FILE * output_file = fopen(filename, "wb");
     return output_file;
 }
