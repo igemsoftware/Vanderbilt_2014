@@ -15,13 +15,13 @@ void vcsfmt(char * filename) {
                                    "Error in creating output file.");
 
     // create temporary file for metadata
-        char * temporary_file_name =
-          malloc((strlen(filename) + strlen(META_SUFFIX) + 1) * sizeof(char));
-        strcpy(temporary_file_name, filename);
-        strcat(temporary_file_name, META_SUFFIX);
-        FILE * temporary_file = create_file_binary_write(temporary_file_name);
-        PRINT_ERROR_AND_RETURN_IF_NULL(temporary_file,
-                                       "Error in creating temp file for meta data.")
+    char * temporary_file_name =
+      malloc((strlen(filename) + strlen(META_SUFFIX) + 1) * sizeof(char));
+    strcpy(temporary_file_name, filename);
+    strcat(temporary_file_name, META_SUFFIX);
+    FILE * temporary_file = create_file_binary_write(temporary_file_name);
+    PRINT_ERROR_AND_RETURN_IF_NULL(temporary_file,
+                                   "Error in creating temp file for meta data.")
 
     string_with_size * input_block_with_size =
       make_new_string_with_size(BLOCK_SIZE);
@@ -32,10 +32,10 @@ void vcsfmt(char * filename) {
     // These constructs are used by the FASTA preformating function.
     // TODO put some checks for file type here.
     string_with_size * preformatted_block_with_size =
-    		make_new_string_with_size(BLOCK_SIZE);
+      make_new_string_with_size(BLOCK_SIZE);
 
     string_with_size * metadata_block_with_size =
-        		make_new_string_with_size(BINBLOCK_SIZE);
+      make_new_string_with_size(BINBLOCK_SIZE);
 
     bool in_comment = false; // file beings outside a comment.
 
@@ -53,7 +53,7 @@ void vcsfmt(char * filename) {
     GMutex process_complete_mutex;
     g_mutex_init(&process_complete_mutex);
 
-  concurrent_read_and_process_block_args_vcsfmt args_to_block_processing;
+    concurrent_read_and_process_block_args_vcsfmt args_to_block_processing;
     args_to_block_processing.input_file = input_file;
     args_to_block_processing.input_block_with_size = input_block_with_size;
     args_to_block_processing.is_within_orf = &is_within_orf;
@@ -85,26 +85,27 @@ void vcsfmt(char * filename) {
 
     // Allocate a 60 char line for the VCSFMT header.
     for (int i = 0; i < 60; ++i)
-    	putc(' ', output_file);
+        putc(' ', output_file);
 
     putc('\n', output_file);
 
     // keep track of how much metadata we have.
     long metadata_bytes = 0;
 
-    while (!feof(input_file) && !ferror(input_file) && !ferror(output_file) && !ferror(temporary_file)) {
+    while (!feof(input_file) && !ferror(input_file) && !ferror(output_file) &&
+           !ferror(temporary_file)) {
         // Read a block
-    	read_block(input_file, input_block_with_size);
+        read_block(input_file, input_block_with_size);
 
-    	// Preprocess the block from FASTA (i.e. remove newlines and metadata).
-    	// TODO - put some file type checks here. (We don't always use FASTA)
-    	fasta_preformat(input_block_with_size,
-    					preformatted_block_with_size,
-    					metadata_block_with_size,
-    					&in_comment,
-    					&lines_pre_processed);
+        // Preprocess the block from FASTA (i.e. remove newlines and metadata).
+        // TODO - put some file type checks here. (We don't always use FASTA)
+        fasta_preformat(input_block_with_size,
+                        preformatted_block_with_size,
+                        metadata_block_with_size,
+                        &in_comment,
+                        &lines_pre_processed);
 
-    	// Process the block and write it to output.
+        // Process the block and write it to output.
         write_block(output_file,
                     process_block_vcsfmt(preformatted_block_with_size,
                                          output_block_with_size,
@@ -117,7 +118,7 @@ void vcsfmt(char * filename) {
         write_block(temporary_file, metadata_block_with_size);
 
         // Update the number of metadata bytes we've written
-        metadata_bytes += metadata_block_with_size->readable_bytes;
+        metadata_bytes += (long int) metadata_block_with_size->readable_bytes;
     }
 
     // error handling
@@ -135,19 +136,17 @@ void vcsfmt(char * filename) {
     temporary_file = fopen(temporary_file_name, "r");
 
     char c;
-    while ((c = fgetc(temporary_file)) != EOF)
-    	fputc(c, output_file);
+    while ((c = (char) fgetc(temporary_file)) != EOF) {
+        fputc(c, output_file);
+    }
 
     // Delete the temp file
     if (remove(temporary_file_name) != 0)
-    	PRINT_ERROR("Could not delete metadata tmp file.");
+        PRINT_ERROR("Could not delete metadata tmp file.");
 
     // Write the fasta-specific header
     // TODO - put a file type check here (we're not always using fasta)
-    fasta_write_header(output_file,
-    					input_file,
-    					metadata_bytes);
-
+    fasta_write_header(output_file, input_file, metadata_bytes);
 
 #endif
 // cleanup allocated memory and open handles
@@ -216,107 +215,105 @@ void de_vcsfmt(char * filename) {
 }
 
 string_with_size * fasta_preformat(string_with_size * input,
-									string_with_size * preformatted,
-									string_with_size * metadata,
-									bool * in_comment,
-									int * lines_processed) {
-		// Set the readable bytes of output and metadata to 0
-		preformatted->readable_bytes = 0;
-		metadata->readable_bytes = 0;
+                                   string_with_size * preformatted,
+                                   string_with_size * metadata,
+                                   bool * in_comment,
+                                   int * lines_processed) {
+    // Set the readable bytes of output and metadata to 0
+    preformatted->readable_bytes = 0;
+    metadata->readable_bytes = 0;
 
-		// Loop through all the readable characters in input.
-		for (size_t i = 0; i < input->readable_bytes; ++i) {
+    // Loop through all the readable characters in input.
+    for (size_t i = 0; i < input->readable_bytes; ++i) {
 
-			char current = input->string[i];
+        char current = input->string[i];
 
-			if (current == '\n') {
-				// The character is a line break
-				if (*in_comment) {
-					// If we were in a comment, write the line break to metadata
-					metadata->string[metadata->readable_bytes] = '\n';
-					metadata->readable_bytes++;
+        if (current == '\n') {
+            // The character is a line break
+            if (*in_comment) {
+                // If we were in a comment, write the line break to metadata
+                metadata->string[metadata->readable_bytes] = '\n';
+                metadata->readable_bytes++;
 
-					// We're not in a comment anymore.
-					*in_comment = false;
-				}
+                // We're not in a comment anymore.
+                *in_comment = false;
+            }
 
-				// Update the lines processed.
-				(*lines_processed)++;
-			}
-			else if (*in_comment) {
-				// We're in a comment.
+            // Update the lines processed.
+            (*lines_processed)++;
+        } else if (*in_comment) {
+            // We're in a comment.
 
-				// Write the char to metadata.
-				metadata->string[metadata->readable_bytes] = current;
-				metadata->readable_bytes++;
-			}
-			else if (current == ';' || current == '>') {
-				// We've found a comment.
+            // Write the char to metadata.
+            metadata->string[metadata->readable_bytes] = current;
+            metadata->readable_bytes++;
+        } else if (current == ';' || current == '>') {
+            // We've found a comment.
 
-				// Annotate the line that we found this comment.
-				int written = write_annotation(&(metadata->string[metadata->readable_bytes]), *lines_processed);
+            // Annotate the line that we found this comment.
+            int written = write_annotation(
+              &(metadata->string[metadata->readable_bytes]), *lines_processed);
 
-				metadata->readable_bytes += written;
+            metadata->readable_bytes += (size_t) written;
 
-				// Flag that we're in a comment now.
-				*in_comment = true;
+            // Flag that we're in a comment now.
+            *in_comment = true;
 
-				// Write the char to metadata.
-				metadata->string[metadata->readable_bytes] = current;
-				metadata->readable_bytes++;
-			}
-			else {
-				// Any other characters we're assuming is genetic data.
-				preformatted->string[preformatted->readable_bytes] = current;
+            // Write the char to metadata.
+            metadata->string[metadata->readable_bytes] = current;
+            metadata->readable_bytes++;
+        } else {
+            // Any other characters we're assuming is genetic data.
+            preformatted->string[preformatted->readable_bytes] = current;
 
-				preformatted->readable_bytes++;
-			}
+            preformatted->readable_bytes++;
+        }
+    }
 
-		}
-
-		return preformatted;
+    return preformatted;
 }
 
 void fasta_write_header(FILE * vcsfmt_file,
-						FILE * fasta_file,
-						long metadata_byte_length) {
+                        FILE * fasta_file,
+                        long metadata_byte_length) {
 
-		fseek(vcsfmt_file, 0, SEEK_SET);
+    fseek(vcsfmt_file, 0, SEEK_SET);
 
-	    fprintf(vcsfmt_file, "VCSFMT;");
-	    fprintf(vcsfmt_file, "FASTA;");
+    fprintf(vcsfmt_file, "VCSFMT;");
+    fprintf(vcsfmt_file, "FASTA;");
 
-	    // Figure out the line length of the fasta file, to be included in the header.
-	    fseek(fasta_file, 0, SEEK_SET);
+    // Figure out the line length of the fasta file, to be included in the
+    // header.
+    fseek(fasta_file, 0, SEEK_SET);
 
-	    // Find the first line that's not a comment
-	    char * line = malloc(200 * sizeof(char));
-	    while (!feof(fasta_file) && !ferror(fasta_file)) {
-	    	fgets(line, 199, fasta_file);
-	    	if (line[0] != ';' && line[0] != '>' && strlen(line) > 0)
-	    		break;
-	    }
+    // Find the first line that's not a comment
+    char * line = malloc(200 * sizeof(char));
+    while (!feof(fasta_file) && !ferror(fasta_file)) {
+        fgets(line, 199, fasta_file);
+        if (line[0] != ';' && line[0] != '>' && strlen(line) > 0)
+            break;
+    }
 
-	    // Print the line length to the header (minus the newline)
-	    fprintf(vcsfmt_file, "%zd;", strlen(line) - 1);
-	    free(line);
+    // Print the line length to the header (minus the newline)
+    fprintf(vcsfmt_file, "%zd;", strlen(line) - 1);
+    free(line);
 
-	    // Print the size of the metadata in bytes to the header
-	    fprintf(vcsfmt_file, "%ld", metadata_byte_length);
-
+    // Print the size of the metadata in bytes to the header
+    fprintf(vcsfmt_file, "%ld", metadata_byte_length);
 }
 
 /**
- * A helper function for preformat that writes a line annotation to a string buffer.
+ * A helper function for preformat that writes a line annotation to a string
+ *buffer.
  *
  * returns the number of characters written.
  */
 int write_annotation(char * output, int line_number) {
-		output[0] = '@';
+    output[0] = '@';
 
-		int written = sprintf(output + 1, "%d", line_number);
+    int written = sprintf(output + 1, "%d", line_number);
 
-		output[written + 1] = '@';
+    output[written + 1] = '@';
 
-		return written + 2;
+    return written + 2;
 }
