@@ -21,10 +21,10 @@ void vcscmp(const char * prev_filename, const char * cur_filename) {
     string_with_size * cur_first_few_chars =
       make_new_string_with_size(LEVENSHTEIN_CHECK_CHARS);
 
-    unsigned long prev_file_line_hash = DJB2_HASH_BEGIN;
-    unsigned long prev_file_line_length = 0;
-    unsigned long cur_file_line_hash = DJB2_HASH_BEGIN;
-    unsigned long cur_file_line_length = 0;
+    unsigned long int prev_file_line_hash = DJB2_HASH_BEGIN;
+    unsigned long int prev_file_line_length = 0;
+    unsigned long int cur_file_line_hash = DJB2_HASH_BEGIN;
+    unsigned long int cur_file_line_length = 0;
     bool prev_length_past_k_chars = false;
     bool cur_length_past_k_chars = false;
 

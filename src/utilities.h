@@ -11,20 +11,10 @@
 
 #include <stdio.h>
 #include <stdbool.h>
-#include <stdlib.h>  // for malloc
-#include <string.h>  // for strlen/strcpy/strcat
-#include <gmp.h>     // for bignums
-
-// because glib doesn't pass some compiler tests under cleanup mode
-#ifdef CLEAN
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpadded"
-#pragma GCC diagnostic ignored "-Wtraditional-conversion"
-#endif
-#include <glib.h>    // for queues, lists, and threads
-#ifdef CLEAN
-#pragma GCC diagnostic pop
-#endif
+#include <stdlib.h> // for malloc
+#include <string.h> // for strlen/strcpy/strcat
+#include <glib.h>   // for queues, lists, and threads
+#include <gmp.h>    // for bignums
 
 // MACROS
 
@@ -40,28 +30,28 @@
 
 #define PRINT_ERROR_AND_RETURN_IF_NULL(ptr, str) \
     if (NULL == ptr) {                           \
-        PRINT_ERROR(str);           \
+        PRINT_ERROR(str);                        \
         return;                                  \
     }
 
-  // FUNCTIONS
+#define TWO_D_ARRAY_INDEX(arr, x, y, max_y) arr[x * max_y + y]
 
-  // open file, return pointer
-  /**
-   * @brief:
-   *
-   */
-  static inline FILE *
-  open_file_read(const char * filename) {
+// FUNCTIONS
+
+// open file, return pointer
+/**
+ * @brief:
+ *
+ */
+static inline FILE * open_file_read(const char * filename) {
     FILE * input_file = fopen(filename, "r");
     return input_file;
 }
 // TODO: mention truncation
-static inline FILE * create_file_binary_write(const  char * filename) {
+static inline FILE * create_file_binary_write(const char * filename) {
     FILE * output_file = fopen(filename, "wb");
     return output_file;
 }
-// create file, return pointer
 
 // STRUCTS AND FUNCTIONS TO MANIPULATE THEM
 // STRING_WITH_SIZE
@@ -85,12 +75,13 @@ static inline string_with_size *
     return sws_to_return;
 }
 #ifdef DEBUG
+// DOES NOT COPY OVER NULL CHAR TERMINATING
 static inline string_with_size *
   make_new_string_with_size_given_string(char * null_term_str) {
     string_with_size * sws_to_return = malloc(sizeof(string_with_size));
-    sws_to_return->string = malloc(sizeof(char) * (strlen(null_term_str) + 1));
-    memcpy(sws_to_return->string, null_term_str, strlen(null_term_str) + 1);
-    sws_to_return->readable_bytes = strlen(null_term_str) + 1;
+    sws_to_return->string = malloc(sizeof(char) * (strlen(null_term_str)));
+    memcpy(sws_to_return->string, null_term_str, strlen(null_term_str));
+    sws_to_return->readable_bytes = strlen(null_term_str);
     return sws_to_return;
 }
 #endif

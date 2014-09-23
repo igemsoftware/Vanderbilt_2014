@@ -16,8 +16,8 @@
 // TODO: javadoc
 typedef struct {
     mpz_t line_number;
-    unsigned long str_hash;   // used because canonical djb2 uses unsigned long
-    unsigned long str_length; // arbitrary choice of length variable bit width
+    unsigned long int str_hash;   // used because canonical djb2 uses unsigned long int
+    unsigned long int str_length; // arbitrary choice of length variable bit width
     string_with_size * first_k_chars;
     bool is_orf;
 } line_id;
@@ -26,12 +26,12 @@ static inline line_id * line_id_set_is_orf(line_id * sid, bool set_is_orf) {
     return sid;
 }
 static inline line_id * line_id_set_str_hash(line_id * sid,
-                                             unsigned long str_hash) {
+                                             unsigned long int str_hash) {
     sid->str_hash = str_hash;
     return sid;
 }
 static inline line_id * line_id_set_str_length(line_id * sid,
-                                               unsigned long str_length) {
+                                               unsigned long int str_length) {
     sid->str_length = str_length;
     return sid;
 }
@@ -49,8 +49,8 @@ static inline line_id *
     sid->first_k_chars = str_k_chars;
     return sid;
 }
-static inline line_id * make_line_id(unsigned long str_hash,
-                                     unsigned long str_length) {
+static inline line_id * make_line_id(unsigned long int str_hash,
+                                     unsigned long int str_length) {
     return line_id_set_first_k_chars(
       line_id_set_str_length(
         line_id_set_str_hash(
@@ -61,8 +61,8 @@ static inline line_id * make_line_id(unsigned long str_hash,
         LEVENSHTEIN_CHECK_CHARS));
 }
 static inline line_id *
-  make_line_id_given_string_with_size(unsigned long str_hash,
-                                      unsigned long str_length,
+  make_line_id_given_string_with_size(unsigned long int str_hash,
+                                      unsigned long int str_length,
                                       string_with_size * str_k_chars) {
     return line_id_set_first_k_chars(
       line_id_set_str_length(
@@ -217,8 +217,8 @@ static inline void
     }
 }
 
-static inline void initialize_line_id(unsigned long * ptr_hash,
-                                      unsigned long * ptr_length,
+static inline void initialize_line_id(unsigned long int * ptr_hash,
+                                      unsigned long int * ptr_length,
                                       string_with_size ** sws,
                                       bool * ptr_past_k_chars) {
     *ptr_hash = DJB2_HASH_BEGIN;
@@ -228,7 +228,7 @@ static inline void initialize_line_id(unsigned long * ptr_hash,
 }
 
 static inline void
-  if_within_first_section_write_to_string(unsigned long ptr_line_length,
+  if_within_first_section_write_to_string(unsigned long int ptr_line_length,
                                           string_with_size * sws_first_chars,
                                           string_with_size * sws_block,
                                           size_t ptr_index) {
@@ -238,11 +238,11 @@ static inline void
 }
 
 static inline void write_string_and_update_hash_and_line_length(
-  unsigned long * ptr_line_length,
+  unsigned long int * ptr_line_length,
   string_with_size * sws_first_chars,
   string_with_size * sws_block,
   size_t ptr_index,
-  unsigned long * instantaneous_hash,
+  unsigned long int * instantaneous_hash,
   char * hash_str,
   bool * ptr_past_k_chars) {
     if_within_first_section_write_to_string(
@@ -257,9 +257,9 @@ static inline void write_string_and_update_hash_and_line_length(
 
 static inline void check_if_past_k_chars_push_tail_and_initialize_line_id(
   bool * ptr_past_k_chars,
-  unsigned long * ptr_line_length,
+  unsigned long int * ptr_line_length,
   GQueue * ids_queue,
-  unsigned long * ptr_line_hash,
+  unsigned long int * ptr_line_hash,
   string_with_size ** first_few_chars,
   mpz_t * lines_processed,
   bool is_line_orf) {
@@ -294,9 +294,9 @@ static inline void
                                    bool * is_line_orf,
                                    string_with_size ** first_few_chars,
                                    bool * ptr_past_k_chars,
-                                   unsigned long * ptr_line_length,
+                                   unsigned long int * ptr_line_length,
                                    GQueue * ids_queue,
-                                   unsigned long * ptr_line_hash) {
+                                   unsigned long int * ptr_line_hash) {
     if (input_block->string[block_index] == '\n') {
         if (mpz_cmp_ui(*lines_processed, 1)) { // if first line
             *is_line_orf = is_first_line_orf(*first_few_chars);
@@ -325,8 +325,8 @@ static inline void add_blocks_to_queue(FILE * active_file,
                                        GQueue * ids_queue,
                                        string_with_size * input_block,
                                        bool * ptr_past_k_chars,
-                                       unsigned long * ptr_line_length,
-                                       unsigned long * ptr_line_hash,
+                                       unsigned long int * ptr_line_length,
+                                       unsigned long int * ptr_line_hash,
                                        string_with_size ** first_few_chars,
                                        mpz_t * lines_processed,
                                        bool * is_line_orf) {
