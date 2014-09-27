@@ -74,6 +74,7 @@ elif (env.build_mode == 'RELEASE'):
         env.Append(CCFLAGS = ['-Wdisabled-optimization'])
 
 # add glib
+# TODO: may want to explicitly use glib 2.4 later, possibly using 2.12 now
 env.ParseConfig('pkg-config --cflags --libs glib-2.0')
 # add gmp
 env.Append(LIBS = ['gmp'])

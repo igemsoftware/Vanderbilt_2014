@@ -26,7 +26,7 @@ static inline unsigned long int djb2_hash_on_string_index(
 static inline size_t get_levenshtein_distance(string_with_size * prev_string,
                                               string_with_size * cur_string) {
     size_t olddiag;
-    // TODO: convert to static-allocated array
+    // TODO: convert to static-allocated array since we know how big it will be
     size_t * matrix_column =
       malloc(sizeof(size_t) * (prev_string->readable_bytes + 1));
     for (size_t prev_index = 1; prev_index <= prev_string->readable_bytes;
@@ -65,27 +65,94 @@ typedef enum {
     leven_insertion,
     leven_deletion,
     leven_substitution,
-    leven_matching
-} levenshtein_string_edit_operation;
+    leven_matching,
+    leven_complete
+}
+levenshtein_string_edit_operation;
 
-// TODO: javadoc, including that as a precondition all up/left/up&left moves are
-// still within the array, and that cur_cell is NOT the base array index, it is
+typedef struct {
+    size_t * cur_cell;
+    size_t cur_x;
+    size_t cur_y;
+    size_t max_y;
+} levenshtein_matrix_state;
+
+static inline bool three_not_null(size_t * x, size_t * y, size_t * z) {
+    return x != NULL || y != NULL || z != NULL;
+}
+
+static inline size_t min_of_non_null_three(size_t * x, size_t * y, size_t * z) {
+    if (x != NULL) {
+        if (y != NULL) {
+            if (z != NULL) {
+                return MIN3(*x, *y, *z);
+            } else {
+                return MIN(*x, *y);
+            }
+        } else {
+            if (z != NULL){
+                return MIN(*x, *z);
+            } else {
+                return *x;
+            }
+        }
+    } else {
+        if (y != NULL) {
+            if (z != NULL){
+                return MIN(*y, *z);
+            } else {
+                return *y;
+            }
+        } else {
+            return *z;          // assumed not all three == NULL
+        }
+    }
+}
+
+// TODO: javadoc, including that as a precondition all up/left/up&left moves
+// are
+// still within the array, and that cur_cell is NOT the base array index, it
+// is
 // the address of the active cell
+// mention that also advances cur cell in an atomic fashion which is kinda
+// cool
 static inline levenshtein_string_edit_operation
-  get_next_levenshtein_operation(short int * cur_cell, size_t max_y) {
-    short int * insert = cur_cell - 1, * delete = cur_cell - max_y,
-                * sub = cur_cell - max_y - 1;
-    short int minimum = MIN3(*insert, *delete, *sub);
+  get_next_levenshtein_operation_and_advance(levenshtein_matrix_state * lms) {
+    size_t * insert_ptr = NULL, * delete_ptr = NULL, * sub_ptr = NULL;
+    // bounds checking
+    if (lms->cur_y > 0) {
+        insert_ptr = lms->cur_cell - 1;
+        if (lms->cur_x > 0) {
+            sub_ptr = lms->cur_cell - lms->max_y - 1;
+        }
+    }
+    if (lms->cur_x > 0) {
+        delete_ptr = lms->cur_cell - lms->max_y;
+    }
+    size_t minimum;
+    if (!three_not_null(insert_ptr, delete_ptr, sub_ptr)) {
+        return leven_complete;  // done; at first element
+    } else {
+        minimum = min_of_non_null_three(insert_ptr, delete_ptr, sub_ptr);
+    }
     // order of checking is arbitrary
-    if (minimum == *sub) {
-        if (*cur_cell == *sub) { // if same value
+    if (sub_ptr != NULL && minimum == *sub_ptr) {
+        --lms->cur_x;
+        --lms->cur_y;
+        if (*lms->cur_cell == *sub_ptr) { // if same value
+            lms->cur_cell = sub_ptr;
             return leven_matching;
         } else {
+            lms->cur_cell = sub_ptr;
             return leven_substitution;
         }
-    } else if (minimum == *delete) {
+    } else if (delete_ptr != NULL && minimum == *delete_ptr) {
+        lms->cur_cell = delete_ptr;
+        --lms->cur_x;
         return leven_deletion;
-    } else {                    // required to be insertion
+    } else { // required to be insertion, required to != NULL
+        --lms->cur_y;
+        lms->cur_cell = insert_ptr;
         return leven_insertion;
     }
 }
@@ -96,39 +163,25 @@ static inline levenshtein_string_edit_operation
 static inline GSList * get_levenshtein_edits(string_with_size * prev_string,
                                              string_with_size * cur_string) {
     // alias variables and allocate matrix
-    size_t m = prev_string->readable_bytes, n = cur_string->readable_bytes;
+    // m is rows, n is columns
+    size_t m = prev_string->readable_bytes + 1,
+           n = cur_string->readable_bytes + 1;
     char * s = prev_string->string, * t = cur_string->string;
-    short int * lmat =
-      malloc(sizeof(short int) * (m + 1) * (n + 1)); // 2D array
-
-#ifdef DEBUG
-    for (size_t i = 0; i <= m; ++i) {
-        for (size_t j = 0; j <= n; ++j) {
-            TWO_D_ARRAY_INDEX(lmat, i, j, n + 1) = 0;
-        }
-    }
-#endif
+    size_t * lmat = malloc(sizeof(size_t) * m * n); // 2D array
 
     // initialize lmat
-    for (size_t i = 0; i <= m; ++i) {
-        TWO_D_ARRAY_INDEX(lmat, i, 0, n + 1) = i;
+    for (size_t k = 0; k < m * n; ++k) {
+        lmat[k] = 0;
     }
-    // for (size_t j = 0; j <= n; ++j) {
-    //     TWO_D_ARRAY_INDEX(lmat, 0, j, n) = j;
-    // }
-#ifdef DEBUG
-    for (size_t i = 0; i <= m; ++i) {
-        for (size_t j = 0; j <= n; ++j) {
-            PRINT_ERROR_SIZE_T_NO_NEWLINE(
-              (size_t) TWO_D_ARRAY_INDEX(lmat, i, j, n + 1));
-            PRINT_ERROR_NO_NEWLINE(",");
-        }
-        PRINT_ERROR_NEWLINE();
+    for (size_t i = 0; i < m; ++i) {
+        TWO_D_ARRAY_INDEX(lmat, i, 0, n) = i;
     }
-    PRINT_ERROR_NEWLINE();
-#endif
-    for (size_t j = 1; j <= n; ++j) {
-        for (size_t i = 1; i <= m; ++i) {
+    for (size_t j = 0; j < n; ++j) {
+        TWO_D_ARRAY_INDEX(lmat, 0, j, n) = j;
+    }
+
+    for (size_t j = 1; j < n; ++j) {
+        for (size_t i = 1; i < m; ++i) {
             if (s[i - 1] == t[j - 1]) { // changed from quoted version of alg
                 // because these strings are zero-based
                 TWO_D_ARRAY_INDEX(lmat, i, j, n) =
@@ -141,43 +194,44 @@ static inline GSList * get_levenshtein_edits(string_with_size * prev_string,
             }
         }
     }
-#ifdef DEBUG
-    for (size_t i = 0; i < m + 1; ++i) {
-        for (size_t j = 0; j < n + 1; ++j) {
-            PRINT_ERROR_SIZE_T_NO_NEWLINE(
-              (size_t) TWO_D_ARRAY_INDEX(lmat, i, j, n));
-            PRINT_ERROR_NO_NEWLINE(",");
-        }
-        PRINT_ERROR_NEWLINE();
-    }
-    PRINT_ERROR_NEWLINE();
-    PRINT_ERROR_SIZE_T_NO_NEWLINE(
-      (size_t) TWO_D_ARRAY_INDEX(lmat, m, n, n));
-    PRINT_ERROR(" IS FINAL LEVENSHTEIN");
-#endif
 
-    // // http://csc260project.hoguer.com/
-    // // GSList * operations_backtrace = NULL;
-    // short int * cur_cell = &TWO_D_ARRAY_INDEX(lmat, m, n, n); // start at end
-    // levenshtein_string_edit_operation cur_op;
-    // while (cur_cell != lmat) {  // while current is cell is not start
-    //     cur_op = get_next_levenshtein_operation(cur_cell, n);
-    //     if (cur_op == leven_matching) {
-    //         PRINT_ERROR_NO_NEWLINE("M");
-    //     } else if (cur_op == leven_substitution) {
-    //         PRINT_ERROR_NO_NEWLINE("S");
-    //     } else if (cur_op == leven_deletion) {
-    //         PRINT_ERROR_NO_NEWLINE("D");
-    //     } else {                // required to be insertion
-    //         PRINT_ERROR_NO_NEWLINE("I");
-    //     }
-    //     PRINT_ERROR_NEWLINE();
-    // }
+    // http://csc260project.hoguer.com/
+    GSList * operations_backtrace = NULL;
+    levenshtein_matrix_state lms;
+    lms.cur_x = m - 1;
+    lms.cur_y = n - 1;
+    lms.max_y = n;
+    lms.cur_cell = &TWO_D_ARRAY_INDEX(lmat, m - 1, n - 1, n); // start at end
+    levenshtein_string_edit_operation * cur_op;
+    while (lms.cur_cell != lmat) { // while current is cell is not start
+        cur_op = malloc(sizeof(levenshtein_string_edit_operation));
+        *cur_op = get_next_levenshtein_operation_and_advance(&lms);
+        if (*cur_op == leven_matching) {
+            PRINT_ERROR("M");
+            operations_backtrace =
+              g_slist_prepend(operations_backtrace, cur_op);
+        } else if (*cur_op == leven_substitution) {
+            PRINT_ERROR("S");
+            operations_backtrace =
+              g_slist_prepend(operations_backtrace, cur_op);
+        } else if (*cur_op == leven_deletion) {
+            PRINT_ERROR("D");
+            operations_backtrace =
+              g_slist_prepend(operations_backtrace, cur_op);
+        } else if (*cur_op == leven_insertion){
+            PRINT_ERROR("I");
+            operations_backtrace =
+              g_slist_prepend(operations_backtrace, cur_op);
+        } else {                // leven_complete is only available option
+            PRINT_ERROR("COMPLETE");
+            free(cur_op);
+        }
+    }
 
     // delete allocated mem (except for list)
     free(lmat);
 
-    return NULL;
+    return operations_backtrace;
 }
 
 #endif /*___STRING_PROCESSING_H___*/
