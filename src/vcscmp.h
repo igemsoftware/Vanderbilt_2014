@@ -71,6 +71,14 @@ static inline line_id *
         str_length),
       str_k_chars);
 }
+static inline line_id * clone_line_id_with_string_null(line_id * base) {
+    line_id * ret = malloc(sizeof(line_id));
+    mpz_init_set(ret->line_number, base->line_number);
+    ret->str_hash = base->str_hash;
+    ret->first_k_chars = NULL;
+    ret->is_orf = base->is_orf;
+    return ret;
+}
 static inline void free_line_id(line_id * sid) {
     free_string_with_size(sid->first_k_chars);
     free(sid);
@@ -123,21 +131,52 @@ static inline void print_line_id_first_k_chars(line_id * sid) {
             sid->first_k_chars->string);
 }
 #endif
+
+typedef struct {
+    line_id * id;
+    bool is_leven_found;
+    GSList ** line_id_pairs;
+} line_id_and_metadata;
+
+typedef struct {
+    line_id * prev_id;
+    line_id * cur_id;
+} line_id_pair;
+static inline line_id_pair * make_line_id_pair(line_id * prev, line_id * cur) {
+    line_id_pair * ret = malloc(sizeof(line_id_pair));
+    ret->prev_id = prev;
+    ret->cur_id = cur;
+    return ret;
+}
+static inline void free_line_id_pair(line_id_pair * lip) {
+    free_line_id(lip->prev_id);
+    free_line_id(lip->cur_id);
+    free(lip);
+}
+
 // compiler will emit a non-inline version of this too, since a pointer is taken
 // to it when g_queue_foreach is used
 static inline void
   if_close_levenshtein_dist_add_to_list(line_id * prev_line_id,
-                                        line_id * cur_line_id) {
-    if (prev_line_id->is_orf && cur_line_id->is_orf) { // alternative: use &&
-                                                       // instead of ==
-        // however, that makes all the really short non-orfs match by
+                                        line_id_and_metadata * cur_data) {
+    if (prev_line_id->is_orf && cur_data->id->is_orf) {
+        // alternative: use &&
+        // instead of ==
+        // using == makes all the really short non-orfs match by
         // levenshtein which is annoying
         // it could actually be quite useful, though, as long as:
         // TODO: consider instead of absolute levenshtein distance, use
         // levenshtein dist as proportion of overall string length
         size_t leven_dist = get_levenshtein_distance(
-          prev_line_id->first_k_chars, cur_line_id->first_k_chars);
+          prev_line_id->first_k_chars, cur_data->id->first_k_chars);
         if (leven_dist < LEVENSHTEIN_CHECK_THRESHOLD) {
+            cur_data->is_leven_found = true;
+            *cur_data->line_id_pairs =
+              g_slist_prepend( // adds in reverse order!!!
+                *cur_data->line_id_pairs,
+                make_line_id_pair(
+                  clone_line_id_with_string_null(prev_line_id),
+                  clone_line_id_with_string_null(cur_data->id)));
 #ifdef DEBUG
             PRINT_ERROR("CLOSE STRING FOUND BY LEVENSHTEIN EDITS");
             PRINT_ERROR_NO_NEWLINE("LEVEN_DIST: ");
@@ -156,17 +195,17 @@ static inline void
             }
             print_line_id_first_k_chars(prev_line_id);
             PRINT_ERROR_NO_NEWLINE("\nCUR_STRING  (LINE ");
-            PRINT_ERROR_MPZ_T_NO_NEWLINE(cur_line_id->line_number);
+            PRINT_ERROR_MPZ_T_NO_NEWLINE(cur_data->id->line_number);
             PRINT_ERROR_NO_NEWLINE(") (CHARS ");
             PRINT_ERROR_SIZE_T_NO_NEWLINE(
-              cur_line_id->first_k_chars->readable_bytes);
+              cur_data->id->first_k_chars->readable_bytes);
             PRINT_ERROR_NO_NEWLINE(") (ORF ");
-            if (cur_line_id->is_orf) {
+            if (cur_data->id->is_orf) {
                 PRINT_ERROR_NO_NEWLINE("YES): ");
             } else {
                 PRINT_ERROR_NO_NEWLINE("NO):  ");
             }
-            print_line_id_first_k_chars(cur_line_id);
+            print_line_id_first_k_chars(cur_data->id);
             PRINT_ERROR_NEWLINE();
             PRINT_ERROR("-----------");
 #endif
@@ -174,22 +213,26 @@ static inline void
     }
 }
 // basically  macros
-static inline void
-  if_similar_edit_levenshtein_dist_queue_add_to_list(GQueue * prev_file_queue,
-                                                     GQueue * cur_file_queue) {
+static inline bool if_similar_edit_levenshtein_dist_queue_add_to_list(
+  GQueue * prev_file_queue, GQueue * cur_file_queue, GSList ** edit_matches) {
+    line_id_and_metadata liam;
+    liam.id = g_queue_peek_head(cur_file_queue);
+    liam.is_leven_found = false;
+    liam.line_id_pairs = edit_matches;
     g_queue_foreach(prev_file_queue,
                     (GFunc) if_close_levenshtein_dist_add_to_list,
-                    g_queue_peek_head(cur_file_queue));
+                    &liam);
+    return liam.is_leven_found;
 }
 static inline void
   if_new_line_then_add_to_list(GQueue * prev_file_line_ids_queue,
                                GQueue * cur_file_line_ids_queue,
                                size_t * ptr_current_streak_of_newly_added_lines,
                                mpz_t * ptr_lines_processed,
-                               bool * ptr_break_out_of_vcscmp) {
+                               bool * ptr_break_out_of_vcscmp,
+                               GSList ** edit_matches) {
     if (!is_line_id_at_top_in_prev_queue(prev_file_line_ids_queue,
                                          cur_file_line_ids_queue)) {
-        ++*ptr_current_streak_of_newly_added_lines;
 #ifdef DEBUG
         PRINT_ERROR_NO_NEWLINE("NEWLY ADDED LINE AT LINE ");
         PRINT_ERROR_MPZ_T_NO_NEWLINE(*ptr_lines_processed);
@@ -209,8 +252,12 @@ static inline void
           (size_t) g_queue_get_length(cur_file_line_ids_queue));
         PRINT_ERROR_NEWLINE();
 #endif
-        if_similar_edit_levenshtein_dist_queue_add_to_list(
-          prev_file_line_ids_queue, cur_file_line_ids_queue);
+        if (if_similar_edit_levenshtein_dist_queue_add_to_list(
+              prev_file_line_ids_queue,
+              cur_file_line_ids_queue,
+              edit_matches)) {
+            ++*ptr_current_streak_of_newly_added_lines;
+        }
     }
     if (*ptr_current_streak_of_newly_added_lines > QUEUE_HASH_CRITICAL_SIZE) {
         *ptr_break_out_of_vcscmp = true;
@@ -255,6 +302,7 @@ static inline void write_string_and_update_hash_and_line_length(
     }
 }
 
+// TODO: string_is probably ok to allocate in loop, but perhaps not; see if this matters
 static inline void check_if_past_k_chars_push_tail_and_initialize_line_id(
   bool * ptr_past_k_chars,
   unsigned long int * ptr_line_length,

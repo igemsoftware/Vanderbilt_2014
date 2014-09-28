@@ -141,8 +141,9 @@ void vcsfmt(char * filename) {
     }
 
     // Delete the temp file
-    if (remove(temporary_file_name) != 0)
+    if (remove(temporary_file_name) != 0) {
         PRINT_ERROR("Could not delete metadata tmp file.");
+    }
 
     // Write the fasta-specific header
     // TODO - put a file type check here (we're not always using fasta)
@@ -151,7 +152,7 @@ void vcsfmt(char * filename) {
 #endif
 // cleanup allocated memory and open handles
 #ifdef CONCURRENT
-    // TODO: fix mutex and thread memory leaks
+    // TODO: fix mutex and thread memory leaks (if they actually exist???)
     g_async_queue_unref(active_queue);
     free(is_processing_complete);
     g_mutex_clear(&process_complete_mutex);
@@ -290,8 +291,9 @@ void fasta_write_header(FILE * vcsfmt_file,
     char * line = malloc(200 * sizeof(char));
     while (!feof(fasta_file) && !ferror(fasta_file)) {
         fgets(line, 199, fasta_file);
-        if (line[0] != ';' && line[0] != '>' && strlen(line) > 0)
+        if (line[0] != ';' && line[0] != '>' && strlen(line) > 0) {
             break;
+        }
     }
 
     // Print the line length to the header (minus the newline)

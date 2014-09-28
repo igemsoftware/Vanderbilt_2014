@@ -1,5 +1,15 @@
 #include "vcscmp.h" // required
 
+#ifdef DEBUG
+static inline void print_line_id_pair(line_id_pair * arg) {
+    PRINT_ERROR_NO_NEWLINE("prev=");
+    PRINT_ERROR_MPZ_T_NO_NEWLINE(arg->prev_id->line_number);
+    PRINT_ERROR_NO_NEWLINE(",cur=");
+    PRINT_ERROR_MPZ_T_NO_NEWLINE(arg->cur_id->line_number);
+    PRINT_ERROR_NEWLINE();
+}
+#endif
+
 void vcscmp(const char * prev_filename, const char * cur_filename) {
     FILE * prev_file = open_file_read(prev_filename);
     PRINT_ERROR_AND_RETURN_IF_NULL(prev_file, "Error in reading prev file.");
@@ -35,7 +45,7 @@ void vcscmp(const char * prev_filename, const char * cur_filename) {
     mpz_init(cur_lines_processed);
     mpz_add_ui(cur_lines_processed, cur_lines_processed, 1);
 
-    bool prev_is_line_orf;      // switches every line
+    bool prev_is_line_orf; // switches every line
     bool cur_is_line_orf;
 
     mpz_t output_lines_processed;
@@ -43,6 +53,9 @@ void vcscmp(const char * prev_filename, const char * cur_filename) {
     mpz_add_ui(output_lines_processed, output_lines_processed, 1); // start at 1
     size_t current_streak_of_newly_added_lines = 0;
     bool break_out_of_vcscmp = false;
+
+    GSList * edit_matches = NULL; // list of lines counted as edits from a
+                                  // line in the previous file
 
     while ((!(feof(prev_file) || ferror(prev_file)) || // until both files EOF
             !(feof(cur_file) || ferror(cur_file))) &&
@@ -79,7 +92,8 @@ void vcscmp(const char * prev_filename, const char * cur_filename) {
                       cur_file_line_ids_queue,
                       &current_streak_of_newly_added_lines,
                       &output_lines_processed,
-                      &break_out_of_vcscmp);
+                      &break_out_of_vcscmp,
+                      &edit_matches);
                     free_line_id(g_queue_pop_head(cur_file_line_ids_queue));
                     mpz_add_ui(
                       output_lines_processed, output_lines_processed, 1);
@@ -90,24 +104,34 @@ void vcscmp(const char * prev_filename, const char * cur_filename) {
                   cur_file_line_ids_queue,
                   &current_streak_of_newly_added_lines,
                   &output_lines_processed,
-                  &break_out_of_vcscmp);
+                  &break_out_of_vcscmp,
+                  &edit_matches);
                 free_line_id(g_queue_pop_head(prev_file_line_ids_queue));
                 free_line_id(g_queue_pop_head(cur_file_line_ids_queue));
                 mpz_add_ui(output_lines_processed, output_lines_processed, 1);
             }
         }
     }
+    // TODO: actually write to files, make loop to continue writing to file
+    // after break_out_of_vcscmp is set to true
     // finish off remainder
-    while (!g_queue_is_empty(cur_file_line_ids_queue) &&
-           !break_out_of_vcscmp) {
+    while (!g_queue_is_empty(cur_file_line_ids_queue) && !break_out_of_vcscmp) {
         if_new_line_then_add_to_list(prev_file_line_ids_queue,
                                      cur_file_line_ids_queue,
                                      &current_streak_of_newly_added_lines,
                                      &output_lines_processed,
-                                     &break_out_of_vcscmp);
+                                     &break_out_of_vcscmp,
+                                     &edit_matches);
         free_line_id(g_queue_pop_head(cur_file_line_ids_queue));
         mpz_add_ui(output_lines_processed, output_lines_processed, 1);
     }
+    edit_matches = g_slist_reverse(edit_matches);
+    g_slist_foreach(edit_matches, (GFunc) print_line_id_pair, NULL);
+#ifdef DEBUG
+    if (edit_matches == NULL) {
+        PRINT_ERROR("LIST OF CLOSE MATCHES EMPTY");
+    }
+#endif
     // free memory and close open handles
     // TODO: free all string_with_size in queue, and all bignums
     g_queue_free(prev_file_line_ids_queue);

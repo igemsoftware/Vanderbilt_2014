@@ -207,23 +207,33 @@ static inline GSList * get_levenshtein_edits(string_with_size * prev_string,
         cur_op = malloc(sizeof(levenshtein_string_edit_operation));
         *cur_op = get_next_levenshtein_operation_and_advance(&lms);
         if (*cur_op == leven_matching) {
-            PRINT_ERROR("M");
+// #ifdef DEBUG
+//             PRINT_ERROR("M");
+// #endif
             operations_backtrace =
               g_slist_prepend(operations_backtrace, cur_op);
         } else if (*cur_op == leven_substitution) {
-            PRINT_ERROR("S");
+// #ifdef DEBUG
+//             PRINT_ERROR("S");
+// #endif
             operations_backtrace =
               g_slist_prepend(operations_backtrace, cur_op);
         } else if (*cur_op == leven_deletion) {
-            PRINT_ERROR("D");
+// #ifdef DEBUG
+//             PRINT_ERROR("D");
+// #endif
             operations_backtrace =
               g_slist_prepend(operations_backtrace, cur_op);
-        } else if (*cur_op == leven_insertion){
-            PRINT_ERROR("I");
+        } else if (*cur_op == leven_insertion) {
+// #ifdef DEBUG
+//             PRINT_ERROR("I");
+// #endif
             operations_backtrace =
               g_slist_prepend(operations_backtrace, cur_op);
         } else {                // leven_complete is only available option
-            PRINT_ERROR("COMPLETE");
+// #ifdef DEBUG
+//             PRINT_ERROR("COMPLETE");
+// #endif
             free(cur_op);
         }
     }

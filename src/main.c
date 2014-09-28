@@ -9,18 +9,6 @@ static inline void print_list_string(char * input_str) {
     printf("%s\n", input_str);
 }
 
-static inline void print_leven_enum(levenshtein_string_edit_operation * op) {
-    if (leven_insertion == *op) {
-        printf("I\n");
-    } else if (leven_deletion == *op) {
-        printf("D\n");
-    } else if (leven_substitution == *op) {
-        printf("S\n");
-    } else if (leven_matching == *op) {
-        printf("M\n");
-    }
-}
-
 int main(int argc, char ** argv) {
 
     dwndiff_arguments args;
@@ -51,26 +39,6 @@ int main(int argc, char ** argv) {
 
     // de_vcsfmt("500_lines_of_dna_minus_lines.fasta.vcsfmt");
 
-    // vcscmp("500_lines_of_dna_minus_lines.fasta.vcsfmt1",
-    //        "500_lines_of_dna_minus_lines.fasta.vcsfmt2");
-
-    string_with_size * str1 =
-      make_new_string_with_size_given_string("apeSAUCESOME");
-    string_with_size * str2 =
-      make_new_string_with_size_given_string("cosmicACEATTO");
-
-    printf("%.*s: ", (int) str1->readable_bytes, str1->string);
-    printf("%zu\n", str1->readable_bytes);
-    printf("%.*s: ", (int) str2->readable_bytes, str2->string);
-    printf("%zu\n", str2->readable_bytes);
-
-    PRINT_ERROR_DIVIDER_LINE();
-    GSList * traceback = get_levenshtein_edits(str1, str2);
-    PRINT_ERROR_DIVIDER_LINE();
-    g_slist_foreach(traceback, (GFunc) print_leven_enum, NULL);
-
-    // free memory and close open handles
-    free_string_with_size(str1);
-    free_string_with_size(str2);
-    g_slist_free_full(traceback, free); // generic free
+    vcscmp("500_lines_of_dna_minus_lines.fasta.vcsfmt1",
+           "500_lines_of_dna_minus_lines.fasta.vcsfmt2");
 }

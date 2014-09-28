@@ -44,15 +44,21 @@ static inline string_with_size *
 }
 
 /**
- *  Given a continuous stream of DNA characters, this function will insert newline characters
- *  in between genes and junk DNA. In other words, each line in the output will be either a gene
+ *  Given a continuous stream of DNA characters, this function will insert
+ *newline characters
+ *  in between genes and junk DNA. In other words, each line in the output will
+ *be either a gene
  *  or junk DNA.
  *
- *  This function expects the input to only contain DNA characters (no new lines or anything else.)
+ *  This function expects the input to only contain DNA characters (no new lines
+ *or anything else.)
  *
- *  This function is also written to be able to process data in multiple chunks. If multiple calls are
- *  made to this function for different chunks of the same data, the same parameters should be passed
- *  in each call. This will let the function remember key information about the last chunk it processed.
+ *  This function is also written to be able to process data in multiple chunks.
+ *If multiple calls are
+ *  made to this function for different chunks of the same data, the same
+ *parameters should be passed
+ *  in each call. This will let the function remember key information about the
+ *last chunk it processed.
  */
 string_with_size *
   process_block_vcsfmt(string_with_size * input_block_with_size,
