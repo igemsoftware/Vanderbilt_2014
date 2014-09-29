@@ -57,6 +57,8 @@ void vcscmp(const char * prev_filename, const char * cur_filename) {
     GSList * edit_matches = NULL; // list of lines counted as edits from a
                                   // line in the previous file
 
+    // TODO: count number of new lines added, and number of edited lines
+
     while ((!(feof(prev_file) || ferror(prev_file)) || // until both files EOF
             !(feof(cur_file) || ferror(cur_file))) &&
            !break_out_of_vcscmp) {
@@ -111,9 +113,11 @@ void vcscmp(const char * prev_filename, const char * cur_filename) {
                 mpz_add_ui(output_lines_processed, output_lines_processed, 1);
             }
         }
+        // write_block(cur_block); // write cur_block to output
     }
     // TODO: actually write to files, make loop to continue writing to file
     // after break_out_of_vcscmp is set to true
+
     // finish off remainder
     while (!g_queue_is_empty(cur_file_line_ids_queue) && !break_out_of_vcscmp) {
         if_new_line_then_add_to_list(prev_file_line_ids_queue,
@@ -125,7 +129,7 @@ void vcscmp(const char * prev_filename, const char * cur_filename) {
         free_line_id(g_queue_pop_head(cur_file_line_ids_queue));
         mpz_add_ui(output_lines_processed, output_lines_processed, 1);
     }
-    edit_matches = g_slist_reverse(edit_matches);
+    edit_matches = g_slist_reverse(edit_matches); // prepend-reverse idiom used
     g_slist_foreach(edit_matches, (GFunc) print_line_id_pair, NULL);
 #ifdef DEBUG
     if (edit_matches == NULL) {
@@ -133,8 +137,11 @@ void vcscmp(const char * prev_filename, const char * cur_filename) {
     }
 #endif
     // free memory and close open handles
-    // TODO: free all string_with_size in queue, and all bignums
-    g_queue_free(prev_file_line_ids_queue);
-    g_queue_free(cur_file_line_ids_queue);
+    // TODO: fix weird failure to free gmps and string_with_sizes
+    free_string_with_size(prev_block);
+    free_string_with_size(cur_block);
+    g_slist_free_full(edit_matches, free_line_id_pair);
+    g_queue_free_full(prev_file_line_ids_queue, free_line_id);
+    g_queue_free_full(cur_file_line_ids_queue, free_line_id);
 #endif
 }

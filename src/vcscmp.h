@@ -79,9 +79,13 @@ static inline line_id * clone_line_id_with_string_null(line_id * base) {
     ret->is_orf = base->is_orf;
     return ret;
 }
-static inline void free_line_id(line_id * sid) {
-    free_string_with_size(sid->first_k_chars);
-    free(sid);
+static inline void free_line_id(void * arg) {
+    if (NULL != arg) {
+        line_id * lid = (line_id *) arg;
+        free_string_with_size(lid->first_k_chars);
+        mpz_clear(lid->line_number);
+        free(lid);
+    }
 }
 static inline bool line_id_equal(line_id * a, line_id * b) {
     return a->str_hash == b->str_hash && a->str_length == b->str_length;
@@ -148,10 +152,13 @@ static inline line_id_pair * make_line_id_pair(line_id * prev, line_id * cur) {
     ret->cur_id = cur;
     return ret;
 }
-static inline void free_line_id_pair(line_id_pair * lip) {
-    free_line_id(lip->prev_id);
-    free_line_id(lip->cur_id);
-    free(lip);
+static inline void free_line_id_pair(void * arg) {
+    if (NULL != arg) {
+        line_id_pair * lip = (line_id_pair *) arg;
+        free_line_id(lip->prev_id);
+        free_line_id(lip->cur_id);
+        free(lip);
+    }
 }
 
 // compiler will emit a non-inline version of this too, since a pointer is taken
@@ -302,7 +309,7 @@ static inline void write_string_and_update_hash_and_line_length(
     }
 }
 
-// TODO: string_is probably ok to allocate in loop, but perhaps not; see if this matters
+// TODO: string_is probably ok to allocate in loop, but perhaps not
 static inline void check_if_past_k_chars_push_tail_and_initialize_line_id(
   bool * ptr_past_k_chars,
   unsigned long int * ptr_line_length,

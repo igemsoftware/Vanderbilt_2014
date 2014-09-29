@@ -97,9 +97,12 @@ static inline string_with_size *
     return sws;
 }
 // TODO: javadoc
-static inline void free_string_with_size(string_with_size * sws_to_free) {
-    free(sws_to_free->string);
-    free(sws_to_free);
+static inline void free_string_with_size(void * arg) {
+    if (NULL != arg) {
+        string_with_size * sws_to_free = (string_with_size *) arg;
+        free(sws_to_free->string);
+        free(sws_to_free);
+    }
 }
 
 #endif /*___UTILITIES_H___*/
