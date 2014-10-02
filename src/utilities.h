@@ -53,6 +53,7 @@
 // parentheses required because of distributivity
 #define TWO_D_ARRAY_INDEX(arr, x, y, max_y) (arr)[(x) * (max_y) + (y)]
 
+// FUNCTIONS
 // FILE FUNCTIONS
 
 /**

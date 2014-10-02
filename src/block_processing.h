@@ -83,6 +83,42 @@ static inline FILE * advance_file_to_line(FILE * file,
     }
 }
 
+// from point to next occurrence of NEWLINE
+static inline void write_current_line_of_file(FILE * source_file,
+                                              FILE * dest_file) {
+    string_with_size * io_block = make_new_string_with_size(BINBLOCK_SIZE);
+    bool succeeded = false;
+    while (!succeeded && !(feof(source_file) || ferror(source_file))) {
+        read_block(source_file, io_block);
+        for (size_t block_index = 0; block_index < io_block->readable_bytes;
+             ++block_index) {
+            if (NEWLINE == io_block->string[block_index]) {
+                // go back to beginning of line
+                // IFFY: casts here could potentially cause annoyance
+                // long used because fseek expects long
+                fseek(source_file,
+                      ((long) block_index) - ((long) io_block->readable_bytes),
+                      SEEK_CUR);
+                set_string_with_size_readable_bytes(io_block, block_index);
+                write_block(dest_file, io_block);
+                succeeded = true;
+                break;
+            }
+        }
+
+    }
+    free_string_with_size(io_block);
+}
+
+static inline void write_line_number_from_file_to_file(mpz_t * from_line_number,
+                                                       mpz_t * to_line_number,
+                                                       FILE * source_file,
+                                                       FILE * dest_file) {
+    advance_file_to_line(
+      source_file, from_line_number, to_line_number, BINBLOCK_SIZE);
+    write_current_line_of_file(source_file, dest_file);
+}
+
 /**
  *  Given a continuous stream of DNA characters, this function will insert
  *newline characters

@@ -16,8 +16,10 @@
 // TODO: javadoc
 typedef struct {
     mpz_t line_number;
-    unsigned long int str_hash;   // used because canonical djb2 uses unsigned long int
-    unsigned long int str_length; // arbitrary choice of length variable bit width
+    unsigned long int
+      str_hash; // used because canonical djb2 uses unsigned long int
+    unsigned long int
+      str_length; // arbitrary choice of length variable bit width
     string_with_size * first_k_chars;
     bool is_orf;
 } line_id;
@@ -140,6 +142,10 @@ typedef struct {
     line_id * id;
     bool is_leven_found;
     GSList ** line_id_pairs;
+    FILE * prev_file;
+    FILE * cur_file;
+    FILE * prev_file_used_for_edits; // TODO: explain why this is here
+    mpz_t prev_line_num_used_for_edits;
 } line_id_and_metadata;
 
 typedef struct {
@@ -184,8 +190,16 @@ static inline void
                 make_line_id_pair(
                   clone_line_id_with_string_null(prev_line_id),
                   clone_line_id_with_string_null(cur_data->id)));
+            // write string from prev file
+            // IFFY: concurrency with this will be awful lol
+            write_line_number_from_file_to_file(
+              &cur_data->prev_line_num_used_for_edits,
+              &prev_line_id->line_number,
+              cur_data->prev_file_used_for_edits,
+              cur_data->cur_file);
+
 #ifdef DEBUG
-            PRINT_ERROR("CLOSE STRING FOUND BY LEVENSHTEIN EDITS");
+              PRINT_ERROR("CLOSE STRING FOUND BY LEVENSHTEIN EDITS");
             PRINT_ERROR_NO_NEWLINE("LEVEN_DIST: ");
             PRINT_ERROR_SIZE_T_NO_NEWLINE(leven_dist);
             PRINT_ERROR_NEWLINE();
@@ -216,19 +230,27 @@ static inline void
             PRINT_ERROR_NEWLINE();
             PRINT_ERROR("-----------");
 #endif
+
         }
     }
 }
 // basically  macros
-static inline bool if_similar_edit_levenshtein_dist_queue_add_to_list(
-  GQueue * prev_file_queue, GQueue * cur_file_queue, GSList ** edit_matches) {
+static inline bool
+  if_similar_edit_levenshtein_dist_queue_add_to_list(GQueue * prev_file_queue,
+                                                     GQueue * cur_file_queue,
+                                                     GSList ** edit_matches,
+                                                     FILE * prev_file,
+                                                     FILE * cur_file) {
     line_id_and_metadata liam;
     liam.id = g_queue_peek_head(cur_file_queue);
     liam.is_leven_found = false;
     liam.line_id_pairs = edit_matches;
-    g_queue_foreach(prev_file_queue,
-                    (GFunc) if_close_levenshtein_dist_add_to_list,
-                    &liam);
+    liam.prev_file = prev_file;
+    liam.cur_file = cur_file;
+    liam.prev_file_used_for_edits = fdopen(fileno(prev_file), "r");
+    mpz_init_set_ui(liam.prev_line_num_used_for_edits, 0);
+    g_queue_foreach(
+      prev_file_queue, (GFunc) if_close_levenshtein_dist_add_to_list, &liam);
     return liam.is_leven_found;
 }
 static inline void
@@ -237,15 +259,17 @@ static inline void
                                size_t * ptr_current_streak_of_newly_added_lines,
                                mpz_t * ptr_lines_processed,
                                bool * ptr_break_out_of_vcscmp,
-                               GSList ** edit_matches) {
+                               GSList ** edit_matches,
+                               FILE * prev_file,
+                               FILE * cur_file) {
     if (!is_line_id_at_top_in_prev_queue(prev_file_line_ids_queue,
                                          cur_file_line_ids_queue)) {
+
 #ifdef DEBUG
         PRINT_ERROR_NO_NEWLINE("NEWLY ADDED LINE AT LINE ");
         PRINT_ERROR_MPZ_T_NO_NEWLINE(*ptr_lines_processed);
         PRINT_ERROR_NO_NEWLINE(" (CUR: ");
-        if (!((line_id *) g_queue_peek_head(cur_file_line_ids_queue))
-              ->is_orf) {
+        if (!((line_id *) g_queue_peek_head(cur_file_line_ids_queue))->is_orf) {
             PRINT_ERROR_NO_NEWLINE("NO ");
         }
         PRINT_ERROR_NO_NEWLINE("ORF)");
@@ -259,10 +283,13 @@ static inline void
           (size_t) g_queue_get_length(cur_file_line_ids_queue));
         PRINT_ERROR_NEWLINE();
 #endif
+
         if (if_similar_edit_levenshtein_dist_queue_add_to_list(
               prev_file_line_ids_queue,
               cur_file_line_ids_queue,
-              edit_matches)) {
+              edit_matches,
+              prev_file,
+              cur_file)) {
             ++*ptr_current_streak_of_newly_added_lines;
         }
     }
@@ -335,6 +362,7 @@ static inline void check_if_past_k_chars_push_tail_and_initialize_line_id(
       ptr_line_hash, ptr_line_length, first_few_chars, ptr_past_k_chars);
 }
 
+// TODO: "ironed out" as below
 // requires that string be >= CODON_LENGTH chars, which needs to be ironed out
 // requires that file be formatted correctly so that lines of orf and non orf
 // alternate, but vcsfmt already enforces that
@@ -352,7 +380,7 @@ static inline void
                                    unsigned long int * ptr_line_length,
                                    GQueue * ids_queue,
                                    unsigned long int * ptr_line_hash) {
-    if (input_block->string[block_index] == NEWLINE) {
+    if (NEWLINE == input_block->string[block_index]) {
         if (mpz_cmp_ui(*lines_processed, 1)) { // if first line
             *is_line_orf = is_first_line_orf(*first_few_chars);
         }

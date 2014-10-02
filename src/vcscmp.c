@@ -96,7 +96,9 @@ void vcscmp(const char * prev_filename, const char * cur_filename) {
                       &current_streak_of_newly_added_lines,
                       &output_lines_processed,
                       &break_out_of_vcscmp,
-                      &edit_matches);
+                      &edit_matches,
+                      prev_file,
+                      cur_file);
                     free_line_id(g_queue_pop_head(cur_file_line_ids_queue));
                     increment_mpz_t(&output_lines_processed);
                 }
@@ -107,7 +109,9 @@ void vcscmp(const char * prev_filename, const char * cur_filename) {
                   &current_streak_of_newly_added_lines,
                   &output_lines_processed,
                   &break_out_of_vcscmp,
-                  &edit_matches);
+                  &edit_matches,
+                  prev_file,
+                  cur_file);
                 free_line_id(g_queue_pop_head(prev_file_line_ids_queue));
                 free_line_id(g_queue_pop_head(cur_file_line_ids_queue));
                 increment_mpz_t(&output_lines_processed);
@@ -124,7 +128,9 @@ void vcscmp(const char * prev_filename, const char * cur_filename) {
                                      &current_streak_of_newly_added_lines,
                                      &output_lines_processed,
                                      &break_out_of_vcscmp,
-                                     &edit_matches);
+                                     &edit_matches,
+                                     prev_file,
+                                     cur_file);
         free_line_id(g_queue_pop_head(cur_file_line_ids_queue));
         increment_mpz_t(&output_lines_processed);
     }
