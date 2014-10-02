@@ -2,6 +2,7 @@
 
 #ifdef DEBUG
 static inline void print_line_id_pair(line_id_pair * arg) {
+    PRINT_ERROR("EDITS:");
     PRINT_ERROR_NO_NEWLINE("prev=");
     PRINT_ERROR_MPZ_T_NO_NEWLINE(arg->prev_id->line_number);
     PRINT_ERROR_NO_NEWLINE(",cur=");
@@ -40,17 +41,17 @@ void vcscmp(const char * prev_filename, const char * cur_filename) {
 
     mpz_t prev_lines_processed;
     mpz_init(prev_lines_processed);
-    mpz_add_ui(prev_lines_processed, prev_lines_processed, 1);
+    increment_mpz_t(&prev_lines_processed);
     mpz_t cur_lines_processed;
     mpz_init(cur_lines_processed);
-    mpz_add_ui(cur_lines_processed, cur_lines_processed, 1);
+    increment_mpz_t(&cur_lines_processed);
 
     bool prev_is_line_orf; // switches every line
     bool cur_is_line_orf;
 
     mpz_t output_lines_processed;
     mpz_init(output_lines_processed);
-    mpz_add_ui(output_lines_processed, output_lines_processed, 1); // start at 1
+    increment_mpz_t(&output_lines_processed); // start at 1
     size_t current_streak_of_newly_added_lines = 0;
     bool break_out_of_vcscmp = false;
 
@@ -97,8 +98,7 @@ void vcscmp(const char * prev_filename, const char * cur_filename) {
                       &break_out_of_vcscmp,
                       &edit_matches);
                     free_line_id(g_queue_pop_head(cur_file_line_ids_queue));
-                    mpz_add_ui(
-                      output_lines_processed, output_lines_processed, 1);
+                    increment_mpz_t(&output_lines_processed);
                 }
             } else {
                 if_new_line_then_add_to_list(
@@ -110,10 +110,9 @@ void vcscmp(const char * prev_filename, const char * cur_filename) {
                   &edit_matches);
                 free_line_id(g_queue_pop_head(prev_file_line_ids_queue));
                 free_line_id(g_queue_pop_head(cur_file_line_ids_queue));
-                mpz_add_ui(output_lines_processed, output_lines_processed, 1);
+                increment_mpz_t(&output_lines_processed);
             }
         }
-        // write_block(cur_block); // write cur_block to output
     }
     // TODO: actually write to files, make loop to continue writing to file
     // after break_out_of_vcscmp is set to true
@@ -127,12 +126,12 @@ void vcscmp(const char * prev_filename, const char * cur_filename) {
                                      &break_out_of_vcscmp,
                                      &edit_matches);
         free_line_id(g_queue_pop_head(cur_file_line_ids_queue));
-        mpz_add_ui(output_lines_processed, output_lines_processed, 1);
+        increment_mpz_t(&output_lines_processed);
     }
     edit_matches = g_slist_reverse(edit_matches); // prepend-reverse idiom used
     g_slist_foreach(edit_matches, (GFunc) print_line_id_pair, NULL);
 #ifdef DEBUG
-    if (edit_matches == NULL) {
+    if (NULL == edit_matches) {
         PRINT_ERROR("LIST OF CLOSE MATCHES EMPTY");
     }
 #endif

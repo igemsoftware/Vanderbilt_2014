@@ -1,10 +1,18 @@
 #ifndef ___UTILITIES_H___
 #define ___UTILITIES_H___
 
+// description
 /*
     preprocessor macros, system headers, and other generic additions to make
     extending this program easier by cataloging all nonstandard utilities in
     one spot
+*/
+
+// searchable comment syntax used throughout project
+/*
+    IFFY: could cause errors, check if weird things are happening
+    TODO: do this now
+    OPTIMIZATION: if speed needed in this function, check here first
 */
 
 // HEADERS AND LIBRARIES
@@ -16,21 +24,26 @@
 #include <glib.h>   // for queues, lists, and threads
 #include <gmp.h>    // for bignums
 
+// PORTABILITY MACROS
+// IFFY: this could cause issues with processing files not made by us
+#define NEWLINE '\n'
+
 // MACROS
+// extra parens used around all macro arguments for evaluation before calling
 
-#define PRINT_ERROR_NO_NEWLINE(str) fprintf(stderr, "%s", str)
+#define PRINT_ERROR_NO_NEWLINE(str) fprintf(stderr, "%s", (str))
 
-#define PRINT_ERROR(str) fprintf(stderr, "%s\n", str)
+#define PRINT_ERROR(str) fprintf(stderr, "%s\n", (str))
 
 #define PRINT_ERROR_NEWLINE() fprintf(stderr, "\n")
 
-#define PRINT_ERROR_SIZE_T_NO_NEWLINE(num) fprintf(stderr, "%zu", num)
+#define PRINT_ERROR_SIZE_T_NO_NEWLINE(num) fprintf(stderr, "%zu", (num))
 
-#define PRINT_ERROR_MPZ_T_NO_NEWLINE(bignum) mpz_out_str(stderr, 10, bignum)
+#define PRINT_ERROR_MPZ_T_NO_NEWLINE(bignum) mpz_out_str(stderr, 10, (bignum))
 
 #define PRINT_ERROR_AND_RETURN_IF_NULL(ptr, str) \
-    if (NULL == ptr) {                           \
-        PRINT_ERROR(str);                        \
+    if (NULL == (ptr)) {                         \
+        PRINT_ERROR((str));                      \
         return;                                  \
     }
 
@@ -40,12 +53,11 @@
 // parentheses required because of distributivity
 #define TWO_D_ARRAY_INDEX(arr, x, y, max_y) (arr)[(x) * (max_y) + (y)]
 
-// FUNCTIONS
+// FILE FUNCTIONS
 
-// open file, return pointer
 /**
  * @brief:
- *
+ * ...
  */
 static inline FILE * open_file_read(const char * filename) {
     FILE * input_file = fopen(filename, "r");
@@ -62,12 +74,12 @@ static inline FILE * create_file_binary_write(const char * filename) {
 // used to return a char string, along with size information
 // TODO: mention that readable_bytes is used by functions like fread because
 // while they will typically fill the entire memory space sometimes they do
-// less, upon reaching EOF or some other
+// less, upon reaching EOF or some other ferror
 typedef struct {
-    char * string;
-    size_t readable_bytes; // current number of useful bytes this is storing
-    size_t size_in_memory; // full size of char * in bytes
-} string_with_size;        // NOT null-terminated by default!
+    char * string;             // NOT null-terminated by default!
+    size_t readable_bytes;     // current number of useful bytes this is storing
+    size_t size_in_memory;     // full size of char * in bytes
+} string_with_size;
 // TODO: javadoc
 // note that sets readable_bytes to 0
 static inline string_with_size *

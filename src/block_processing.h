@@ -43,6 +43,46 @@ static inline string_with_size *
     return output_block_with_size;
 }
 
+static inline mpz_t * increment_mpz_t(mpz_t * in) {
+    mpz_add_ui(*in, *in, 1);
+    return in;
+}
+static inline bool less_than_mpz_t(mpz_t * lhs, mpz_t * rhs) {
+    return mpz_cmp(*lhs, *rhs) < 0;
+}
+static inline FILE * advance_file_to_line(FILE * file,
+                                          mpz_t * cur_line,
+                                          mpz_t * final_line,
+                                          size_t block_size) {
+    if (!less_than_mpz_t(cur_line, final_line)) {
+        return file;
+    } else {
+        string_with_size * in_block = make_new_string_with_size(block_size);
+        bool succeeded = false;
+        while (!succeeded && !(feof(file) || ferror(file))) {
+            read_block(file, in_block);
+            for (size_t block_index = 0; block_index < in_block->readable_bytes;
+                 ++block_index) {
+                if (NEWLINE == in_block->string[block_index]) {
+                    increment_mpz_t(cur_line);
+                    if (!less_than_mpz_t(cur_line, final_line)) { // if ==
+                        // go back to beginning of line
+                        // IFFY: casts here could potentially cause annoyance
+                        // long used because fseek expects long
+                        fseek(file,
+                              ((long) block_index) - ((long) block_size),
+                              SEEK_CUR);
+                        succeeded = true;
+                        break;
+                    }
+                }
+            }
+        }
+        free_string_with_size(in_block);
+        return file;
+    }
+}
+
 /**
  *  Given a continuous stream of DNA characters, this function will insert
  *newline characters

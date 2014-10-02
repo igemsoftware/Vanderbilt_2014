@@ -136,7 +136,7 @@ static inline levenshtein_string_edit_operation
         minimum = min_of_non_null_three(insert_ptr, delete_ptr, sub_ptr);
     }
     // order of checking is arbitrary
-    if (sub_ptr != NULL && minimum == *sub_ptr) {
+    if (NULL != sub_ptr && minimum == *sub_ptr) {
         --lms->cur_x;
         --lms->cur_y;
         if (*lms->cur_cell == *sub_ptr) { // if same value
@@ -146,7 +146,7 @@ static inline levenshtein_string_edit_operation
             lms->cur_cell = sub_ptr;
             return leven_substitution;
         }
-    } else if (delete_ptr != NULL && minimum == *delete_ptr) {
+    } else if (NULL != delete_ptr && minimum == *delete_ptr) {
         lms->cur_cell = delete_ptr;
         --lms->cur_x;
         return leven_deletion;

@@ -39,6 +39,6 @@ int main(int argc, char ** argv) {
 
     // de_vcsfmt("500_lines_of_dna_minus_lines.fasta.vcsfmt");
 
-    vcscmp("500_lines_of_dna_minus_lines.fasta.vcsfmt1",
-           "500_lines_of_dna_minus_lines.fasta.vcsfmt2");
+    // vcscmp("500_lines_of_dna_minus_lines.fasta.vcsfmt1",
+    //        "500_lines_of_dna_minus_lines.fasta.vcsfmt2");
 }

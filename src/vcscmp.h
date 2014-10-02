@@ -352,7 +352,7 @@ static inline void
                                    unsigned long int * ptr_line_length,
                                    GQueue * ids_queue,
                                    unsigned long int * ptr_line_hash) {
-    if (input_block->string[block_index] == '\n') {
+    if (input_block->string[block_index] == NEWLINE) {
         if (mpz_cmp_ui(*lines_processed, 1)) { // if first line
             *is_line_orf = is_first_line_orf(*first_few_chars);
         }
@@ -363,8 +363,8 @@ static inline void
                                                                first_few_chars,
                                                                lines_processed,
                                                                *is_line_orf);
-        mpz_add_ui(*lines_processed, *lines_processed, 1); // increment
-        *is_line_orf = !*is_line_orf;                      // flip it
+        increment_mpz_t(lines_processed);
+        *is_line_orf = !*is_line_orf; // flip it
     } else {
         write_string_and_update_hash_and_line_length(ptr_line_length,
                                                      *first_few_chars,

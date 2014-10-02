@@ -87,7 +87,7 @@ void vcsfmt(char * filename) {
     for (int i = 0; i < 60; ++i)
         putc(' ', output_file);
 
-    putc('\n', output_file);
+    putc(NEWLINE, output_file);
 
     // keep track of how much metadata we have.
     long metadata_bytes = 0;
@@ -129,7 +129,7 @@ void vcsfmt(char * filename) {
     }
 
     // Add an extra newline to output
-    fputc('\n', output_file);
+    fputc(NEWLINE, output_file);
 
     // Append the metadata file to the output file.
     fclose(temporary_file);
@@ -229,11 +229,11 @@ string_with_size * fasta_preformat(string_with_size * input,
 
         char current = input->string[i];
 
-        if (current == '\n') {
+        if (current == NEWLINE) {
             // The character is a line break
             if (*in_comment) {
                 // If we were in a comment, write the line break to metadata
-                metadata->string[metadata->readable_bytes] = '\n';
+                metadata->string[metadata->readable_bytes] = NEWLINE;
                 metadata->readable_bytes++;
 
                 // We're not in a comment anymore.
