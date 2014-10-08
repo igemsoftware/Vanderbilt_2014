@@ -142,9 +142,9 @@ typedef struct {
     line_id * id;
     bool is_leven_found;
     GSList ** line_id_pairs;
+    FILE * prev_file_used_for_edits; // TODO: explain why this is here
     FILE * prev_file;
     FILE * cur_file;
-    FILE * prev_file_used_for_edits; // TODO: explain why this is here
     mpz_t prev_line_num_used_for_edits;
 } line_id_and_metadata;
 
@@ -192,11 +192,12 @@ static inline void
                   clone_line_id_with_string_null(cur_data->id)));
             // write string from prev file
             // IFFY: concurrency with this will be awful lol
-            write_line_number_from_file_to_file(
-              &cur_data->prev_line_num_used_for_edits,
-              &prev_line_id->line_number,
-              cur_data->prev_file_used_for_edits,
-              cur_data->cur_file);
+            // TODO: add this, fix FILE * == 0x0 nullpointer segfault whatever
+            // write_line_number_from_file_to_file(
+            //   &cur_data->prev_line_num_used_for_edits,
+            //   &prev_line_id->line_number,
+            //   cur_data->prev_file_used_for_edits,
+            //   cur_data->cur_file);
 
 #ifdef DEBUG
               PRINT_ERROR("CLOSE STRING FOUND BY LEVENSHTEIN EDITS");
@@ -235,19 +236,20 @@ static inline void
     }
 }
 // basically  macros
-static inline bool
-  if_similar_edit_levenshtein_dist_queue_add_to_list(GQueue * prev_file_queue,
-                                                     GQueue * cur_file_queue,
-                                                     GSList ** edit_matches,
-                                                     FILE * prev_file,
-                                                     FILE * cur_file) {
+static inline bool if_similar_edit_levenshtein_dist_queue_add_to_list(
+  GQueue * prev_file_queue,
+  GQueue * cur_file_queue,
+  GSList ** edit_matches,
+  FILE * prev_file_used_for_edits,
+  FILE * prev_file,
+  FILE * cur_file) {
     line_id_and_metadata liam;
     liam.id = g_queue_peek_head(cur_file_queue);
     liam.is_leven_found = false;
     liam.line_id_pairs = edit_matches;
     liam.prev_file = prev_file;
     liam.cur_file = cur_file;
-    liam.prev_file_used_for_edits = fdopen(fileno(prev_file), "r");
+    liam.prev_file_used_for_edits = prev_file_used_for_edits;
     mpz_init_set_ui(liam.prev_line_num_used_for_edits, 0);
     g_queue_foreach(
       prev_file_queue, (GFunc) if_close_levenshtein_dist_add_to_list, &liam);
@@ -257,9 +259,11 @@ static inline void
   if_new_line_then_add_to_list(GQueue * prev_file_line_ids_queue,
                                GQueue * cur_file_line_ids_queue,
                                size_t * ptr_current_streak_of_newly_added_lines,
-                               mpz_t * ptr_lines_processed,
+                               mpz_t * in_ptr_lines_processed,
+                               mpz_t * out_ptr_lines_processed,
                                bool * ptr_break_out_of_vcscmp,
                                GSList ** edit_matches,
+                               FILE * prev_file_used_for_edits,
                                FILE * prev_file,
                                FILE * cur_file) {
     if (!is_line_id_at_top_in_prev_queue(prev_file_line_ids_queue,
@@ -267,7 +271,7 @@ static inline void
 
 #ifdef DEBUG
         PRINT_ERROR_NO_NEWLINE("NEWLY ADDED LINE AT LINE ");
-        PRINT_ERROR_MPZ_T_NO_NEWLINE(*ptr_lines_processed);
+        PRINT_ERROR_MPZ_T_NO_NEWLINE(*out_ptr_lines_processed);
         PRINT_ERROR_NO_NEWLINE(" (CUR: ");
         if (!((line_id *) g_queue_peek_head(cur_file_line_ids_queue))->is_orf) {
             PRINT_ERROR_NO_NEWLINE("NO ");
@@ -288,9 +292,13 @@ static inline void
               prev_file_line_ids_queue,
               cur_file_line_ids_queue,
               edit_matches,
+              prev_file_used_for_edits,
               prev_file,
               cur_file)) {
+            #error add line
             ++*ptr_current_streak_of_newly_added_lines;
+        } else {
+            // write_current_line_of_file(prev_file, cur_file);
         }
     }
     if (*ptr_current_streak_of_newly_added_lines > QUEUE_HASH_CRITICAL_SIZE) {

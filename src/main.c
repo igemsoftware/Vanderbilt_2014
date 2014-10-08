@@ -41,4 +41,16 @@ int main(int argc, char ** argv) {
 
     vcscmp("500_lines_of_dna_minus_lines.fasta.vcsfmt1",
            "500_lines_of_dna_minus_lines.fasta.vcsfmt2");
+
+    // mpz_t begin_line;
+    // mpz_init_set_ui(begin_line, 1);
+    // mpz_t end_line;
+    // mpz_init_set_ui(end_line, 50);
+    // FILE * infile =
+    // open_file_read("500_lines_of_dna_minus_lines.fasta.vcsfmt");
+    // write_line_number_from_file_to_file(&begin_line, &end_line, infile,
+    // stdout);
+    // fclose(infile);
+    // mpz_clear(begin_line);
+    // mpz_clear(end_line);
 }

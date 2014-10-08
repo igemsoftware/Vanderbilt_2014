@@ -11,10 +11,9 @@
 #define DJB2_MAGIC_CONSTANT 5
 static inline unsigned long int djb2_hash_on_string_index(
   unsigned long int instantaneous_hash, char * str, size_t cur_index) {
-    // same as instantaneous_hash * 33 ^ str[cur_index]
-    return ((instantaneous_hash << DJB2_MAGIC_CONSTANT) + instantaneous_hash) ^
-           (unsigned long int) str[cur_index];
+    return ((instantaneous_hash * 33) ^ (unsigned long int) str[cur_index]);
     // OPTIMIZATION: is using the function character-by-character inefficient?
+    // can we act upon larger blocks of data?
 }
 
 // TODO: javadoc

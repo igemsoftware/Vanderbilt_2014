@@ -16,6 +16,12 @@ void vcscmp(const char * prev_filename, const char * cur_filename) {
     PRINT_ERROR_AND_RETURN_IF_NULL(prev_file, "Error in reading prev file.");
     FILE * cur_file = open_file_read(cur_filename);
     PRINT_ERROR_AND_RETURN_IF_NULL(cur_file, "Error in reading cur file.");
+    FILE * prev_file_used_for_edits = open_file_read(prev_filename);
+    PRINT_ERROR_AND_RETURN_IF_NULL(prev_file_used_for_edits,
+                                   "Error in reading prev file.");
+    mpz_t cur_line_prev_file_used_for_edits;
+    mpz_init_and_set_ui(cur_line_prev_file_used_for_edits, 1);
+
 #ifdef CONCURRENT
 #error FUNCTIONALITY NOT IMPLEMENTED YET
 #else
@@ -110,6 +116,7 @@ void vcscmp(const char * prev_filename, const char * cur_filename) {
                   &output_lines_processed,
                   &break_out_of_vcscmp,
                   &edit_matches,
+                  prev_file_used_for_edits,
                   prev_file,
                   cur_file);
                 free_line_id(g_queue_pop_head(prev_file_line_ids_queue));
@@ -126,9 +133,11 @@ void vcscmp(const char * prev_filename, const char * cur_filename) {
         if_new_line_then_add_to_list(prev_file_line_ids_queue,
                                      cur_file_line_ids_queue,
                                      &current_streak_of_newly_added_lines,
+
                                      &output_lines_processed,
                                      &break_out_of_vcscmp,
                                      &edit_matches,
+                                     prev_file_used_for_edits,
                                      prev_file,
                                      cur_file);
         free_line_id(g_queue_pop_head(cur_file_line_ids_queue));
