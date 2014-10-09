@@ -236,7 +236,7 @@ static inline void
     }
 }
 // basically  macros
-static inline bool if_similar_edit_levenshtein_dist_queue_add_to_list(
+static inline bool get_if_edit_line_and_if_so_add_to_list(
   GQueue * prev_file_queue,
   GQueue * cur_file_queue,
   GSList ** edit_matches,
@@ -255,23 +255,28 @@ static inline bool if_similar_edit_levenshtein_dist_queue_add_to_list(
       prev_file_queue, (GFunc) if_close_levenshtein_dist_add_to_list, &liam);
     return liam.is_leven_found;
 }
-static inline void
-  if_new_line_then_add_to_list(GQueue * prev_file_line_ids_queue,
-                               GQueue * cur_file_line_ids_queue,
-                               size_t * ptr_current_streak_of_newly_added_lines,
-                               mpz_t * in_ptr_lines_processed,
-                               mpz_t * out_ptr_lines_processed,
-                               bool * ptr_break_out_of_vcscmp,
-                               GSList ** edit_matches,
-                               FILE * prev_file_used_for_edits,
-                               FILE * prev_file,
-                               FILE * cur_file) {
-    if (!is_line_id_at_top_in_prev_queue(prev_file_line_ids_queue,
-                                         cur_file_line_ids_queue)) {
 
+// CLOBBERS LINES_PROCESSED ARGUMENTS
+// i.e. sets them to their new appropriate values
+static inline void write_line_and_if_new_add_to_list(
+  GQueue * prev_file_line_ids_queue,
+  GQueue * cur_file_line_ids_queue,
+  size_t * current_streak_of_newly_added_lines,
+  mpz_t * input_file_lines_processed,
+  mpz_t * output_file_lines_processed,
+  bool * break_out_of_vcscmp,
+  GSList ** edit_matches,
+  FILE * prev_file_used_for_edits,
+  FILE * prev_file,
+  FILE * cur_file,
+  FILE * out_file) {
+    // TODO: explain why we chose QUEUE_HASH_CRITICAL_SIZE here and what this is
+    if (*current_streak_of_newly_added_lines < QUEUE_HASH_CRITICAL_SIZE &&
+        !is_line_id_at_top_in_prev_queue(prev_file_line_ids_queue,
+                                         cur_file_line_ids_queue)) {
 #ifdef DEBUG
         PRINT_ERROR_NO_NEWLINE("NEWLY ADDED LINE AT LINE ");
-        PRINT_ERROR_MPZ_T_NO_NEWLINE(*out_ptr_lines_processed);
+        PRINT_ERROR_MPZ_T_NO_NEWLINE(*output_file_lines_processed);
         PRINT_ERROR_NO_NEWLINE(" (CUR: ");
         if (!((line_id *) g_queue_peek_head(cur_file_line_ids_queue))->is_orf) {
             PRINT_ERROR_NO_NEWLINE("NO ");
@@ -287,22 +292,33 @@ static inline void
           (size_t) g_queue_get_length(cur_file_line_ids_queue));
         PRINT_ERROR_NEWLINE();
 #endif
-
-        if (if_similar_edit_levenshtein_dist_queue_add_to_list(
-              prev_file_line_ids_queue,
-              cur_file_line_ids_queue,
-              edit_matches,
+        boolean_and_data is_edit_and_line_id_if_so =
+          get_if_edit_line_and_if_so_add_to_list(prev_file_line_ids_queue,
+                                                 cur_file_line_ids_queue,
+                                                 edit_matches,
+                                                 prev_file_used_for_edits,
+                                                 prev_file,
+                                                 cur_file);
+        if (is_edit_and_line_id_if_so.boolean) { // if current line is edit line
+            write_line_number_from_file_to_file(
+              input_file_lines_processed,
+              &((line_id *) is_edit_and_line_id_if_so.data)->line_number,
               prev_file_used_for_edits,
-              prev_file,
-              cur_file)) {
-            #error add line
-            ++*ptr_current_streak_of_newly_added_lines;
-        } else {
-            // write_current_line_of_file(prev_file, cur_file);
+              out_file);
+            ++*current_streak_of_newly_added_lines;
+        } else {                // if just new line
+            write_line_number_from_file_to_file(input_file_lines_processed, )
         }
+    } else {
+        write_line_number_from_file_to_file(
+          output_file_lines_processed,
+          &((line_id *) g_queue_peek_head(cur_file_line_ids_queue))
+             ->line_number,
+          cur_file,
+          out_file);
     }
-    if (*ptr_current_streak_of_newly_added_lines > QUEUE_HASH_CRITICAL_SIZE) {
-        *ptr_break_out_of_vcscmp = true;
+    if (*current_streak_of_newly_added_lines > QUEUE_HASH_CRITICAL_SIZE) {
+        *break_out_of_vcscmp = true;
     }
 }
 

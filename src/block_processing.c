@@ -127,7 +127,7 @@ void concurrent_read_and_process_block_vcsfmt(
           read_block(args->input_file, args->input_block_with_size)
             ->readable_bytes);
         // OPTIMIZATION: allocate from (possibly self-growing) pool of memory
-        args->output_block_with_size = make_new_string_with_size(BINBLOCK_SIZE);
+        args->output_block_with_size = make_new_string_with_size(BIN_BLOCK_SIZE);
         process_block_vcsfmt(args->input_block_with_size,
                       args->output_block_with_size,
                       args->is_within_orf,

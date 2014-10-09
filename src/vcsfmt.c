@@ -27,7 +27,7 @@ void vcsfmt(char * filename) {
       make_new_string_with_size(BLOCK_SIZE);
 #ifndef CONCURRENT
     string_with_size * output_block_with_size =
-      make_new_string_with_size(BINBLOCK_SIZE);
+      make_new_string_with_size(BIN_BLOCK_SIZE);
 
     // These constructs are used by the FASTA preformating function.
     // TODO put some checks for file type here.
@@ -35,7 +35,7 @@ void vcsfmt(char * filename) {
       make_new_string_with_size(BLOCK_SIZE);
 
     string_with_size * metadata_block_with_size =
-      make_new_string_with_size(BINBLOCK_SIZE);
+      make_new_string_with_size(BIN_BLOCK_SIZE);
 
     bool in_comment = false; // file beings outside a comment.
 
@@ -185,10 +185,10 @@ void de_vcsfmt(char * filename) {
     PRINT_ERROR_AND_RETURN_IF_NULL(output_file,
                                    "Error in creating output file.");
     string_with_size * input_block_with_size =
-      make_new_string_with_size(BINBLOCK_SIZE);
+      make_new_string_with_size(BIN_BLOCK_SIZE);
     // TODO: make concurrent
     string_with_size * output_block_with_size =
-      make_new_string_with_size(BINBLOCK_SIZE);
+      make_new_string_with_size(BIN_BLOCK_SIZE);
 
     while (!feof(input_file) && !ferror(input_file) && !ferror(output_file)) {
         read_block(input_file, input_block_with_size);
