@@ -96,7 +96,7 @@ static inline FILE *
   advance_file_one_line(FILE * file, mpz_t * cur_line, size_t block_size) {
     mpz_t final_line_one_up;
     mpz_init_set(final_line_one_up, *cur_line);
-    mpz_add_ui(final_line_one_up, 1);
+    increment_mpz_t(&final_line_one_up);
     FILE * advanced_file =
       advance_file_to_line(file, cur_line, &final_line_one_up, block_size);
     mpz_clear(final_line_one_up);
@@ -143,6 +143,15 @@ static inline void write_current_line_of_file(FILE * source_file,
 }
 
 // CLOBBERS FROM_LINE_NUMBER
+// i.e. increment it
+static inline void write_single_line_from_file_to_file(mpz_t * from_line_number,
+                                                       FILE * source_file,
+                                                       FILE * dest_file) {
+    increment_mpz_t(from_line_number);
+    write_current_line_of_file(source_file, dest_file);
+}
+
+// CLOBBERS FROM_LINE_NUMBER
 // i.e. sets it equal to to_line_number
 static inline void
   write_line_number_from_file_to_file(mpz_t * from_line_number,
@@ -155,30 +164,34 @@ static inline void
     mpz_set(*from_line_number, *to_line_number);
 }
 
-/**
- *  Given a continuous stream of DNA characters, this function will insert
- *newline characters
- *  in between genes and junk DNA. In other words, each line in the output will
- *be either a gene
- *  or junk DNA.
- *
- *  This function expects the input to only contain DNA characters (no new lines
- *or anything else).
- *
- *  This function is also written to be able to process data in multiple chunks.
- *If multiple calls are
- *  made to this function for different chunks of the same data, the same
- *parameters should be passed
- *  in each call. This will let the function remember key information about the
- *last chunk it processed.
- */
-string_with_size *
-  process_block_vcsfmt(string_with_size * input_block_with_size,
-                       string_with_size * output_block_with_size,
-                       bool * is_within_orf,
-                       size_t * cur_orf_pos,
-                       char * current_codon_frame,
-                       bool is_final_block);
+  /**
+   *  Given a continuous stream of DNA characters, this function will insert
+   *newline characters
+   *  in between genes and junk DNA. In other words, each line in the output
+   *will
+   *be either a gene
+   *  or junk DNA.
+   *
+   *  This function expects the input to only contain DNA characters (no new
+   *lines
+   *or anything else).
+   *
+   *  This function is also written to be able to process data in multiple
+   *chunks.
+   *If multiple calls are
+   *  made to this function for different chunks of the same data, the same
+   *parameters should be passed
+   *  in each call. This will let the function remember key information about
+   *the
+   *last chunk it processed.
+   */
+  string_with_size
+  * process_block_vcsfmt(string_with_size * input_block_with_size,
+                         string_with_size * output_block_with_size,
+                         bool * is_within_orf,
+                         size_t * cur_orf_pos,
+                         char * current_codon_frame,
+                         bool is_final_block);
 
 // TODO: javadoc this
 string_with_size *

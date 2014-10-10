@@ -40,7 +40,8 @@ int main(int argc, char ** argv) {
     // de_vcsfmt("500_lines_of_dna_minus_lines.fasta.vcsfmt");
 
     vcscmp("500_lines_of_dna_minus_lines.fasta.vcsfmt1",
-           "500_lines_of_dna_minus_lines.fasta.vcsfmt2");
+           "500_lines_of_dna_minus_lines.fasta.vcsfmt2",
+           "WEIRD_OUTPUT_FILE.vcscmp");
 
     // mpz_t begin_line;
     // mpz_init_set_ui(begin_line, 1);

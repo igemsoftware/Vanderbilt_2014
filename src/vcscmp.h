@@ -102,6 +102,11 @@ static inline bool line_id_equal(line_id * a, line_id * b) {
 typedef struct {
     void * data;
     bool * boolean;
+} boolean_ptr_and_data;
+
+typedef struct {
+    void * data;
+    bool boolean;
 } boolean_and_data;
 
 // TODO: javadoc all of this
@@ -113,7 +118,7 @@ typedef struct {
 // to it when g_queue_foreach is used
 static inline void
   set_bool_if_line_id_match(line_id * prev_line_id,
-                            boolean_and_data * bool_data_bundle) {
+                            boolean_ptr_and_data * bool_data_bundle) {
     if (line_id_equal(prev_line_id, bool_data_bundle->data)) {
         *bool_data_bundle->boolean = true;
     }
@@ -122,7 +127,7 @@ static inline void
 static inline bool is_line_id_at_top_in_prev_queue(GQueue * prev_file_queue,
                                                    GQueue * cur_file_queue) {
     bool is_line_id_found = false;
-    boolean_and_data bool_data_bundle;
+    boolean_ptr_and_data bool_data_bundle;
     bool_data_bundle.data = g_queue_peek_head(cur_file_queue);
     bool_data_bundle.boolean = &is_line_id_found;
     g_queue_foreach(
@@ -142,10 +147,6 @@ typedef struct {
     line_id * id;
     bool is_leven_found;
     GSList ** line_id_pairs;
-    FILE * prev_file_used_for_edits; // TODO: explain why this is here
-    FILE * prev_file;
-    FILE * cur_file;
-    mpz_t prev_line_num_used_for_edits;
 } line_id_and_metadata;
 
 typedef struct {
@@ -184,23 +185,16 @@ static inline void
           prev_line_id->first_k_chars, cur_data->id->first_k_chars);
         if (leven_dist < LEVENSHTEIN_CHECK_THRESHOLD) {
             cur_data->is_leven_found = true;
+            cur_data->id = prev_line_id;
             *cur_data->line_id_pairs =
               g_slist_prepend( // adds in reverse order!!!
                 *cur_data->line_id_pairs,
                 make_line_id_pair(
                   clone_line_id_with_string_null(prev_line_id),
                   clone_line_id_with_string_null(cur_data->id)));
-            // write string from prev file
-            // IFFY: concurrency with this will be awful lol
-            // TODO: add this, fix FILE * == 0x0 nullpointer segfault whatever
-            // write_line_number_from_file_to_file(
-            //   &cur_data->prev_line_num_used_for_edits,
-            //   &prev_line_id->line_number,
-            //   cur_data->prev_file_used_for_edits,
-            //   cur_data->cur_file);
 
 #ifdef DEBUG
-              PRINT_ERROR("CLOSE STRING FOUND BY LEVENSHTEIN EDITS");
+            PRINT_ERROR("CLOSE STRING FOUND BY LEVENSHTEIN EDITS");
             PRINT_ERROR_NO_NEWLINE("LEVEN_DIST: ");
             PRINT_ERROR_SIZE_T_NO_NEWLINE(leven_dist);
             PRINT_ERROR_NEWLINE();
@@ -235,25 +229,27 @@ static inline void
         }
     }
 }
+
 // basically  macros
-static inline bool get_if_edit_line_and_if_so_add_to_list(
+static inline boolean_and_data get_if_edit_line_and_if_so_add_to_list(
   GQueue * prev_file_queue,
   GQueue * cur_file_queue,
-  GSList ** edit_matches,
-  FILE * prev_file_used_for_edits,
-  FILE * prev_file,
-  FILE * cur_file) {
+  GSList ** edit_matches) {
     line_id_and_metadata liam;
     liam.id = g_queue_peek_head(cur_file_queue);
     liam.is_leven_found = false;
     liam.line_id_pairs = edit_matches;
-    liam.prev_file = prev_file;
-    liam.cur_file = cur_file;
-    liam.prev_file_used_for_edits = prev_file_used_for_edits;
-    mpz_init_set_ui(liam.prev_line_num_used_for_edits, 0);
+
     g_queue_foreach(
       prev_file_queue, (GFunc) if_close_levenshtein_dist_add_to_list, &liam);
-    return liam.is_leven_found;
+    boolean_and_data return_val;
+    if (liam.is_leven_found) {
+        return_val.boolean = true;
+        return_val.data = liam.id;
+    } else {
+        return_val.boolean = false;
+    }
+    return return_val;
 }
 
 // CLOBBERS LINES_PROCESSED ARGUMENTS
@@ -262,12 +258,11 @@ static inline void write_line_and_if_new_add_to_list(
   GQueue * prev_file_line_ids_queue,
   GQueue * cur_file_line_ids_queue,
   size_t * current_streak_of_newly_added_lines,
-  mpz_t * input_file_lines_processed,
+  mpz_t * input_file_lines_processed_for_edits,
   mpz_t * output_file_lines_processed,
   bool * break_out_of_vcscmp,
   GSList ** edit_matches,
   FILE * prev_file_used_for_edits,
-  FILE * prev_file,
   FILE * cur_file,
   FILE * out_file) {
     // TODO: explain why we chose QUEUE_HASH_CRITICAL_SIZE here and what this is
@@ -293,21 +288,19 @@ static inline void write_line_and_if_new_add_to_list(
         PRINT_ERROR_NEWLINE();
 #endif
         boolean_and_data is_edit_and_line_id_if_so =
-          get_if_edit_line_and_if_so_add_to_list(prev_file_line_ids_queue,
-                                                 cur_file_line_ids_queue,
-                                                 edit_matches,
-                                                 prev_file_used_for_edits,
-                                                 prev_file,
-                                                 cur_file);
+          get_if_edit_line_and_if_so_add_to_list(
+            prev_file_line_ids_queue, cur_file_line_ids_queue, edit_matches);
+        // TODO: actually add to edit_matches list!
         if (is_edit_and_line_id_if_so.boolean) { // if current line is edit line
             write_line_number_from_file_to_file(
-              input_file_lines_processed,
+              input_file_lines_processed_for_edits,
               &((line_id *) is_edit_and_line_id_if_so.data)->line_number,
               prev_file_used_for_edits,
               out_file);
             ++*current_streak_of_newly_added_lines;
         } else {                // if just new line
-            write_line_number_from_file_to_file(input_file_lines_processed, )
+            write_single_line_from_file_to_file(
+              output_file_lines_processed, cur_file, out_file);
         }
     } else {
         write_line_number_from_file_to_file(
@@ -465,6 +458,8 @@ static inline void add_blocks_to_queue(FILE * active_file,
     }
 }
 
-void vcscmp(const char * prev_filename, const char * cur_filename);
+void vcscmp(const char * prev_filename,
+            const char * cur_filename,
+            const char * out_filename);
 
 #endif /*___VCS_CMP_H___*/
