@@ -259,6 +259,7 @@ static inline void write_line_and_if_new_add_to_list(
   GQueue * cur_file_line_ids_queue,
   size_t * current_streak_of_newly_added_lines,
   mpz_t * input_file_lines_processed_for_edits,
+  mpz_t * cur_file_lines_processed,
   mpz_t * output_file_lines_processed,
   bool * break_out_of_vcscmp,
   GSList ** edit_matches,
@@ -297,14 +298,14 @@ static inline void write_line_and_if_new_add_to_list(
               &((line_id *) is_edit_and_line_id_if_so.data)->line_number,
               prev_file_used_for_edits,
               out_file);
-            ++*current_streak_of_newly_added_lines;
-        } else {                // if just new line
+        } else { // if just new line
             write_single_line_from_file_to_file(
-              output_file_lines_processed, cur_file, out_file);
+              cur_file_lines_processed, cur_file, out_file);
+            ++*current_streak_of_newly_added_lines;
         }
     } else {
         write_line_number_from_file_to_file(
-          output_file_lines_processed,
+          cur_file_lines_processed,
           &((line_id *) g_queue_peek_head(cur_file_line_ids_queue))
              ->line_number,
           cur_file,
@@ -313,6 +314,7 @@ static inline void write_line_and_if_new_add_to_list(
     if (*current_streak_of_newly_added_lines > QUEUE_HASH_CRITICAL_SIZE) {
         *break_out_of_vcscmp = true;
     }
+    increment_mpz_t(output_file_lines_processed);
 }
 
 static inline void initialize_line_id(unsigned long int * ptr_hash,
