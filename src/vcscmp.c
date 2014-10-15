@@ -14,15 +14,18 @@ static inline void print_line_id_pair(line_id_pair * arg) {
 void vcscmp(const char * prev_filename,
             const char * cur_filename,
             const char * out_filename) {
-    FILE * prev_file_used_for_edits = open_file_read(prev_filename);
-    PRINT_ERROR_AND_RETURN_IF_NULL(prev_file_used_for_edits,
-                                   "Error in reading prev file.");
     FILE * prev_file = open_file_read(prev_filename);
     PRINT_ERROR_AND_RETURN_IF_NULL(prev_file, "Error in reading prev file.");
     FILE * cur_file = open_file_read(cur_filename);
     PRINT_ERROR_AND_RETURN_IF_NULL(cur_file, "Error in reading cur file.");
     FILE * out_file = create_file_binary_write(out_filename);
     PRINT_ERROR_AND_RETURN_IF_NULL(out_file, "Error in creating output file.");
+    FILE * prev_file_used_for_edits = open_file_read(prev_filename);
+    PRINT_ERROR_AND_RETURN_IF_NULL(prev_file_used_for_edits,
+                                   "Error in reading prev file.");
+    FILE * cur_file_used_for_edits = open_file_read(cur_filename);
+    PRINT_ERROR_AND_RETURN_IF_NULL(cur_file_used_for_edits,
+                                   "Error in reading cur file.");
 
 #ifdef CONCURRENT
 #error FUNCTIONALITY NOT IMPLEMENTED YET
@@ -53,8 +56,10 @@ void vcscmp(const char * prev_filename,
     mpz_init_set_ui(cur_lines_processed, 1);
     mpz_t output_lines_processed;
     mpz_init_set_ui(output_lines_processed, 1);
-    mpz_t cur_line_prev_file_used_for_edits;
-    mpz_init_set_ui(cur_line_prev_file_used_for_edits, 1);
+    mpz_t prev_file_lines_processed_for_edits;
+    mpz_init_set_ui(prev_file_lines_processed_for_edits, 1);
+    mpz_t cur_file_lines_processed_for_edits;
+    mpz_init_set_ui(cur_file_lines_processed_for_edits, 1);
 
     bool prev_is_line_orf; // switches every line
     bool cur_is_line_orf;
@@ -101,13 +106,13 @@ void vcscmp(const char * prev_filename,
                       prev_file_line_ids_queue,
                       cur_file_line_ids_queue,
                       &current_streak_of_newly_added_lines,
-                      &cur_line_prev_file_used_for_edits,
-                      &cur_lines_processed,
+                      &prev_file_lines_processed_for_edits,
+                      &cur_file_lines_processed_for_edits,
                       &output_lines_processed,
                       &break_out_of_vcscmp,
                       &edit_matches,
                       prev_file_used_for_edits,
-                      cur_file,
+                      cur_file_used_for_edits,
                       out_file);
                     free_line_id(g_queue_pop_head(cur_file_line_ids_queue));
                 }
@@ -116,34 +121,32 @@ void vcscmp(const char * prev_filename,
                   prev_file_line_ids_queue,
                   cur_file_line_ids_queue,
                   &current_streak_of_newly_added_lines,
-                  &cur_line_prev_file_used_for_edits,
-                  &cur_lines_processed,
+                  &prev_file_lines_processed_for_edits,
+                  &cur_file_lines_processed_for_edits,
                   &output_lines_processed,
                   &break_out_of_vcscmp,
                   &edit_matches,
                   prev_file_used_for_edits,
-                  cur_file,
+                  cur_file_used_for_edits,
                   out_file);
                 free_line_id(g_queue_pop_head(prev_file_line_ids_queue));
                 free_line_id(g_queue_pop_head(cur_file_line_ids_queue));
             }
         }
     }
-    // TODO: actually write to files, make loop to continue writing to file
-    // after break_out_of_vcscmp is set to true
-
+    // TODO: make loop to continue writing to file after break_out_of_vcscmp = T
     // finish off remainder
     while (!g_queue_is_empty(cur_file_line_ids_queue) && !break_out_of_vcscmp) {
         write_line_and_if_new_add_to_list(prev_file_line_ids_queue,
                                           cur_file_line_ids_queue,
                                           &current_streak_of_newly_added_lines,
-                                          &cur_line_prev_file_used_for_edits,
-                                          &cur_lines_processed,
+                                          &prev_file_lines_processed_for_edits,
+                                          &cur_file_lines_processed_for_edits,
                                           &output_lines_processed,
                                           &break_out_of_vcscmp,
                                           &edit_matches,
                                           prev_file_used_for_edits,
-                                          cur_file,
+                                          cur_file_used_for_edits,
                                           out_file);
         free_line_id(g_queue_pop_head(cur_file_line_ids_queue));
     }

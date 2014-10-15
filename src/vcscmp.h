@@ -101,11 +101,6 @@ static inline bool line_id_equal(line_id * a, line_id * b) {
 // TODO: rename struct so intended usage is clear, mention foreach loop
 typedef struct {
     void * data;
-    bool * boolean;
-} boolean_ptr_and_data;
-
-typedef struct {
-    void * data;
     bool boolean;
 } boolean_and_data;
 
@@ -118,21 +113,20 @@ typedef struct {
 // to it when g_queue_foreach is used
 static inline void
   set_bool_if_line_id_match(line_id * prev_line_id,
-                            boolean_ptr_and_data * bool_data_bundle) {
+                            boolean_and_data * bool_data_bundle) {
     if (line_id_equal(prev_line_id, bool_data_bundle->data)) {
-        *bool_data_bundle->boolean = true;
+        bool_data_bundle->boolean = true;
     }
 }
 // basically macros
-static inline bool is_line_id_at_top_in_prev_queue(GQueue * prev_file_queue,
+static inline bool is_cur_line_in_prev_queue(GQueue * prev_file_queue,
                                                    GQueue * cur_file_queue) {
-    bool is_line_id_found = false;
-    boolean_ptr_and_data bool_data_bundle;
+    boolean_and_data bool_data_bundle;
     bool_data_bundle.data = g_queue_peek_head(cur_file_queue);
-    bool_data_bundle.boolean = &is_line_id_found;
+    bool_data_bundle.boolean = false;
     g_queue_foreach(
       prev_file_queue, (GFunc) set_bool_if_line_id_match, &bool_data_bundle);
-    return is_line_id_found;
+    return bool_data_bundle.boolean;
 }
 #ifdef DEBUG
 static inline void print_line_id_first_k_chars(line_id * sid) {
@@ -146,8 +140,8 @@ static inline void print_line_id_first_k_chars(line_id * sid) {
 typedef struct {
     line_id * id;
     bool is_leven_found;
-    GSList ** line_id_pairs;
-} line_id_and_metadata;
+    GSList ** edit_matches;
+} line_id_with_edit_match_info;
 
 typedef struct {
     line_id * prev_id;
@@ -170,25 +164,19 @@ static inline void free_line_id_pair(void * arg) {
 
 // compiler will emit a non-inline version of this too, since a pointer is taken
 // to it when g_queue_foreach is used
-static inline void
-  if_close_levenshtein_dist_add_to_list(line_id * prev_line_id,
-                                        line_id_and_metadata * cur_data) {
+static inline void if_close_levenshtein_dist_add_to_list(
+  line_id * prev_line_id, line_id_with_edit_match_info * cur_data) {
     if (prev_line_id->is_orf && cur_data->id->is_orf) {
-        // alternative: use &&
-        // instead of ==
-        // using == makes all the really short non-orfs match by
-        // levenshtein which is annoying
-        // it could actually be quite useful, though, as long as:
-        // TODO: consider instead of absolute levenshtein distance, use
-        // levenshtein dist as proportion of overall string length
+        // use && instead of == so short non-orfs don't match
+        // TODO: instead of absolute levenshtein distance, use proportaional
         size_t leven_dist = get_levenshtein_distance(
           prev_line_id->first_k_chars, cur_data->id->first_k_chars);
         if (leven_dist < LEVENSHTEIN_CHECK_THRESHOLD) {
             cur_data->is_leven_found = true;
             cur_data->id = prev_line_id;
-            *cur_data->line_id_pairs =
+            *cur_data->edit_matches =
               g_slist_prepend( // adds in reverse order!!!
-                *cur_data->line_id_pairs,
+                *cur_data->edit_matches,
                 make_line_id_pair(
                   clone_line_id_with_string_null(prev_line_id),
                   clone_line_id_with_string_null(cur_data->id)));
@@ -225,30 +213,22 @@ static inline void
             PRINT_ERROR_NEWLINE();
             PRINT_ERROR("-----------");
 #endif
-
         }
     }
 }
 
 // basically  macros
 static inline boolean_and_data get_if_edit_line_and_if_so_add_to_list(
-  GQueue * prev_file_queue,
-  GQueue * cur_file_queue,
-  GSList ** edit_matches) {
-    line_id_and_metadata liam;
+  GQueue * prev_file_queue, GQueue * cur_file_queue, GSList ** edit_matches) {
+    line_id_with_edit_match_info liam;
     liam.id = g_queue_peek_head(cur_file_queue);
     liam.is_leven_found = false;
-    liam.line_id_pairs = edit_matches;
-
+    liam.edit_matches = edit_matches;
     g_queue_foreach(
       prev_file_queue, (GFunc) if_close_levenshtein_dist_add_to_list, &liam);
     boolean_and_data return_val;
-    if (liam.is_leven_found) {
-        return_val.boolean = true;
-        return_val.data = liam.id;
-    } else {
-        return_val.boolean = false;
-    }
+    return_val.boolean = liam.is_leven_found;
+    return_val.data = liam.id;
     return return_val;
 }
 
@@ -267,9 +247,16 @@ static inline void write_line_and_if_new_add_to_list(
   FILE * cur_file,
   FILE * out_file) {
     // TODO: explain why we chose QUEUE_HASH_CRITICAL_SIZE here and what this is
-    if (*current_streak_of_newly_added_lines < QUEUE_HASH_CRITICAL_SIZE &&
-        !is_line_id_at_top_in_prev_queue(prev_file_line_ids_queue,
-                                         cur_file_line_ids_queue)) {
+#ifdef DEBUG
+    if (break_out_of_vcscmp) {
+        PRINT_ERROR("F");
+    } else {
+        PRINT_ERROR("G");
+    }
+#endif
+    if (!is_cur_line_in_prev_queue(prev_file_line_ids_queue,
+                                   cur_file_line_ids_queue) &&
+        !break_out_of_vcscmp) {
 #ifdef DEBUG
         PRINT_ERROR_NO_NEWLINE("NEWLY ADDED LINE AT LINE ");
         PRINT_ERROR_MPZ_T_NO_NEWLINE(*output_file_lines_processed);
@@ -288,31 +275,43 @@ static inline void write_line_and_if_new_add_to_list(
           (size_t) g_queue_get_length(cur_file_line_ids_queue));
         PRINT_ERROR_NEWLINE();
 #endif
+        // adds to edit_matches list
         boolean_and_data is_edit_and_line_id_if_so =
           get_if_edit_line_and_if_so_add_to_list(
             prev_file_line_ids_queue, cur_file_line_ids_queue, edit_matches);
-        // TODO: actually add to edit_matches list!
         if (is_edit_and_line_id_if_so.boolean) { // if current line is edit line
+#ifdef DEBUG
+        PRINT_ERROR("SNOOP DOGG");
+#endif
             write_line_number_from_file_to_file(
               input_file_lines_processed_for_edits,
               &((line_id *) is_edit_and_line_id_if_so.data)->line_number,
               prev_file_used_for_edits,
               out_file);
         } else { // if just new line
-            write_single_line_from_file_to_file(
+#ifdef DEBUG
+            PRINT_ERROR("JOHN TRAVOLTA");
+#endif
+            write_current_line_of_file(
               cur_file_lines_processed, cur_file, out_file);
             ++*current_streak_of_newly_added_lines;
+            if (*current_streak_of_newly_added_lines >
+                QUEUE_HASH_CRITICAL_SIZE) {
+                *break_out_of_vcscmp = true;
+            }
         }
-    } else {
+    } else { // just write from cur file to out file
+        // OPTIMIZATION: if break_out_of_vcscmp, just do straight block I/O
+        // instead of line-by-line like this
+#ifdef DEBUG
+        PRINT_ERROR("ACE VENTURA");
+#endif
         write_line_number_from_file_to_file(
           cur_file_lines_processed,
           &((line_id *) g_queue_peek_head(cur_file_line_ids_queue))
              ->line_number,
           cur_file,
           out_file);
-    }
-    if (*current_streak_of_newly_added_lines > QUEUE_HASH_CRITICAL_SIZE) {
-        *break_out_of_vcscmp = true;
     }
     increment_mpz_t(output_file_lines_processed);
 }
@@ -355,7 +354,7 @@ static inline void write_string_and_update_hash_and_line_length(
     }
 }
 
-// TODO: string_is probably ok to allocate in loop, but perhaps not
+// OPTIMIZATION: string probably ok to allocate in loop, but perhaps not
 static inline void check_if_past_k_chars_push_tail_and_initialize_line_id(
   bool * ptr_past_k_chars,
   unsigned long int * ptr_line_length,
