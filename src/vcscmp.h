@@ -248,16 +248,16 @@ static inline void write_line_and_if_new_add_to_list(
   FILE * out_file) {
     // TODO: explain why we chose QUEUE_HASH_CRITICAL_SIZE here and what this is
 #ifdef DEBUG
-    static size_t count = 0;
-    PRINT_ERROR_NO_NEWLINE("WRITE_LINE_COUNT: ");
-    PRINT_ERROR_SIZE_T_NO_NEWLINE(count);
-    PRINT_ERROR_NEWLINE();
-    ++count;
-    if (*break_out_of_vcscmp) {
-        PRINT_ERROR("F");
-    } else {
-        PRINT_ERROR("G");
-    }
+    // static size_t count = 0;
+    // PRINT_ERROR_NO_NEWLINE("WRITE_LINE_COUNT: ");
+    // PRINT_ERROR_SIZE_T_NO_NEWLINE(count);
+    // PRINT_ERROR_NEWLINE();
+    // ++count;
+    // if (*break_out_of_vcscmp) {
+    //     PRINT_ERROR("F");
+    // } else {
+    //     PRINT_ERROR("G");
+    // }
 #endif
     // NOTE: break_out_of_vcscmp is passed by pointer, so if you do not
     // dereference it, it will return TRUE, since obviously a pointer value != 0
@@ -288,18 +288,18 @@ static inline void write_line_and_if_new_add_to_list(
           get_if_edit_line_and_if_so_add_to_list(
             prev_file_line_ids_queue, cur_file_line_ids_queue, edit_matches);
         if (is_edit_and_line_id_if_so.boolean) { // if current line is edit line
-#ifdef DEBUG
-        PRINT_ERROR("SNOOP DOGG");
-#endif
+// #ifdef DEBUG
+//         PRINT_ERROR("SNOOP DOGG");
+// #endif
             write_line_number_from_file_to_file(
               input_file_lines_processed_for_edits,
               &((line_id *) is_edit_and_line_id_if_so.data)->line_number,
               prev_file_used_for_edits,
               out_file);
         } else { // if just new line
-#ifdef DEBUG
-            PRINT_ERROR("JOHN TRAVOLTA");
-#endif
+// #ifdef DEBUG
+//             PRINT_ERROR("JOHN TRAVOLTA");
+// #endif
             write_current_line_of_file(
               cur_file_lines_processed, cur_file, out_file);
             ++*current_streak_of_newly_added_lines;
@@ -311,9 +311,9 @@ static inline void write_line_and_if_new_add_to_list(
     } else { // just write from cur file to out file
         // OPTIMIZATION: if break_out_of_vcscmp, just do straight block I/O
         // instead of line-by-line like this
-#ifdef DEBUG
-        PRINT_ERROR("ACE VENTURA");
-#endif
+// #ifdef DEBUG
+//         PRINT_ERROR("ACE VENTURA");
+// #endif
         write_line_number_from_file_to_file(
           cur_file_lines_processed,
           &((line_id *) g_queue_peek_head(cur_file_line_ids_queue))

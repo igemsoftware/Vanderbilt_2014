@@ -86,8 +86,7 @@ static inline FILE * advance_file_to_line(FILE * file,
                     increment_mpz_t(cur_line);
                     if (!less_than_mpz_t(cur_line, final_line)) { // if ==
                         // go back to beginning of line
-                        // IFFY: casts here could potentially cause annoyance
-                        // long used because fseek expects long
+                        // IFFY: the off-by-one errors here are killer
                         fseek(file,
                               ((long) block_index) -
                                 ((long) in_block->readable_bytes - 1),
@@ -99,38 +98,28 @@ static inline FILE * advance_file_to_line(FILE * file,
             }
         }
         free_string_with_size(in_block);
-        mpz_set(*cur_line, *final_line);
         return file;
     }
 }
 
 // CLOBBERS FROM_LINE_NUMBER (increments)
+// SETS FILE POINTER TO FIRST CHARACTER OF *NEXT* LINE
 // INCLUDES NEWLINE
 static inline void write_current_line_of_file(mpz_t * from_line_number,
                                               FILE * source_file,
                                               FILE * dest_file) {
     string_with_size * io_block = make_new_string_with_size(BIN_BLOCK_SIZE);
     bool succeeded = false;
-    mpz_t cur_point_in_line;
-    mpz_init(cur_point_in_line); // set to 0
     while (!succeeded && !(feof(source_file) || ferror(source_file))) {
         read_block(source_file, io_block);
         for (size_t block_index = 0; block_index < io_block->readable_bytes;
              ++block_index) {
             if (NEWLINE == io_block->string[block_index]) {
                 // go back to beginning of line
-                // IFFY: casts here could potentially cause annoyance
-                // long used because fseek expects long
-                while (mpz_cmp_ui(cur_point_in_line, BIN_BLOCK_SIZE) >=
-                       0) { // while chars in line > size of a
-                            // single block
-                    // seek back to beginning of line
-                    fseek(source_file, -((long) BIN_BLOCK_SIZE), SEEK_CUR);
-                    mpz_sub_ui(
-                      cur_point_in_line, cur_point_in_line, BIN_BLOCK_SIZE);
-                }
+                // IFFY: the off-by-one errors here are killer
                 fseek(source_file,
-                      ((long) block_index) - ((long) io_block->readable_bytes),
+                      ((long) block_index) -
+                        ((long) io_block->readable_bytes - 1),
                       SEEK_CUR);
                 // +1 is to include the newline at the end
                 set_string_with_size_readable_bytes(io_block, block_index + 1);
@@ -139,10 +128,8 @@ static inline void write_current_line_of_file(mpz_t * from_line_number,
             }
         }
         write_block(dest_file, io_block);
-        mpz_add_ui(cur_point_in_line, cur_point_in_line, BIN_BLOCK_SIZE);
     }
     free_string_with_size(io_block);
-    mpz_clear(cur_point_in_line);
     increment_mpz_t(from_line_number);
 }
 

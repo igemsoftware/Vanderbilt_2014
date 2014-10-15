@@ -39,24 +39,28 @@ int main(int argc, char ** argv) {
 
     // de_vcsfmt("500_lines_of_dna_minus_lines.fasta.vcsfmt");
 
-    vcscmp("500_lines_of_dna_minus_lines.fasta.vcsfmt1",
-           "500_lines_of_dna_minus_lines.fasta.vcsfmt2",
-           "WEIRD_OUTPUT_FILE.vcscmp");
+    // vcscmp("500_lines_of_dna_minus_lines.fasta.vcsfmt1",
+    //        "500_lines_of_dna_minus_lines.fasta.vcsfmt2",
+    //        "WEIRD_OUTPUT_FILE.vcscmp");
 
-    // mpz_t begin_line;
-    // mpz_init_set_ui(begin_line, 1);
-    // mpz_t mid_line;
-    // mpz_init_set_ui(mid_line, 50);
-    // mpz_t end_line;
-    // mpz_init_set_ui(end_line, 232);
-    // mpz_t end2_line;
-    // mpz_init_set_ui(end2_line, 233);
-    // FILE * infile = open_file_read("500_lines_of_dna_minus_lines.fasta.vcsfmt");
-    // write_line_number_from_file_to_file(&begin_line, &mid_line, infile, stdout);
-    // write_line_number_from_file_to_file(&mid_line, &end_line, infile, stdout);
-    // write_line_number_from_file_to_file(&end_line, &end2_line, infile, stdout);
-    // mpz_clear(begin_line);
-    // mpz_clear(mid_line);
-    // mpz_clear(end_line);
-    // mpz_clear(end2_line);
+    mpz_t begin_line;
+    mpz_init_set_ui(begin_line, 1);
+    mpz_t mid_line;
+    mpz_init_set_ui(mid_line, 50);
+    mpz_t end_line;
+    mpz_init_set_ui(end_line, 235);
+    mpz_t end2_line;
+    mpz_init_set_ui(end2_line, 238);
+    FILE * infile = open_file_read("500_lines_of_dna_minus_lines.fasta.vcsfmt");
+    write_line_number_from_file_to_file(&begin_line, &mid_line, infile, stdout);
+    write_current_line_of_file(&mid_line, infile, stdout);
+    write_current_line_of_file(&mid_line, infile, stdout);
+    write_current_line_of_file(&mid_line, infile, stdout);
+    write_line_number_from_file_to_file(&begin_line, &end_line, infile, stdout);
+    write_line_number_from_file_to_file(
+      &begin_line, &end2_line, infile, stdout);
+    mpz_clear(begin_line);
+    mpz_clear(mid_line);
+    mpz_clear(end_line);
+    mpz_clear(end2_line);
 }
