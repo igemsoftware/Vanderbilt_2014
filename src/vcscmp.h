@@ -248,15 +248,23 @@ static inline void write_line_and_if_new_add_to_list(
   FILE * out_file) {
     // TODO: explain why we chose QUEUE_HASH_CRITICAL_SIZE here and what this is
 #ifdef DEBUG
-    if (break_out_of_vcscmp) {
+    static size_t count = 0;
+    PRINT_ERROR_NO_NEWLINE("WRITE_LINE_COUNT: ");
+    PRINT_ERROR_SIZE_T_NO_NEWLINE(count);
+    PRINT_ERROR_NEWLINE();
+    ++count;
+    if (*break_out_of_vcscmp) {
         PRINT_ERROR("F");
     } else {
         PRINT_ERROR("G");
     }
 #endif
+    // NOTE: break_out_of_vcscmp is passed by pointer, so if you do not
+    // dereference it, it will return TRUE, since obviously a pointer value != 0
+    // this screwed me over a bit so be careful
     if (!is_cur_line_in_prev_queue(prev_file_line_ids_queue,
                                    cur_file_line_ids_queue) &&
-        !break_out_of_vcscmp) {
+        !*break_out_of_vcscmp) {
 #ifdef DEBUG
         PRINT_ERROR_NO_NEWLINE("NEWLY ADDED LINE AT LINE ");
         PRINT_ERROR_MPZ_T_NO_NEWLINE(*output_file_lines_processed);

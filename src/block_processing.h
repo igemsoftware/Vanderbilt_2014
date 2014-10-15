@@ -52,6 +52,12 @@ static inline bool less_than_mpz_t(mpz_t * lhs, mpz_t * rhs) {
     return mpz_cmp(*lhs, *rhs) < 0;
 }
 
+#ifdef DEBUG
+static inline bool equal_to_mpz_t(mpz_t * lhs, mpz_t * rhs) {
+    return mpz_cmp(*lhs, *rhs) == 0;
+}
+#endif
+
 // CLOBBERS CUR_LINE BY SETTING EQUAL TO FINAL_LINE
 // also doesn't do anything of final_line <= cur_line
 static inline FILE * advance_file_to_line(FILE * file,
@@ -60,11 +66,13 @@ static inline FILE * advance_file_to_line(FILE * file,
                                           size_t block_size) {
     if (!less_than_mpz_t(cur_line, final_line)) {
 #ifdef DEBUG
-        PRINT_ERROR_MPZ_T_NO_NEWLINE(*cur_line);
-        PRINT_ERROR_NO_NEWLINE(",");
-        PRINT_ERROR_MPZ_T_NO_NEWLINE(*final_line);
-        PRINT_ERROR_NEWLINE();
-        PRINT_ERROR("NOT ADVANCING FILE!!!!!!!");
+        if (!equal_to_mpz_t(cur_line, final_line)) {
+            PRINT_ERROR_MPZ_T_NO_NEWLINE(*cur_line);
+            PRINT_ERROR_NO_NEWLINE(",");
+            PRINT_ERROR_MPZ_T_NO_NEWLINE(*final_line);
+            PRINT_ERROR_NEWLINE();
+            PRINT_ERROR("NOT ADVANCING FILE!!!!!!!");
+        }
 #endif
         return file;
     } else {
