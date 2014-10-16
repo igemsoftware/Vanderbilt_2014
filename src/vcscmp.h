@@ -138,12 +138,6 @@ static inline void print_line_id_first_k_chars(line_id * sid) {
 #endif
 
 typedef struct {
-    line_id * id;
-    bool is_leven_found;
-    GSList ** edit_matches;
-} line_id_with_edit_match_info;
-
-typedef struct {
     line_id * prev_id;
     line_id * cur_id;
 } line_id_pair;
@@ -161,6 +155,12 @@ static inline void free_line_id_pair(void * arg) {
         free(lip);
     }
 }
+
+typedef struct {
+    line_id * id;
+    bool is_leven_found;
+    GSList ** edit_matches;
+} line_id_with_edit_match_info;
 
 // compiler will emit a non-inline version of this too, since a pointer is taken
 // to it when g_queue_foreach is used
@@ -246,7 +246,6 @@ static inline void write_line_and_if_new_add_to_list(
   FILE * prev_file_used_for_edits,
   FILE * cur_file,
   FILE * out_file) {
-    // TODO: explain why we chose QUEUE_HASH_CRITICAL_SIZE here and what this is
 #ifdef DEBUG
     // static size_t count = 0;
     // PRINT_ERROR_NO_NEWLINE("WRITE_LINE_COUNT: ");
