@@ -39,6 +39,9 @@
 
 #define PRINT_ERROR_SIZE_T_NO_NEWLINE(num) fprintf(stderr, "%zu", (num))
 
+#define PRINT_ERROR_UNSIGNED_LONG_LONG_NO_NEWLINE(num) \
+    fprintf(stderr, "%llu", (num))
+
 #define PRINT_ERROR_MPZ_T_NO_NEWLINE(bignum) mpz_out_str(stderr, 10, (bignum))
 
 #define PRINT_ERROR_AND_RETURN_IF_NULL(ptr, str) \
@@ -74,20 +77,28 @@ FILE * create_file_binary_write(const char * filename);
 // while they will typically fill the entire memory space sometimes they do
 // less, upon reaching EOF or some other ferror
 typedef struct {
-    char * string;         // NOT null-terminated by default!
-    size_t readable_bytes; // current number of useful bytes this is storing
-    size_t size_in_memory; // full size of char * in bytes
+    char * string; // NOT null-terminated by default!
+    unsigned long long
+      readable_bytes; // current number of useful bytes this is storing
+    unsigned long long size_in_memory; // full size of char * in bytes
 } string_with_size;
 // TODO: javadoc
 // note that sets readable_bytes to 0
-string_with_size * make_new_string_with_size(size_t size_in_memory);
+string_with_size * make_new_string_with_size(unsigned long long size_in_memory);
 #ifdef DEBUG
 // DOES NOT COPY OVER NULL CHAR TERMINATING
 string_with_size * make_new_string_with_size_given_string(char * null_term_str);
 #endif
 // TODO: javadoc
-string_with_size * set_string_with_size_readable_bytes(string_with_size * sws,
-                                                       size_t readable_bytes);
+string_with_size *
+  set_string_with_size_readable_bytes(string_with_size * sws,
+                                      unsigned long long readable_bytes);
+// TODO: javadoc
+string_with_size * copy_string_with_size(string_with_size * from_sws,
+                                         string_with_size * to_sws);
+// TODO: javadoc
+string_with_size * grow_string_with_size(string_with_size ** sws,
+                                         unsigned long long final_size_in_mem);
 // TODO: javadoc
 void free_string_with_size(void * arg);
 

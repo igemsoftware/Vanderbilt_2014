@@ -10,7 +10,7 @@
 // TODO: javadoc
 #define DJB2_MAGIC_CONSTANT 5
 unsigned long int djb2_hash_on_string_index(
-  unsigned long int instantaneous_hash, char * str, size_t cur_index);
+  unsigned long int instantaneous_hash, char * str, unsigned long long cur_index);
 
 // TODO: javadoc
 // http://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/
@@ -18,7 +18,7 @@ unsigned long int djb2_hash_on_string_index(
 #define MIN3(a, b, c) \
     ((a) < (b) ? ((a) < (c) ? (a) : (c)) : ((b) < (c) ? (b) : (c)))
 // precondition: strings are same size
-size_t get_levenshtein_distance(string_with_size * prev_string,
+unsigned long long get_levenshtein_distance(string_with_size * prev_string,
                                 string_with_size * cur_string);
 
 /*
@@ -36,15 +36,15 @@ typedef enum {
 } levenshtein_string_edit_operation;
 
 typedef struct {
-    size_t * cur_cell;
-    size_t cur_x;
-    size_t cur_y;
-    size_t max_y;
+    unsigned long long * cur_cell;
+    unsigned long long cur_x;
+    unsigned long long cur_y;
+    unsigned long long max_y;
 } levenshtein_matrix_state;
 
-bool three_not_null(size_t * x, size_t * y, size_t * z);
+bool three_not_null(unsigned long long * x, unsigned long long * y, unsigned long long * z);
 
-size_t min_of_non_null_three(size_t * x, size_t * y, size_t * z);
+unsigned long long min_of_non_null_three(unsigned long long * x, unsigned long long * y, unsigned long long * z);
 
 // TODO: javadoc, including that as a precondition all up/left/up&left moves
 // are
@@ -64,6 +64,11 @@ GSList * get_levenshtein_edits_and_free(string_with_size * prev_string,
                                         string_with_size * cur_string);
 
 char convert_leven_op_to_char(levenshtein_string_edit_operation cur_op);
+
+typedef struct {
+    string_with_size * sws;
+    unsigned long long index;
+} string_with_size_and_index;
 
 void write_leven_char_to_index_of_string(
   levenshtein_string_edit_operation * cur_op,

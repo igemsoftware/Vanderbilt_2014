@@ -1,26 +1,26 @@
 #include "string_processing.h"
 
 unsigned long int djb2_hash_on_string_index(
-  unsigned long int instantaneous_hash, char * str, size_t cur_index) {
+  unsigned long int instantaneous_hash, char * str, unsigned long long cur_index) {
     return ((instantaneous_hash * 33) ^ (unsigned long int)str[cur_index]);
     // OPTIMIZATION: is using the function character-by-character inefficient?
     // can we act upon larger blocks of data?
 }
 
-size_t get_levenshtein_distance(string_with_size * prev_string,
+unsigned long long get_levenshtein_distance(string_with_size * prev_string,
                                 string_with_size * cur_string) {
-    size_t olddiag;
+    unsigned long long olddiag;
     // TODO: convert to static-allocated array since we know how big it will be
-    size_t * matrix_column =
-      malloc(sizeof(size_t) * (prev_string->readable_bytes + 1));
-    for (size_t prev_index = 1; prev_index <= prev_string->readable_bytes;
+    unsigned long long * matrix_column =
+      malloc(sizeof(unsigned long long) * (prev_string->readable_bytes + 1));
+    for (unsigned long long prev_index = 1; prev_index <= prev_string->readable_bytes;
          ++prev_index) {
         matrix_column[prev_index] = prev_index;
     }
-    for (size_t cur_index = 1; cur_index <= cur_string->readable_bytes;
+    for (unsigned long long cur_index = 1; cur_index <= cur_string->readable_bytes;
          ++cur_index) {
         matrix_column[0] = cur_index;
-        for (size_t prev_index = 1, lastdiag = cur_index;
+        for (unsigned long long prev_index = 1, lastdiag = cur_index;
              prev_index <= prev_string->readable_bytes;
              ++prev_index) {
             olddiag = matrix_column[prev_index];
@@ -34,16 +34,16 @@ size_t get_levenshtein_distance(string_with_size * prev_string,
             lastdiag = olddiag;
         }
     }
-    size_t ret = matrix_column[prev_string->readable_bytes] - 1;
+    unsigned long long ret = matrix_column[prev_string->readable_bytes] - 1;
     free(matrix_column);
     return ret;
 }
 
-bool three_not_null(size_t * x, size_t * y, size_t * z) {
+bool three_not_null(unsigned long long * x, unsigned long long * y, unsigned long long * z) {
     return x != NULL || y != NULL || z != NULL;
 }
 
-size_t min_of_non_null_three(size_t * x, size_t * y, size_t * z) {
+unsigned long long min_of_non_null_three(unsigned long long * x, unsigned long long * y, unsigned long long * z) {
     if (x != NULL) {
         if (y != NULL) {
             if (z != NULL) {
@@ -73,7 +73,7 @@ size_t min_of_non_null_three(size_t * x, size_t * y, size_t * z) {
 
 levenshtein_string_edit_operation
   get_next_levenshtein_operation_and_advance(levenshtein_matrix_state * lms) {
-    size_t * insert_ptr = NULL, *delete_ptr = NULL, *sub_ptr = NULL;
+    unsigned long long * insert_ptr = NULL, *delete_ptr = NULL, *sub_ptr = NULL;
     // bounds checking
     if (lms->cur_y > 0) {
         insert_ptr = lms->cur_cell - 1;
@@ -84,7 +84,7 @@ levenshtein_string_edit_operation
     if (lms->cur_x > 0) {
         delete_ptr = lms->cur_cell - lms->max_y;
     }
-    size_t minimum;
+    unsigned long long minimum;
     if (!three_not_null(insert_ptr, delete_ptr, sub_ptr)) {
         return leven_complete; // done; at first element
     } else {
@@ -116,22 +116,23 @@ GSList * get_levenshtein_edits_and_free(string_with_size * prev_string,
                                         string_with_size * cur_string) {
     // alias variables and allocate matrix
     // m is rows, n is columns
-    size_t m = prev_string->readable_bytes + 1,
-           n = cur_string->readable_bytes + 1;
+    unsigned long long m = prev_string->readable_bytes + 1,
+                       n = cur_string->readable_bytes + 1;
     char * s = prev_string->string, *t = cur_string->string;
-    size_t * lmat = malloc(sizeof(size_t) * m * n); // 2D array
+    unsigned long long * lmat =
+      malloc(sizeof(unsigned long long) * m * n); // 2D array
     // initialize lmat
-    for (size_t k = 0; k < m * n; ++k) {
+    for (unsigned long long k = 0; k < m * n; ++k) {
         lmat[k] = 0;
     }
-    for (size_t i = 0; i < m; ++i) {
+    for (unsigned long long i = 0; i < m; ++i) {
         TWO_D_ARRAY_INDEX(lmat, i, 0, n) = i;
     }
-    for (size_t j = 0; j < n; ++j) {
+    for (unsigned long long j = 0; j < n; ++j) {
         TWO_D_ARRAY_INDEX(lmat, 0, j, n) = j;
     }
-    for (size_t j = 1; j < n; ++j) {
-        for (size_t i = 1; i < m; ++i) {
+    for (unsigned long long j = 1; j < n; ++j) {
+        for (unsigned long long i = 1; i < m; ++i) {
             if (s[i - 1] == t[j - 1]) { // changed from quoted version of alg
                 // because these strings are zero-based
                 TWO_D_ARRAY_INDEX(lmat, i, j, n) =
@@ -204,16 +205,11 @@ char convert_leven_op_to_char(levenshtein_string_edit_operation cur_op) {
     case leven_insertion:
         return 'I';
         break;
-    case default:               // required to be leven_complete
+    default:               // required to be leven_complete
         return 'C';
         break;
     }
 }
-
-typedef struct {
-    string_with_size * sws;
-    size_t index;
-} string_with_size_and_index;
 
 void write_leven_char_to_index_of_string(
   levenshtein_string_edit_operation * cur_op,

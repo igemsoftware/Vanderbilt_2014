@@ -128,18 +128,18 @@ void if_close_levenshtein_dist_add_to_list(
         //         cur_data->id->first_k_chars->readable_bytes);
         //     PRINT_ERROR_NEWLINE();
         // #endif
-        size_t leven_dist = get_levenshtein_distance(
+        unsigned long long leven_dist = get_levenshtein_distance(
           prev_line_id->first_k_chars, cur_data->id->first_k_chars);
         if (leven_dist < LEVENSHTEIN_CHECK_THRESHOLD) {
 #ifdef DEBUG
             PRINT_ERROR("CLOSE STRING FOUND BY LEVENSHTEIN EDITS");
             PRINT_ERROR_NO_NEWLINE("LEVEN_DIST: ");
-            PRINT_ERROR_SIZE_T_NO_NEWLINE(leven_dist);
+            PRINT_ERROR_UNSIGNED_LONG_LONG_NO_NEWLINE(leven_dist);
             PRINT_ERROR_NEWLINE();
             PRINT_ERROR_NO_NEWLINE("PREV_STRING (LINE ");
             PRINT_ERROR_MPZ_T_NO_NEWLINE(prev_line_id->line_number);
             PRINT_ERROR_NO_NEWLINE(") (CHARS ");
-            PRINT_ERROR_SIZE_T_NO_NEWLINE(
+            PRINT_ERROR_UNSIGNED_LONG_LONG_NO_NEWLINE(
               prev_line_id->first_k_chars->readable_bytes);
             PRINT_ERROR_NO_NEWLINE(") (ORF ");
             if (prev_line_id->is_orf) {
@@ -151,7 +151,7 @@ void if_close_levenshtein_dist_add_to_list(
             PRINT_ERROR_NO_NEWLINE("\nCUR_STRING  (LINE ");
             PRINT_ERROR_MPZ_T_NO_NEWLINE(cur_data->id->line_number);
             PRINT_ERROR_NO_NEWLINE(") (CHARS ");
-            PRINT_ERROR_SIZE_T_NO_NEWLINE(
+            PRINT_ERROR_UNSIGNED_LONG_LONG_NO_NEWLINE(
               cur_data->id->first_k_chars->readable_bytes);
             PRINT_ERROR_NO_NEWLINE(") (ORF ");
             if (cur_data->id->is_orf) {
@@ -205,7 +205,7 @@ void print_line_id_pair(line_id_pair * arg) {
 void write_line_and_if_new_add_to_list(
   GQueue * prev_file_line_ids_queue,
   GQueue * cur_file_line_ids_queue,
-  size_t * current_streak_of_newly_added_lines,
+  unsigned long long * current_streak_of_newly_added_lines,
   mpz_t * input_file_lines_processed_for_edits,
   mpz_t * cur_file_lines_processed,
   mpz_t * output_file_lines_processed,
@@ -215,9 +215,9 @@ void write_line_and_if_new_add_to_list(
   FILE * cur_file,
   FILE * out_file) {
 #ifdef DEBUG
-// static size_t count = 0;
+// static unsigned long long count = 0;
 // PRINT_ERROR_NO_NEWLINE("WRITE_LINE_COUNT: ");
-// PRINT_ERROR_SIZE_T_NO_NEWLINE(count);
+// PRINT_ERROR_UNSIGNED_LONG_LONG_NO_NEWLINE(count);
 // PRINT_ERROR_NEWLINE();
 // ++count;
 // if (*break_out_of_vcscmp) {
@@ -242,12 +242,12 @@ void write_line_and_if_new_add_to_list(
         PRINT_ERROR_NO_NEWLINE("ORF)");
         PRINT_ERROR_NEWLINE();
         PRINT_ERROR_NO_NEWLINE("PREV_QUEUE SIZE: ");
-        PRINT_ERROR_SIZE_T_NO_NEWLINE(
-          (size_t)g_queue_get_length(prev_file_line_ids_queue));
+        PRINT_ERROR_UNSIGNED_LONG_LONG_NO_NEWLINE(
+          (unsigned long long)g_queue_get_length(prev_file_line_ids_queue));
         PRINT_ERROR_NEWLINE();
         PRINT_ERROR_NO_NEWLINE("CUR_QUEUE SIZE: ");
-        PRINT_ERROR_SIZE_T_NO_NEWLINE(
-          (size_t)g_queue_get_length(cur_file_line_ids_queue));
+        PRINT_ERROR_UNSIGNED_LONG_LONG_NO_NEWLINE(
+          (unsigned long long)g_queue_get_length(cur_file_line_ids_queue));
         PRINT_ERROR_NEWLINE();
 #endif
         // adds to edit_matches list
@@ -303,7 +303,7 @@ void initialize_line_id(unsigned long int * ptr_hash,
 void if_within_first_section_write_to_string(unsigned long int ptr_line_length,
                                              string_with_size * sws_first_chars,
                                              string_with_size * sws_block,
-                                             size_t ptr_index) {
+                                             unsigned long long ptr_index) {
     if (ptr_line_length < LEVENSHTEIN_CHECK_CHARS) {
         sws_first_chars->string[ptr_line_length] = sws_block->string[ptr_index];
     }
@@ -313,7 +313,7 @@ void write_string_and_update_hash_and_line_length(
   unsigned long int * ptr_line_length,
   string_with_size * sws_first_chars,
   string_with_size * sws_block,
-  size_t ptr_index,
+  unsigned long long ptr_index,
   unsigned long int * instantaneous_hash,
   char * hash_str,
   bool * ptr_past_k_chars) {
@@ -362,7 +362,7 @@ bool is_first_line_orf(string_with_size * first_few_chars) {
 }
 
 void react_to_next_character_of_block(string_with_size * input_block,
-                                      size_t block_index,
+                                      unsigned long long block_index,
                                       mpz_t * lines_processed,
                                       bool * is_line_orf,
                                       string_with_size ** first_few_chars,
@@ -406,7 +406,7 @@ void add_blocks_to_queue(FILE * active_file,
     if (!(feof(active_file) || ferror(active_file)) &&
         g_queue_get_length(ids_queue) < QUEUE_HASH_CRITICAL_SIZE) {
         read_block(active_file, input_block);
-        for (size_t block_index = 0; block_index < input_block->readable_bytes;
+        for (unsigned long long block_index = 0; block_index < input_block->readable_bytes;
              ++block_index) {
             react_to_next_character_of_block(input_block,
                                              block_index,
@@ -431,11 +431,12 @@ void add_blocks_to_queue(FILE * active_file,
     }
 }
 
-string_with_size * optimal_levenshtein_string_between_lines(FILE * prev_file,
-                                                            FILE * cur_file) {
+string_with_size *
+  optimal_levenshtein_string_between_lines(FILE * prev_file,
+                                           FILE * cur_file) {
     return format_and_free_levenshtein_list_to_string_with_size(
-      get_levenshtein_edits(get_current_line_of_file(prev_file),
-                            get_current_line_of_file(cur_file)));
+      get_levenshtein_edits_and_free(get_current_line_of_file(prev_file),
+                                     get_current_line_of_file(cur_file)));
 }
 
 void print_levenshtein_smallest_edits_to_out_file(
@@ -443,16 +444,24 @@ void print_levenshtein_smallest_edits_to_out_file(
   diff_file_trio_with_indices * files_and_indices) {
     advance_file_to_line(files_and_indices->prev_file,
                          files_and_indices->prev_file_index,
-                         arg->prev_id,
+                         &arg->prev_id->line_number,
                          BIN_BLOCK_SIZE);
     advance_file_to_line(files_and_indices->cur_file,
                          files_and_indices->cur_file_index,
-                         args->cur_id,
+                         &arg->cur_id->line_number,
                          BIN_BLOCK_SIZE);
     write_block(files_and_indices->out_file,
                 optimal_levenshtein_string_between_lines(
                   files_and_indices->prev_file,
                   files_and_indices->cur_file));
+    fputc('\n',files_and_indices->out_file); // delimit by newline
+#ifdef DEBUG
+    write_block(stderr,
+                optimal_levenshtein_string_between_lines(
+                  files_and_indices->prev_file,
+                  files_and_indices->cur_file));
+    fputc('\n', stderr);
+#endif
 }
 
 void vcscmp(const char * prev_filename,
@@ -507,7 +516,7 @@ void vcscmp(const char * prev_filename,
     bool prev_is_line_orf; // switches every line
     bool cur_is_line_orf;
 
-    size_t current_streak_of_newly_added_lines = 0;
+    unsigned long long current_streak_of_newly_added_lines = 0;
     bool break_out_of_vcscmp = false;
 
     GSList * edit_matches = NULL; // list of lines counted as edits from a
@@ -602,6 +611,7 @@ void vcscmp(const char * prev_filename,
     dftwi.cur_file = cur_file;
     dftwi.cur_file_index = &cur_lines_processed;
     dftwi.out_file = out_file;
+    fputc('\n',out_file);       // delimit by newline
     g_slist_foreach(edit_matches,
                     (GFunc)print_levenshtein_smallest_edits_to_out_file,
                     &dftwi);

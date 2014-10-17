@@ -43,7 +43,7 @@ void vcsfmt(char * filename) {
 
 #endif
     bool is_within_orf = false; // file begins outside of orf
-    size_t cur_orf_pos = 0;
+    unsigned long long cur_orf_pos = 0;
     char current_codon_frame[CODON_LENGTH] = {'\0'};
 
 #ifdef CONCURRENT
@@ -225,7 +225,7 @@ string_with_size * fasta_preformat(string_with_size * input,
     metadata->readable_bytes = 0;
 
     // Loop through all the readable characters in input.
-    for (size_t i = 0; i < input->readable_bytes; ++i) {
+    for (unsigned long long i = 0; i < input->readable_bytes; ++i) {
 
         char current = input->string[i];
 
@@ -255,7 +255,7 @@ string_with_size * fasta_preformat(string_with_size * input,
             int written = write_annotation(
               &(metadata->string[metadata->readable_bytes]), *lines_processed);
 
-            metadata->readable_bytes += (size_t) written;
+            metadata->readable_bytes += (unsigned long long) written;
 
             // Flag that we're in a comment now.
             *in_comment = true;

@@ -35,11 +35,12 @@ int main(int argc, char **argv) {
     }
   }
 
-  // vcsfmt("500_lines_of_dna_minus_lines.fasta");
+  vcsfmt("500_lines_of_dna_minus_lines_0.fasta");
+  vcsfmt("500_lines_of_dna_minus_lines_1.fasta");
 
   // de_vcsfmt("500_lines_of_dna_minus_lines.fasta.vcsfmt");
 
-  vcscmp("500_lines_of_dna_minus_lines.fasta.vcsfmt1",
-         "500_lines_of_dna_minus_lines.fasta.vcsfmt2",
+  vcscmp("500_lines_of_dna_minus_lines_0.fasta.vcsfmt",
+         "500_lines_of_dna_minus_lines_1.fasta.vcsfmt",
          "WEIRD_OUTPUT_FILE.vcscmp");
 }

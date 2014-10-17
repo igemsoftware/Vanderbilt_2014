@@ -21,10 +21,17 @@
 // maximum possible size of output block, assuming every possible 60-char
 // sequence is an orf (which won't happen)
 // two newlines per orf in the worst possible case
-#define BIN_BLOCK_SIZE (size_t)(BLOCK_SIZE * (1 + 2 / (double)MIN_ORF_LENGTH))
+#define BIN_BLOCK_SIZE \
+    (unsigned long long)(BLOCK_SIZE * (1 + 2 / (double)MIN_ORF_LENGTH))
 
 string_with_size * read_block(FILE * input_file,
                               string_with_size * input_string_with_size);
+
+string_with_size *
+  read_block_with_offset(FILE * input_file,
+                         string_with_size * input_string_with_size,
+                         unsigned long long size_to_read,
+                         unsigned long long offset);
 
 string_with_size * write_block(FILE * output_file,
                                string_with_size * output_block_with_size);
@@ -42,7 +49,7 @@ bool equal_to_mpz_t(mpz_t * lhs, mpz_t * rhs);
 FILE * advance_file_to_line(FILE * file,
                             mpz_t * cur_line,
                             mpz_t * final_line,
-                            size_t block_size);
+                            unsigned long long block_size);
 
 // CLOBBERS FROM_LINE_NUMBER (increments)
 // SETS FILE POINTER TO FIRST CHARACTER OF *NEXT* LINE
@@ -60,7 +67,9 @@ void write_line_number_from_file_to_file(mpz_t * from_line_number,
                                          FILE * source_file,
                                          FILE * dest_file);
 
-string_with_size * get_current_line_of_file(FILE* source_file);
+// assumes file is at beginning of required line
+// puts file pointer back where it started
+string_with_size * get_current_line_of_file(FILE * source_file);
 
 /**
  *  Given a continuous stream of DNA characters, this function will insert
@@ -87,7 +96,7 @@ string_with_size *
   process_block_vcsfmt(string_with_size * input_block_with_size,
                        string_with_size * output_block_with_size,
                        bool * is_within_orf,
-                       size_t * cur_orf_pos,
+                       unsigned long long * cur_orf_pos,
                        char * current_codon_frame,
                        bool is_final_block);
 
@@ -106,7 +115,7 @@ typedef struct {
     string_with_size * input_block_with_size;
     string_with_size * output_block_with_size;
     bool * is_within_orf;
-    size_t * cur_orf_pos;
+    unsigned long long * cur_orf_pos;
     char * current_codon_frame;
     bool is_final_block;
     GAsyncQueue * active_queue;

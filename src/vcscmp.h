@@ -92,7 +92,7 @@ boolean_and_data get_if_edit_line_and_if_so_add_to_list(
 void write_line_and_if_new_add_to_list(
   GQueue * prev_file_line_ids_queue,
   GQueue * cur_file_line_ids_queue,
-  size_t * current_streak_of_newly_added_lines,
+  unsigned long long * current_streak_of_newly_added_lines,
   mpz_t * input_file_lines_processed_for_edits,
   mpz_t * cur_file_lines_processed,
   mpz_t * output_file_lines_processed,
@@ -110,13 +110,13 @@ void initialize_line_id(unsigned long int * ptr_hash,
 void if_within_first_section_write_to_string(unsigned long int ptr_line_length,
                                              string_with_size * sws_first_chars,
                                              string_with_size * sws_block,
-                                             size_t ptr_index);
+                                             unsigned long long ptr_index);
 
 void write_string_and_update_hash_and_line_length(
   unsigned long int * ptr_line_length,
   string_with_size * sws_first_chars,
   string_with_size * sws_block,
-  size_t ptr_index,
+  unsigned long long ptr_index,
   unsigned long int * instantaneous_hash,
   char * hash_str,
   bool * ptr_past_k_chars);
@@ -138,7 +138,7 @@ void check_if_past_k_chars_push_tail_and_initialize_line_id(
 bool is_first_line_orf(string_with_size * first_few_chars);
 
 void react_to_next_character_of_block(string_with_size * input_block,
-                                      size_t block_index,
+                                      unsigned long long block_index,
                                       mpz_t * lines_processed,
                                       bool * is_line_orf,
                                       string_with_size ** first_few_chars,
@@ -169,8 +169,9 @@ typedef struct {
     FILE * out_file;
 } diff_file_trio_with_indices;
 
-string_with_size * optimal_levenshtein_string_between_lines(FILE * prev_file,
-                                                            FILE * cur_file);
+string_with_size *
+  optimal_levenshtein_string_between_lines(FILE * prev_file,
+                                           FILE * cur_file);
 
 // since address being taken for use in for_each, compiler will also emit
 // non-inline version
