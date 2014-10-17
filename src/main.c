@@ -5,7 +5,7 @@
 #include "vcscmp.h"         // for producing diff-compatible output
 
 // example function used for g_slist_foreach
-static inline void print_list_string(char *input_str) {
+void print_list_string(char *input_str) {
   printf("%s\n", input_str);
 }
 
@@ -42,25 +42,4 @@ int main(int argc, char **argv) {
   vcscmp("500_lines_of_dna_minus_lines.fasta.vcsfmt1",
          "500_lines_of_dna_minus_lines.fasta.vcsfmt2",
          "WEIRD_OUTPUT_FILE.vcscmp");
-
-  // mpz_t index_line;
-  // mpz_init_set_ui(index_line, 1);
-  // mpz_t mid_line;
-  // mpz_init_set_ui(mid_line, 50);
-  // mpz_t end_line;
-  // mpz_init_set_ui(end_line, 235);
-  // mpz_t end2_line;
-  // mpz_init_set_ui(end2_line, 238);
-  // FILE *infile = open_file_read("500_lines_of_dna_minus_lines.fasta.vcsfmt");
-  // write_current_line_of_file(&index_line, infile, stdout);
-  // write_line_number_from_file_to_file(&index_line, &mid_line, infile, stdout);
-  // write_current_line_of_file(&index_line, infile, stdout);
-  // write_current_line_of_file(&index_line, infile, stdout);
-  // write_current_line_of_file(&index_line, infile, stdout);
-  // write_line_number_from_file_to_file(&index_line, &end_line, infile, stdout);
-  // write_line_number_from_file_to_file(&index_line, &end2_line, infile, stdout);
-  // mpz_clear(index_line);
-  // mpz_clear(mid_line);
-  // mpz_clear(end_line);
-  // mpz_clear(end2_line);
 }

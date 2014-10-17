@@ -40,7 +40,7 @@ typedef struct {
     bool has_no_args;
 } dwndiff_arguments;
 // CTOR
-static inline dwndiff_arguments
+dwndiff_arguments
   initialize_dwndiff_arguments(dwndiff_arguments args) {
     args.files = NULL;
     args.preformat_loc_dir = "";

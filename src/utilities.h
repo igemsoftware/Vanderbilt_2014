@@ -25,7 +25,7 @@
 #include <gmp.h>    // for bignums
 
 // PORTABILITY MACROS
-// IFFY: this could cause issues with processing files not made by us
+// IFFY: this could cause issues with processing files not made on linux systems
 #define NEWLINE '\n'
 
 // MACROS
@@ -50,7 +50,7 @@
 #define PRINT_ERROR_DIVIDER_LINE() fprintf(stderr, "%s\n", "------------");
 
 #define PRINT_ERROR_STRING_FIXED_LENGTH_NO_NEWLINE(str, len) \
-    fprintf(stderr, "%.*s", (int) len, str)
+    fprintf(stderr, "%.*s", (int)len, str)
 
 // x is vertical (downwards), y is horizontal (rightwards)
 // parentheses required because of distributivity
@@ -63,15 +63,9 @@
  * @brief:
  * ...
  */
-static inline FILE * open_file_read(const char * filename) {
-    FILE * input_file = fopen(filename, "r");
-    return input_file;
-}
+FILE * open_file_read(const char * filename);
 // TODO: mention truncation
-static inline FILE * create_file_binary_write(const char * filename) {
-    FILE * output_file = fopen(filename, "wb");
-    return output_file;
-}
+FILE * create_file_binary_write(const char * filename);
 
 // STRUCTS AND FUNCTIONS TO MANIPULATE THEM
 // STRING_WITH_SIZE
@@ -80,45 +74,21 @@ static inline FILE * create_file_binary_write(const char * filename) {
 // while they will typically fill the entire memory space sometimes they do
 // less, upon reaching EOF or some other ferror
 typedef struct {
-    char * string;             // NOT null-terminated by default!
-    size_t readable_bytes;     // current number of useful bytes this is storing
-    size_t size_in_memory;     // full size of char * in bytes
+    char * string;         // NOT null-terminated by default!
+    size_t readable_bytes; // current number of useful bytes this is storing
+    size_t size_in_memory; // full size of char * in bytes
 } string_with_size;
 // TODO: javadoc
 // note that sets readable_bytes to 0
-static inline string_with_size *
-  make_new_string_with_size(size_t size_in_memory) {
-    string_with_size * sws_to_return = malloc(sizeof(string_with_size));
-    sws_to_return->string = malloc(size_in_memory * (sizeof(char)));
-    sws_to_return->readable_bytes = 0;
-    sws_to_return->size_in_memory = size_in_memory;
-    return sws_to_return;
-}
+string_with_size * make_new_string_with_size(size_t size_in_memory);
 #ifdef DEBUG
 // DOES NOT COPY OVER NULL CHAR TERMINATING
-static inline string_with_size *
-  make_new_string_with_size_given_string(char * null_term_str) {
-    string_with_size * sws_to_return = malloc(sizeof(string_with_size));
-    sws_to_return->string = malloc(sizeof(char) * (strlen(null_term_str)));
-    memcpy(sws_to_return->string, null_term_str, strlen(null_term_str));
-    sws_to_return->readable_bytes = strlen(null_term_str);
-    return sws_to_return;
-}
+string_with_size * make_new_string_with_size_given_string(char * null_term_str);
 #endif
 // TODO: javadoc
-static inline string_with_size *
-  set_string_with_size_readable_bytes(string_with_size * sws,
-                                      size_t readable_bytes) {
-    sws->readable_bytes = readable_bytes;
-    return sws;
-}
+string_with_size * set_string_with_size_readable_bytes(string_with_size * sws,
+                                                       size_t readable_bytes);
 // TODO: javadoc
-static inline void free_string_with_size(void * arg) {
-    if (NULL != arg) {
-        string_with_size * sws_to_free = (string_with_size *) arg;
-        free(sws_to_free->string);
-        free(sws_to_free);
-    }
-}
+void free_string_with_size(void * arg);
 
 #endif /*___UTILITIES_H___*/

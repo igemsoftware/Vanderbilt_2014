@@ -21,130 +21,46 @@
 // maximum possible size of output block, assuming every possible 60-char
 // sequence is an orf (which won't happen)
 // two newlines per orf in the worst possible case
-#define BIN_BLOCK_SIZE (size_t)(BLOCK_SIZE * (1 + 2 / (double) MIN_ORF_LENGTH))
+#define BIN_BLOCK_SIZE (size_t)(BLOCK_SIZE * (1 + 2 / (double)MIN_ORF_LENGTH))
 
-static inline string_with_size *
-  read_block(FILE * input_file, string_with_size * input_string_with_size) {
-    input_string_with_size->readable_bytes =
-      fread(input_string_with_size->string,
-            sizeof(char),
-            input_string_with_size->size_in_memory,
-            input_file);
-    return input_string_with_size;
-}
+string_with_size * read_block(FILE * input_file,
+                              string_with_size * input_string_with_size);
 
-static inline string_with_size *
-  write_block(FILE * output_file, string_with_size * output_block_with_size) {
-    output_block_with_size->readable_bytes =
-      fwrite(output_block_with_size->string,
-             sizeof(char),
-             output_block_with_size->readable_bytes,
-             output_file);
-    return output_block_with_size;
-}
+string_with_size * write_block(FILE * output_file,
+                               string_with_size * output_block_with_size);
 
-static inline mpz_t * increment_mpz_t(mpz_t * in) {
-    mpz_add_ui(*in, *in, 1);
-    return in;
-}
+mpz_t * increment_mpz_t(mpz_t * in);
 
-static inline bool less_than_mpz_t(mpz_t * lhs, mpz_t * rhs) {
-    return mpz_cmp(*lhs, *rhs) < 0;
-}
+bool less_than_mpz_t(mpz_t * lhs, mpz_t * rhs);
 
-#ifdef DEBUG
-static inline bool equal_to_mpz_t(mpz_t * lhs, mpz_t * rhs) {
-    return mpz_cmp(*lhs, *rhs) == 0;
-}
-#endif
+bool less_than_or_equal_to_mpz_t(mpz_t * lhs, mpz_t * rhs);
+
+bool equal_to_mpz_t(mpz_t * lhs, mpz_t * rhs);
 
 // CLOBBERS CUR_LINE BY SETTING EQUAL TO FINAL_LINE
-// also doesn't do anything of final_line <= cur_line
-static inline FILE * advance_file_to_line(FILE * file,
-                                          mpz_t * cur_line,
-                                          mpz_t * final_line,
-                                          size_t block_size) {
-    if (!less_than_mpz_t(cur_line, final_line)) {
-#ifdef DEBUG
-        if (!equal_to_mpz_t(cur_line, final_line)) {
-            PRINT_ERROR_MPZ_T_NO_NEWLINE(*cur_line);
-            PRINT_ERROR_NO_NEWLINE(",");
-            PRINT_ERROR_MPZ_T_NO_NEWLINE(*final_line);
-            PRINT_ERROR_NEWLINE();
-            PRINT_ERROR("NOT ADVANCING FILE!!!!!!!");
-        }
-#endif
-        return file;
-    } else {
-        string_with_size * in_block = make_new_string_with_size(block_size);
-        bool succeeded = false;
-        while (!succeeded && !(feof(file) || ferror(file))) {
-            read_block(file, in_block);
-            for (size_t block_index = 0; block_index < in_block->readable_bytes;
-                 ++block_index) {
-                if (NEWLINE == in_block->string[block_index]) {
-                    increment_mpz_t(cur_line);
-                    if (!less_than_mpz_t(cur_line, final_line)) { // if ==
-                        // go back to beginning of line
-                        // IFFY: the off-by-one errors here are killer
-                        fseek(file,
-                              ((long) block_index) -
-                                ((long) in_block->readable_bytes - 1),
-                              SEEK_CUR);
-                        succeeded = true;
-                        break;
-                    }
-                }
-            }
-        }
-        free_string_with_size(in_block);
-        return file;
-    }
-}
+// starts again from beginning of file if final_line < cur_line
+FILE * advance_file_to_line(FILE * file,
+                            mpz_t * cur_line,
+                            mpz_t * final_line,
+                            size_t block_size);
 
 // CLOBBERS FROM_LINE_NUMBER (increments)
 // SETS FILE POINTER TO FIRST CHARACTER OF *NEXT* LINE
 // INCLUDES NEWLINE
-static inline void write_current_line_of_file(mpz_t * from_line_number,
-                                              FILE * source_file,
-                                              FILE * dest_file) {
-    string_with_size * io_block = make_new_string_with_size(BIN_BLOCK_SIZE);
-    bool succeeded = false;
-    while (!succeeded && !(feof(source_file) || ferror(source_file))) {
-        read_block(source_file, io_block);
-        for (size_t block_index = 0; block_index < io_block->readable_bytes;
-             ++block_index) {
-            if (NEWLINE == io_block->string[block_index]) {
-                // go back to beginning of line
-                // IFFY: the off-by-one errors here are killer
-                fseek(source_file,
-                      ((long) block_index) -
-                        ((long) io_block->readable_bytes - 1),
-                      SEEK_CUR);
-                // +1 is to include the newline at the end
-                set_string_with_size_readable_bytes(io_block, block_index + 1);
-                succeeded = true;
-                break;
-            }
-        }
-        write_block(dest_file, io_block);
-    }
-    free_string_with_size(io_block);
-    increment_mpz_t(from_line_number);
-}
+void write_current_line_of_file(mpz_t * from_line_number,
+                                FILE * source_file,
+                                FILE * dest_file);
 
 // TODO: have function which advances to line and writes to output for speed
 
 // CLOBBERS FROM_LINE_NUMBER
 // i.e. sets it equal to to_line_number + 1
-static inline void write_line_number_from_file_to_file(mpz_t * from_line_number,
-                                                       mpz_t * to_line_number,
-                                                       FILE * source_file,
-                                                       FILE * dest_file) {
-    advance_file_to_line(
-      source_file, from_line_number, to_line_number, BIN_BLOCK_SIZE);
-    write_current_line_of_file(from_line_number, source_file, dest_file);
-}
+void write_line_number_from_file_to_file(mpz_t * from_line_number,
+                                         mpz_t * to_line_number,
+                                         FILE * source_file,
+                                         FILE * dest_file);
+
+string_with_size * get_current_line_of_file(FILE* source_file);
 
 /**
  *  Given a continuous stream of DNA characters, this function will insert
@@ -220,18 +136,8 @@ void
 
 // TODO: javadoc
 // cool mutex stuff
-static inline bool is_processing_complete_vcsfmt_concurrent(
-  concurrent_read_write_block_args_vcsfmt * args) {
-    if (g_async_queue_length(args->active_queue) != 0) {
-        return false;
-    } else {
-        // OPTIMIZATION: make this variable static somehow
-        bool result;
-        g_mutex_lock(args->process_complete_mutex);
-        result = *args->is_processing_complete;
-        g_mutex_unlock(args->process_complete_mutex);
-        return result;
-    }
-}
+bool is_processing_complete_vcsfmt_concurrent(
+  concurrent_read_write_block_args_vcsfmt * args);
+
 #endif
 #endif /*___BLOCK_PROCESSING_H___*/
