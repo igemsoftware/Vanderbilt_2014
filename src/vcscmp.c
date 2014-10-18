@@ -1,4 +1,4 @@
-#include "vcscmp.h" // required
+#include "vcscmp.h"
 
 // OPTIMIZATION: inline everything
 line_id * line_id_set_is_orf(line_id * sid, bool set_is_orf) {
