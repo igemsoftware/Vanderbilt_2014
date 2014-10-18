@@ -54,11 +54,11 @@
 #define PRINT_ERROR_DIVIDER_LINE() fprintf(stderr, "%s\n", "------------");
 
 #define PRINT_ERROR_STRING_FIXED_LENGTH_NO_NEWLINE(str, len) \
-    fprintf(stderr, "%.*s", (int)len, str)
+    fprintf(stderr, "%.*s", (int) len, str)
 
 // x is vertical (downwards), y is horizontal (rightwards)
 // parentheses required because of distributivity
-#define TWO_D_ARRAY_INDEX(arr, x, y, max_y) (arr)[(x) * (max_y) + (y)]
+#define TWO_D_ARRAY_INDEX(arr, x, y, max_y) (arr)[ (x) * (max_y) + (y) ]
 
 /* cldoc:begin-category(utilities::file functions) */
 

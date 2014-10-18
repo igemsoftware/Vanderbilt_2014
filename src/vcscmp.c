@@ -57,7 +57,7 @@ line_id * clone_line_id_with_string_null(line_id * base) {
 }
 void free_line_id(void * arg) {
     if (NULL != arg) {
-        line_id * lid = (line_id *)arg;
+        line_id * lid = (line_id *) arg;
         free_string_with_size(lid->first_k_chars);
         mpz_clear(lid->line_number);
         free(lid);
@@ -79,15 +79,14 @@ bool is_cur_line_in_prev_queue(GQueue * prev_file_queue,
     boolean_and_data bool_data_bundle;
     bool_data_bundle.data = g_queue_peek_head(cur_file_queue);
     bool_data_bundle.boolean = false;
-    g_queue_foreach(
-      prev_file_queue, (GFunc)set_bool_if_line_id_match, &bool_data_bundle);
+    g_queue_foreach(prev_file_queue, (GFunc) set_bool_if_line_id_match,
+                    &bool_data_bundle);
     return bool_data_bundle.boolean;
 }
 #ifdef DEBUG
 void print_line_id_first_k_chars(line_id * sid) {
-    fprintf(stderr,
-            "%.*s",
-            (int)sid->first_k_chars->readable_bytes, // int cast required
+    fprintf(stderr, "%.*s",
+            (int) sid->first_k_chars->readable_bytes, // int cast required
             sid->first_k_chars->string);
 }
 #endif
@@ -100,7 +99,7 @@ line_id_pair * make_line_id_pair(line_id * prev, line_id * cur) {
 }
 void free_line_id_pair(void * arg) {
     if (NULL != arg) {
-        line_id_pair * lip = (line_id_pair *)arg;
+        line_id_pair * lip = (line_id_pair *) arg;
         free_line_id(lip->prev_id);
         free_line_id(lip->cur_id);
         free(lip);
@@ -181,8 +180,8 @@ boolean_and_data get_if_edit_line_and_if_so_add_to_list(
     liam.id = g_queue_peek_head(cur_file_queue);
     liam.is_leven_found = false;
     liam.edit_matches = edit_matches;
-    g_queue_foreach(
-      prev_file_queue, (GFunc)if_close_levenshtein_dist_add_to_list, &liam);
+    g_queue_foreach(prev_file_queue,
+                    (GFunc) if_close_levenshtein_dist_add_to_list, &liam);
     boolean_and_data return_val;
     return_val.boolean = liam.is_leven_found;
     return_val.data = liam.id;
@@ -236,18 +235,18 @@ void write_line_and_if_new_add_to_list(
         PRINT_ERROR_NO_NEWLINE("NEWLY ADDED LINE AT LINE ");
         PRINT_ERROR_MPZ_T_NO_NEWLINE(*output_file_lines_processed);
         PRINT_ERROR_NO_NEWLINE(" (CUR: ");
-        if (!((line_id *)g_queue_peek_head(cur_file_line_ids_queue))->is_orf) {
+        if (!((line_id *) g_queue_peek_head(cur_file_line_ids_queue))->is_orf) {
             PRINT_ERROR_NO_NEWLINE("NO ");
         }
         PRINT_ERROR_NO_NEWLINE("ORF)");
         PRINT_ERROR_NEWLINE();
         PRINT_ERROR_NO_NEWLINE("PREV_QUEUE SIZE: ");
         PRINT_ERROR_UNSIGNED_LONG_LONG_NO_NEWLINE(
-          (unsigned long long)g_queue_get_length(prev_file_line_ids_queue));
+          (unsigned long long) g_queue_get_length(prev_file_line_ids_queue));
         PRINT_ERROR_NEWLINE();
         PRINT_ERROR_NO_NEWLINE("CUR_QUEUE SIZE: ");
         PRINT_ERROR_UNSIGNED_LONG_LONG_NO_NEWLINE(
-          (unsigned long long)g_queue_get_length(cur_file_line_ids_queue));
+          (unsigned long long) g_queue_get_length(cur_file_line_ids_queue));
         PRINT_ERROR_NEWLINE();
 #endif
         // adds to edit_matches list
@@ -260,15 +259,14 @@ void write_line_and_if_new_add_to_list(
             // #endif
             write_line_number_from_file_to_file(
               input_file_lines_processed_for_edits,
-              &((line_id *)is_edit_and_line_id_if_so.data)->line_number,
-              prev_file_used_for_edits,
-              out_file);
+              &((line_id *) is_edit_and_line_id_if_so.data)->line_number,
+              prev_file_used_for_edits, out_file);
         } else { // if just new line
                  // #ifdef DEBUG
                  //             PRINT_ERROR("JOHN TRAVOLTA");
                  // #endif
-            write_current_line_of_file(
-              cur_file_lines_processed, cur_file, out_file);
+            write_current_line_of_file(cur_file_lines_processed, cur_file,
+                                       out_file);
             ++*current_streak_of_newly_added_lines;
             if (*current_streak_of_newly_added_lines >
                 QUEUE_HASH_CRITICAL_SIZE) {
@@ -282,10 +280,9 @@ void write_line_and_if_new_add_to_list(
         //         PRINT_ERROR("ACE VENTURA");
         // #endif
         write_line_number_from_file_to_file(
-          cur_file_lines_processed,
-          &((line_id *)g_queue_peek_head(cur_file_line_ids_queue))->line_number,
-          cur_file,
-          out_file);
+          cur_file_lines_processed, &((line_id *) g_queue_peek_head(
+                                        cur_file_line_ids_queue))->line_number,
+          cur_file, out_file);
     }
     increment_mpz_t(output_file_lines_processed);
 }
@@ -305,7 +302,8 @@ void if_within_first_section_write_to_string(unsigned long int ptr_line_length,
                                              string_with_size * sws_block,
                                              unsigned long long ptr_index) {
     if (ptr_line_length < LEVENSHTEIN_CHECK_CHARS) {
-        sws_first_chars->string[ptr_line_length] = sws_block->string[ptr_index];
+        sws_first_chars->string[ ptr_line_length ] =
+          sws_block->string[ ptr_index ];
     }
 }
 
@@ -317,8 +315,8 @@ void write_string_and_update_hash_and_line_length(
   unsigned long int * instantaneous_hash,
   char * hash_str,
   bool * ptr_past_k_chars) {
-    if_within_first_section_write_to_string(
-      *ptr_line_length, sws_first_chars, sws_block, ptr_index);
+    if_within_first_section_write_to_string(*ptr_line_length, sws_first_chars,
+                                            sws_block, ptr_index);
     *instantaneous_hash =
       djb2_hash_on_string_index(*instantaneous_hash, hash_str, ptr_index);
     ++*ptr_line_length;
@@ -340,17 +338,15 @@ void check_if_past_k_chars_push_tail_and_initialize_line_id(
         *ptr_line_length = LEVENSHTEIN_CHECK_CHARS;
     }
     g_queue_push_tail(
-      ids_queue,
-      line_id_set_is_orf(
-        line_id_set_line_number(make_line_id_given_string_with_size(
-                                  *ptr_line_hash,
-                                  *ptr_line_length,
-                                  set_string_with_size_readable_bytes(
-                                    *first_few_chars, *ptr_line_length)),
-                                lines_processed),
-        is_line_orf));
-    initialize_line_id(
-      ptr_line_hash, ptr_line_length, first_few_chars, ptr_past_k_chars);
+      ids_queue, line_id_set_is_orf(line_id_set_line_number(
+                                      make_line_id_given_string_with_size(
+                                        *ptr_line_hash, *ptr_line_length,
+                                        set_string_with_size_readable_bytes(
+                                          *first_few_chars, *ptr_line_length)),
+                                      lines_processed),
+                                    is_line_orf));
+    initialize_line_id(ptr_line_hash, ptr_line_length, first_few_chars,
+                       ptr_past_k_chars);
 }
 
 // TODO: "ironed out" as below
@@ -370,27 +366,19 @@ void react_to_next_character_of_block(string_with_size * input_block,
                                       unsigned long int * ptr_line_length,
                                       GQueue * ids_queue,
                                       unsigned long int * ptr_line_hash) {
-    if (NEWLINE == input_block->string[block_index]) {
+    if (NEWLINE == input_block->string[ block_index ]) {
         if (mpz_cmp_ui(*lines_processed, 1)) { // if first line
             *is_line_orf = is_first_line_orf(*first_few_chars);
         }
-        check_if_past_k_chars_push_tail_and_initialize_line_id(ptr_past_k_chars,
-                                                               ptr_line_length,
-                                                               ids_queue,
-                                                               ptr_line_hash,
-                                                               first_few_chars,
-                                                               lines_processed,
-                                                               *is_line_orf);
+        check_if_past_k_chars_push_tail_and_initialize_line_id(
+          ptr_past_k_chars, ptr_line_length, ids_queue, ptr_line_hash,
+          first_few_chars, lines_processed, *is_line_orf);
         increment_mpz_t(lines_processed);
         *is_line_orf = !*is_line_orf; // flip it
     } else {
-        write_string_and_update_hash_and_line_length(ptr_line_length,
-                                                     *first_few_chars,
-                                                     input_block,
-                                                     block_index,
-                                                     ptr_line_hash,
-                                                     input_block->string,
-                                                     ptr_past_k_chars);
+        write_string_and_update_hash_and_line_length(
+          ptr_line_length, *first_few_chars, input_block, block_index,
+          ptr_line_hash, input_block->string, ptr_past_k_chars);
     }
 }
 
@@ -406,60 +394,44 @@ void add_blocks_to_queue(FILE * active_file,
     if (!(feof(active_file) || ferror(active_file)) &&
         g_queue_get_length(ids_queue) < QUEUE_HASH_CRITICAL_SIZE) {
         read_block(active_file, input_block);
-        for (unsigned long long block_index = 0; block_index < input_block->readable_bytes;
-             ++block_index) {
-            react_to_next_character_of_block(input_block,
-                                             block_index,
-                                             lines_processed,
-                                             is_line_orf,
-                                             first_few_chars,
-                                             ptr_past_k_chars,
-                                             ptr_line_length,
-                                             ids_queue,
-                                             ptr_line_hash);
+        for (unsigned long long block_index = 0;
+             block_index < input_block->readable_bytes; ++block_index) {
+            react_to_next_character_of_block(
+              input_block, block_index, lines_processed, is_line_orf,
+              first_few_chars, ptr_past_k_chars, ptr_line_length, ids_queue,
+              ptr_line_hash);
         }
         if (feof(active_file) || ferror(active_file)) { // if at end of file
             check_if_past_k_chars_push_tail_and_initialize_line_id(
-              ptr_past_k_chars,
-              ptr_line_length,
-              ids_queue,
-              ptr_line_hash,
-              first_few_chars,
-              lines_processed,
-              *is_line_orf);
+              ptr_past_k_chars, ptr_line_length, ids_queue, ptr_line_hash,
+              first_few_chars, lines_processed, *is_line_orf);
         }
     }
 }
 
-string_with_size *
-  optimal_levenshtein_string_between_lines(FILE * prev_file,
-                                           FILE * cur_file) {
+string_with_size * optimal_levenshtein_string_between_lines(FILE * prev_file,
+                                                            FILE * cur_file) {
     return format_and_free_levenshtein_list_to_string_with_size(
       get_levenshtein_edits_and_free(get_current_line_of_file(prev_file),
                                      get_current_line_of_file(cur_file)));
 }
 
 void print_levenshtein_smallest_edits_to_out_file(
-  line_id_pair * arg,
-  diff_file_trio_with_indices * files_and_indices) {
+  line_id_pair * arg, diff_file_trio_with_indices * files_and_indices) {
     advance_file_to_line(files_and_indices->prev_file,
                          files_and_indices->prev_file_index,
-                         &arg->prev_id->line_number,
-                         BIN_BLOCK_SIZE);
+                         &arg->prev_id->line_number, BIN_BLOCK_SIZE);
     advance_file_to_line(files_and_indices->cur_file,
                          files_and_indices->cur_file_index,
-                         &arg->cur_id->line_number,
-                         BIN_BLOCK_SIZE);
+                         &arg->cur_id->line_number, BIN_BLOCK_SIZE);
     write_block(files_and_indices->out_file,
                 optimal_levenshtein_string_between_lines(
-                  files_and_indices->prev_file,
-                  files_and_indices->cur_file));
-    fputc('\n',files_and_indices->out_file); // delimit by newline
+                  files_and_indices->prev_file, files_and_indices->cur_file));
+    fputc('\n', files_and_indices->out_file); // delimit by newline
 #ifdef DEBUG
     write_block(stderr,
                 optimal_levenshtein_string_between_lines(
-                  files_and_indices->prev_file,
-                  files_and_indices->cur_file));
+                  files_and_indices->prev_file, files_and_indices->cur_file));
     fputc('\n', stderr);
 #endif
 }
@@ -527,24 +499,14 @@ void vcscmp(const char * prev_filename,
     while ((!(feof(prev_file) || ferror(prev_file)) || // until both files EOF
             !(feof(cur_file) || ferror(cur_file))) &&
            !break_out_of_vcscmp) {
-        add_blocks_to_queue(prev_file,
-                            prev_file_line_ids_queue,
-                            prev_block,
-                            &prev_length_past_k_chars,
-                            &prev_file_line_length,
-                            &prev_file_line_hash,
-                            &prev_first_few_chars,
-                            &prev_lines_processed,
-                            &prev_is_line_orf);
-        add_blocks_to_queue(cur_file,
-                            cur_file_line_ids_queue,
-                            cur_block,
-                            &cur_length_past_k_chars,
-                            &cur_file_line_length,
-                            &cur_file_line_hash,
-                            &cur_first_few_chars,
-                            &cur_lines_processed,
-                            &cur_is_line_orf);
+        add_blocks_to_queue(prev_file, prev_file_line_ids_queue, prev_block,
+                            &prev_length_past_k_chars, &prev_file_line_length,
+                            &prev_file_line_hash, &prev_first_few_chars,
+                            &prev_lines_processed, &prev_is_line_orf);
+        add_blocks_to_queue(cur_file, cur_file_line_ids_queue, cur_block,
+                            &cur_length_past_k_chars, &cur_file_line_length,
+                            &cur_file_line_hash, &cur_first_few_chars,
+                            &cur_lines_processed, &cur_is_line_orf);
         if (g_queue_get_length(prev_file_line_ids_queue) >=
               QUEUE_HASH_CRITICAL_SIZE &&
             g_queue_get_length(cur_file_line_ids_queue) >=
@@ -555,32 +517,23 @@ void vcscmp(const char * prev_filename,
                                   LINES_ABOVE_BELOW_TO_SEARCH) < 0 &&
                        !break_out_of_vcscmp) {
                     write_line_and_if_new_add_to_list(
-                      prev_file_line_ids_queue,
-                      cur_file_line_ids_queue,
+                      prev_file_line_ids_queue, cur_file_line_ids_queue,
                       &current_streak_of_newly_added_lines,
                       &prev_file_lines_processed_for_edits,
                       &cur_file_lines_processed_for_edits,
-                      &output_lines_processed,
-                      &break_out_of_vcscmp,
-                      &edit_matches,
-                      prev_file_used_for_edits,
-                      cur_file_used_for_edits,
-                      out_file);
+                      &output_lines_processed, &break_out_of_vcscmp,
+                      &edit_matches, prev_file_used_for_edits,
+                      cur_file_used_for_edits, out_file);
                     free_line_id(g_queue_pop_head(cur_file_line_ids_queue));
                 }
             } else {
                 write_line_and_if_new_add_to_list(
-                  prev_file_line_ids_queue,
-                  cur_file_line_ids_queue,
+                  prev_file_line_ids_queue, cur_file_line_ids_queue,
                   &current_streak_of_newly_added_lines,
                   &prev_file_lines_processed_for_edits,
-                  &cur_file_lines_processed_for_edits,
-                  &output_lines_processed,
-                  &break_out_of_vcscmp,
-                  &edit_matches,
-                  prev_file_used_for_edits,
-                  cur_file_used_for_edits,
-                  out_file);
+                  &cur_file_lines_processed_for_edits, &output_lines_processed,
+                  &break_out_of_vcscmp, &edit_matches, prev_file_used_for_edits,
+                  cur_file_used_for_edits, out_file);
                 free_line_id(g_queue_pop_head(prev_file_line_ids_queue));
                 free_line_id(g_queue_pop_head(cur_file_line_ids_queue));
             }
@@ -588,22 +541,18 @@ void vcscmp(const char * prev_filename,
     }
     // finish off remainder
     while (!g_queue_is_empty(cur_file_line_ids_queue) && !break_out_of_vcscmp) {
-        write_line_and_if_new_add_to_list(prev_file_line_ids_queue,
-                                          cur_file_line_ids_queue,
-                                          &current_streak_of_newly_added_lines,
-                                          &prev_file_lines_processed_for_edits,
-                                          &cur_file_lines_processed_for_edits,
-                                          &output_lines_processed,
-                                          &break_out_of_vcscmp,
-                                          &edit_matches,
-                                          prev_file_used_for_edits,
-                                          cur_file_used_for_edits,
-                                          out_file);
+        write_line_and_if_new_add_to_list(
+          prev_file_line_ids_queue, cur_file_line_ids_queue,
+          &current_streak_of_newly_added_lines,
+          &prev_file_lines_processed_for_edits,
+          &cur_file_lines_processed_for_edits, &output_lines_processed,
+          &break_out_of_vcscmp, &edit_matches, prev_file_used_for_edits,
+          cur_file_used_for_edits, out_file);
         free_line_id(g_queue_pop_head(cur_file_line_ids_queue));
     }
     edit_matches = g_slist_reverse(edit_matches); // prepend-reverse idiom used
 #ifdef DEBUG
-    g_slist_foreach(edit_matches, (GFunc)print_line_id_pair, NULL);
+    g_slist_foreach(edit_matches, (GFunc) print_line_id_pair, NULL);
 #endif
     diff_file_trio_with_indices dftwi;
     dftwi.prev_file = prev_file;
@@ -611,9 +560,9 @@ void vcscmp(const char * prev_filename,
     dftwi.cur_file = cur_file;
     dftwi.cur_file_index = &cur_lines_processed;
     dftwi.out_file = out_file;
-    fputc('\n',out_file);       // delimit by newline
+    fputc('\n', out_file); // delimit by newline
     g_slist_foreach(edit_matches,
-                    (GFunc)print_levenshtein_smallest_edits_to_out_file,
+                    (GFunc) print_levenshtein_smallest_edits_to_out_file,
                     &dftwi);
 #ifdef DEBUG
     if (NULL == edit_matches) {

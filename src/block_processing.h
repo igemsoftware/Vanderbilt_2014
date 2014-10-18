@@ -22,7 +22,7 @@
 // sequence is an orf (which won't happen)
 // two newlines per orf in the worst possible case
 #define BIN_BLOCK_SIZE \
-    (unsigned long long)(BLOCK_SIZE * (1 + 2 / (double)MIN_ORF_LENGTH))
+    (unsigned long long)(BLOCK_SIZE * (1 + 2 / (double) MIN_ORF_LENGTH))
 
 string_with_size * read_block(FILE * input_file,
                               string_with_size * input_string_with_size);

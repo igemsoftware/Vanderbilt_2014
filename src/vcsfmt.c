@@ -44,7 +44,7 @@ void vcsfmt(char * filename) {
 #endif
     bool is_within_orf = false; // file begins outside of orf
     unsigned long long cur_orf_pos = 0;
-    char current_codon_frame[CODON_LENGTH] = {'\0'};
+    char current_codon_frame[ CODON_LENGTH ] = {'\0'};
 
 #ifdef CONCURRENT
     GAsyncQueue * active_queue = g_async_queue_new();
@@ -76,10 +76,9 @@ void vcsfmt(char * filename) {
       g_thread_new("read_and_process_block_thread",
                    (GThreadFunc) concurrent_read_and_process_block,
                    &args_to_block_processing);
-    GThread * write_block_thread =
-      g_thread_new("write_block_thread",
-                   (GThreadFunc) concurrent_write_block_vcsfmt,
-                   &args_to_write_block);
+    GThread * write_block_thread = g_thread_new(
+      "write_block_thread", (GThreadFunc) concurrent_write_block_vcsfmt,
+      &args_to_write_block);
     g_thread_join(write_block_thread); // implicitly frees thread
 #else
 
@@ -99,19 +98,15 @@ void vcsfmt(char * filename) {
 
         // Preprocess the block from FASTA (i.e. remove newlines and metadata).
         // TODO - put some file type checks here. (We don't always use FASTA)
-        fasta_preformat(input_block_with_size,
-                        preformatted_block_with_size,
-                        metadata_block_with_size,
-                        &in_comment,
+        fasta_preformat(input_block_with_size, preformatted_block_with_size,
+                        metadata_block_with_size, &in_comment,
                         &lines_pre_processed);
 
         // Process the block and write it to output.
         write_block(output_file,
                     process_block_vcsfmt(preformatted_block_with_size,
-                                         output_block_with_size,
-                                         &is_within_orf,
-                                         &cur_orf_pos,
-                                         current_codon_frame,
+                                         output_block_with_size, &is_within_orf,
+                                         &cur_orf_pos, current_codon_frame,
                                          feof(input_file)));
 
         // Write the metadata to a temporary file.
@@ -227,13 +222,13 @@ string_with_size * fasta_preformat(string_with_size * input,
     // Loop through all the readable characters in input.
     for (unsigned long long i = 0; i < input->readable_bytes; ++i) {
 
-        char current = input->string[i];
+        char current = input->string[ i ];
 
         if (current == NEWLINE) {
             // The character is a line break
             if (*in_comment) {
                 // If we were in a comment, write the line break to metadata
-                metadata->string[metadata->readable_bytes] = NEWLINE;
+                metadata->string[ metadata->readable_bytes ] = NEWLINE;
                 metadata->readable_bytes++;
 
                 // We're not in a comment anymore.
@@ -246,14 +241,15 @@ string_with_size * fasta_preformat(string_with_size * input,
             // We're in a comment.
 
             // Write the char to metadata.
-            metadata->string[metadata->readable_bytes] = current;
+            metadata->string[ metadata->readable_bytes ] = current;
             metadata->readable_bytes++;
         } else if (current == ';' || current == '>') {
             // We've found a comment.
 
             // Annotate the line that we found this comment.
-            int written = write_annotation(
-              &(metadata->string[metadata->readable_bytes]), *lines_processed);
+            int written =
+              write_annotation(&(metadata->string[ metadata->readable_bytes ]),
+                               *lines_processed);
 
             metadata->readable_bytes += (unsigned long long) written;
 
@@ -261,11 +257,11 @@ string_with_size * fasta_preformat(string_with_size * input,
             *in_comment = true;
 
             // Write the char to metadata.
-            metadata->string[metadata->readable_bytes] = current;
+            metadata->string[ metadata->readable_bytes ] = current;
             metadata->readable_bytes++;
         } else {
             // Any other characters we're assuming is genetic data.
-            preformatted->string[preformatted->readable_bytes] = current;
+            preformatted->string[ preformatted->readable_bytes ] = current;
 
             preformatted->readable_bytes++;
         }
@@ -291,7 +287,7 @@ void fasta_write_header(FILE * vcsfmt_file,
     char * line = malloc(200 * sizeof(char));
     while (!feof(fasta_file) && !ferror(fasta_file)) {
         fgets(line, 199, fasta_file);
-        if (line[0] != ';' && line[0] != '>' && strlen(line) > 0) {
+        if (line[ 0 ] != ';' && line[ 0 ] != '>' && strlen(line) > 0) {
             break;
         }
     }
@@ -311,11 +307,11 @@ void fasta_write_header(FILE * vcsfmt_file,
  * returns the number of characters written.
  */
 int write_annotation(char * output, int line_number) {
-    output[0] = '@';
+    output[ 0 ] = '@';
 
     int written = sprintf(output + 1, "%d", line_number);
 
-    output[written + 1] = '@';
+    output[ written + 1 ] = '@';
 
     return written + 2;
 }

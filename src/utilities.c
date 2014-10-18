@@ -42,7 +42,7 @@ string_with_size * copy_string_with_size(string_with_size * from_sws,
                                          string_with_size * to_sws) {
     for (unsigned long long index = 0; index < from_sws->readable_bytes;
          ++index) {
-        to_sws->string[index] = from_sws->string[index];
+        to_sws->string[ index ] = from_sws->string[ index ];
     }
     return to_sws;
 }
@@ -66,7 +66,7 @@ string_with_size * grow_string_with_size(string_with_size ** sws,
 // TODO: javadoc
 void free_string_with_size(void * arg) {
     if (NULL != arg) {
-        string_with_size * sws_to_free = (string_with_size *)arg;
+        string_with_size * sws_to_free = (string_with_size *) arg;
         free(sws_to_free->string);
         free(sws_to_free);
     }

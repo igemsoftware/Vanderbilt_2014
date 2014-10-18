@@ -9,8 +9,10 @@
 // returns the next hash value
 // TODO: javadoc
 #define DJB2_MAGIC_CONSTANT 5
-unsigned long int djb2_hash_on_string_index(
-  unsigned long int instantaneous_hash, char * str, unsigned long long cur_index);
+unsigned long int
+  djb2_hash_on_string_index(unsigned long int instantaneous_hash,
+                            char * str,
+                            unsigned long long cur_index);
 
 // TODO: javadoc
 // http://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/
@@ -19,7 +21,7 @@ unsigned long int djb2_hash_on_string_index(
     ((a) < (b) ? ((a) < (c) ? (a) : (c)) : ((b) < (c) ? (b) : (c)))
 // precondition: strings are same size
 unsigned long long get_levenshtein_distance(string_with_size * prev_string,
-                                string_with_size * cur_string);
+                                            string_with_size * cur_string);
 
 /*
   * insert: left one
@@ -42,9 +44,13 @@ typedef struct {
     unsigned long long max_y;
 } levenshtein_matrix_state;
 
-bool three_not_null(unsigned long long * x, unsigned long long * y, unsigned long long * z);
+bool three_not_null(unsigned long long * x,
+                    unsigned long long * y,
+                    unsigned long long * z);
 
-unsigned long long min_of_non_null_three(unsigned long long * x, unsigned long long * y, unsigned long long * z);
+unsigned long long min_of_non_null_three(unsigned long long * x,
+                                         unsigned long long * y,
+                                         unsigned long long * z);
 
 // TODO: javadoc, including that as a precondition all up/left/up&left moves
 // are

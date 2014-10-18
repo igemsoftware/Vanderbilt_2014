@@ -6,7 +6,7 @@ AllowAllParametersOfDeclarationOnNextLine: true
 AllowShortBlocksOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: false
-# AlwaysBreakAfterDefinitionReturnType: false
+AlwaysBreakAfterDefinitionReturnType: false
 AlwaysBreakBeforeMultilineStrings: false
 BinPackParameters: false
 BreakBeforeBinaryOperators: false
@@ -29,8 +29,8 @@ SpaceBeforeParens: ControlStatements
 SpaceInEmptyParentheses: false
 SpacesBeforeTrailingComments: 1
 SpacesInCStyleCastParentheses: false
-# SpaceAfterCStyleCast: true
+SpaceAfterCStyleCast: true
 SpacesInParentheses: false
-# SpacesInSquareBrackets: true
+SpacesInSquareBrackets: true
 TabWidth: 40 # kept ridiculously wide so that if tabs are inserted they will be obvious
 UseTab: Never

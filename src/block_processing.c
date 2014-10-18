@@ -3,10 +3,8 @@
 string_with_size * read_block(FILE * input_file,
                               string_with_size * input_string_with_size) {
     input_string_with_size->readable_bytes =
-      fread(input_string_with_size->string,
-            sizeof(char),
-            input_string_with_size->size_in_memory,
-            input_file);
+      fread(input_string_with_size->string, sizeof(char),
+            input_string_with_size->size_in_memory, input_file);
     return input_string_with_size;
 }
 
@@ -16,9 +14,7 @@ string_with_size *
                          unsigned long long size_to_read,
                          unsigned long long offset) {
     input_string_with_size->readable_bytes +=
-      fread(input_string_with_size->string + offset,
-            sizeof(char),
-            size_to_read,
+      fread(input_string_with_size->string + offset, sizeof(char), size_to_read,
             input_file);
     return input_string_with_size;
 }
@@ -26,10 +22,8 @@ string_with_size *
 string_with_size * write_block(FILE * output_file,
                                string_with_size * output_block_with_size) {
     output_block_with_size->readable_bytes =
-      fwrite(output_block_with_size->string,
-             sizeof(char),
-             output_block_with_size->readable_bytes,
-             output_file);
+      fwrite(output_block_with_size->string, sizeof(char),
+             output_block_with_size->readable_bytes, output_file);
     return output_block_with_size;
 }
 
@@ -77,16 +71,14 @@ FILE * advance_file_to_line(FILE * file,
         while (!succeeded && !(feof(file) || ferror(file))) {
             read_block(file, in_block);
             for (unsigned long long block_index = 0;
-                 block_index < in_block->readable_bytes;
-                 ++block_index) {
-                if (NEWLINE == in_block->string[block_index]) {
+                 block_index < in_block->readable_bytes; ++block_index) {
+                if (NEWLINE == in_block->string[ block_index ]) {
                     increment_mpz_t(cur_line);
                     if (!less_than_mpz_t(cur_line, final_line)) { // if ==
                         // go back to beginning of line
                         // IFFY: the off-by-one errors here are killer
-                        fseek(file,
-                              ((long)block_index) -
-                                ((long)in_block->readable_bytes - 1),
+                        fseek(file, ((long) block_index) -
+                                      ((long) in_block->readable_bytes - 1),
                               SEEK_CUR);
                         succeeded = true;
                         break;
@@ -110,14 +102,12 @@ void write_current_line_of_file(mpz_t * from_line_number,
     while (!succeeded && !(feof(source_file) || ferror(source_file))) {
         read_block(source_file, io_block);
         for (unsigned long long block_index = 0;
-             block_index < io_block->readable_bytes;
-             ++block_index) {
-            if (NEWLINE == io_block->string[block_index]) {
+             block_index < io_block->readable_bytes; ++block_index) {
+            if (NEWLINE == io_block->string[ block_index ]) {
                 // go back to beginning of line
                 // IFFY: the off-by-one errors here are killer
-                fseek(source_file,
-                      ((long)block_index) -
-                        ((long)io_block->readable_bytes - 1),
+                fseek(source_file, ((long) block_index) -
+                                     ((long) io_block->readable_bytes - 1),
                       SEEK_CUR);
                 // +1 is to include the newline at the end
                 set_string_with_size_readable_bytes(io_block, block_index + 1);
@@ -137,8 +127,8 @@ void write_line_number_from_file_to_file(mpz_t * from_line_number,
                                          mpz_t * to_line_number,
                                          FILE * source_file,
                                          FILE * dest_file) {
-    advance_file_to_line(
-      source_file, from_line_number, to_line_number, BIN_BLOCK_SIZE);
+    advance_file_to_line(source_file, from_line_number, to_line_number,
+                         BIN_BLOCK_SIZE);
     write_current_line_of_file(from_line_number, source_file, dest_file);
 }
 
@@ -151,17 +141,17 @@ string_with_size * get_current_line_of_file(FILE * source_file) {
     string_with_size * io_block = make_new_string_with_size(BIN_BLOCK_SIZE);
     bool succeeded = false;
     while (!succeeded && !(feof(source_file) || ferror(source_file))) {
-        read_block_with_offset(
-          source_file, io_block, BIN_BLOCK_SIZE, current_offset);
+        read_block_with_offset(source_file, io_block, BIN_BLOCK_SIZE,
+                               current_offset);
         for (unsigned long long current_slot_in_sws = current_offset;
-             current_slot_in_sws < BIN_BLOCK_SIZE;
-             ++current_slot_in_sws) {
+             current_slot_in_sws < BIN_BLOCK_SIZE; ++current_slot_in_sws) {
             // #ifdef DEBUG
             //             fprintf(stderr, "%c",
             //             io_block->string[current_slot_in_sws]);
             // #endif
-            if (NEWLINE == io_block->string[current_slot_in_sws]) {
-                fseek(source_file, -((long)io_block->readable_bytes), SEEK_CUR);
+            if (NEWLINE == io_block->string[ current_slot_in_sws ]) {
+                fseek(source_file, -((long) io_block->readable_bytes),
+                      SEEK_CUR);
                 // +1 to include newline
                 io_block->readable_bytes = current_slot_in_sws + 1;
                 succeeded = true;
@@ -186,28 +176,26 @@ string_with_size *
                        bool is_final_block) {
     output_block_with_size->readable_bytes = 0;
     for (unsigned long long codon_index = 0;
-         codon_index < input_block_with_size->readable_bytes;
-         ++codon_index) {
-        current_codon_frame[CODON_LENGTH - 1] =
-          input_block_with_size->string[codon_index];
+         codon_index < input_block_with_size->readable_bytes; ++codon_index) {
+        current_codon_frame[ CODON_LENGTH - 1 ] =
+          input_block_with_size->string[ codon_index ];
         // first base is only null at start/end of ORF or at beginning
-        if (current_codon_frame[0] != '\0') {
+        if (current_codon_frame[ 0 ] != '\0') {
             if (*is_within_orf) { // same here
                 if (*cur_orf_pos >= MIN_ORF_LENGTH - CODON_LENGTH &&
                     is_stop_codon(current_codon_frame)) {
                     for (unsigned long long base_index = 0;
-                         base_index < CODON_LENGTH;
-                         ++base_index) {
+                         base_index < CODON_LENGTH; ++base_index) {
                         output_block_with_size
-                          ->string[output_block_with_size->readable_bytes +
-                                   base_index] =
-                          current_codon_frame[base_index];
-                        current_codon_frame[base_index] =
+                          ->string[ output_block_with_size->readable_bytes +
+                                    base_index ] =
+                          current_codon_frame[ base_index ];
+                        current_codon_frame[ base_index ] =
                           '\0'; // nullify to read in more characters
                     }
                     output_block_with_size
-                      ->string[output_block_with_size->readable_bytes +
-                               CODON_LENGTH] = NEWLINE;
+                      ->string[ output_block_with_size->readable_bytes +
+                                CODON_LENGTH ] = NEWLINE;
                     // output_block_with_size->readable_bytes INCREMENTED AT END
                     // OF LOOP
                     output_block_with_size->readable_bytes += CODON_LENGTH;
@@ -215,13 +203,12 @@ string_with_size *
                     *cur_orf_pos = 0;
                 } else {
                     for (unsigned long long base_index = 0;
-                         base_index < CODON_LENGTH;
-                         ++base_index) {
+                         base_index < CODON_LENGTH; ++base_index) {
                         output_block_with_size
-                          ->string[output_block_with_size->readable_bytes +
-                                   base_index] =
-                          current_codon_frame[base_index];
-                        current_codon_frame[base_index] = '\0';
+                          ->string[ output_block_with_size->readable_bytes +
+                                    base_index ] =
+                          current_codon_frame[ base_index ];
+                        current_codon_frame[ base_index ] = '\0';
                     }
                     *cur_orf_pos += 3;
                     output_block_with_size->readable_bytes += 2;
@@ -229,28 +216,27 @@ string_with_size *
             } else {
                 if (is_start_codon(current_codon_frame)) {
                     output_block_with_size
-                      ->string[output_block_with_size->readable_bytes] =
+                      ->string[ output_block_with_size->readable_bytes ] =
                       NEWLINE;
                     for (unsigned long long base_index = 0;
-                         base_index < CODON_LENGTH;
-                         ++base_index) {
+                         base_index < CODON_LENGTH; ++base_index) {
                         output_block_with_size
-                          ->string[output_block_with_size->readable_bytes +
-                                   base_index + 1] =
-                          current_codon_frame[base_index];
-                        current_codon_frame[base_index] =
+                          ->string[ output_block_with_size->readable_bytes +
+                                    base_index + 1 ] =
+                          current_codon_frame[ base_index ];
+                        current_codon_frame[ base_index ] =
                           '\0'; // nullify to read in more characters
                     }
                     output_block_with_size->readable_bytes += CODON_LENGTH;
                     output_block_with_size
-                      ->string[output_block_with_size->readable_bytes +
-                               CODON_LENGTH] = NEWLINE;
+                      ->string[ output_block_with_size->readable_bytes +
+                                CODON_LENGTH ] = NEWLINE;
                     *is_within_orf = true;
                     *cur_orf_pos = 3;
                 } else {
                     output_block_with_size
-                      ->string[output_block_with_size->readable_bytes] =
-                      current_codon_frame[0];
+                      ->string[ output_block_with_size->readable_bytes ] =
+                      current_codon_frame[ 0 ];
                 }
             }
             ++output_block_with_size->readable_bytes;
@@ -258,10 +244,10 @@ string_with_size *
         // shuffle bases over
         for (unsigned long long base_index = 0; base_index < CODON_LENGTH - 1;
              ++base_index) {
-            current_codon_frame[base_index] =
-              current_codon_frame[base_index + 1];
+            current_codon_frame[ base_index ] =
+              current_codon_frame[ base_index + 1 ];
         }
-        current_codon_frame[CODON_LENGTH - 1] = '\0'; // nullify final
+        current_codon_frame[ CODON_LENGTH - 1 ] = '\0'; // nullify final
         // leaves first two codons in current_codon_frame pointer for next block
     }
     // if this is the last block, eject the last two bases
@@ -269,11 +255,11 @@ string_with_size *
         for (unsigned long long base_index = 0; base_index < CODON_LENGTH - 1;
              ++base_index) {
             if (output_block_with_size
-                  ->string[output_block_with_size->readable_bytes +
-                           base_index] != '\0') {
+                  ->string[ output_block_with_size->readable_bytes +
+                            base_index ] != '\0') {
                 output_block_with_size
-                  ->string[output_block_with_size->readable_bytes +
-                           base_index] = current_codon_frame[base_index];
+                  ->string[ output_block_with_size->readable_bytes +
+                            base_index ] = current_codon_frame[ base_index ];
             }
         }
         output_block_with_size->readable_bytes += CODON_LENGTH - 1;
@@ -286,12 +272,11 @@ string_with_size *
                           string_with_size * output_block_with_size) {
     output_block_with_size->readable_bytes = 0;
     for (unsigned long long bytes_read = 0;
-         bytes_read < input_block_with_size->readable_bytes;
-         ++bytes_read) {
-        if (input_block_with_size->string[bytes_read] != NEWLINE) {
+         bytes_read < input_block_with_size->readable_bytes; ++bytes_read) {
+        if (input_block_with_size->string[ bytes_read ] != NEWLINE) {
             output_block_with_size
-              ->string[output_block_with_size->readable_bytes] =
-              input_block_with_size->string[bytes_read];
+              ->string[ output_block_with_size->readable_bytes ] =
+              input_block_with_size->string[ bytes_read ];
             ++output_block_with_size->readable_bytes;
         }
     }
@@ -310,10 +295,8 @@ void concurrent_read_and_process_block_vcsfmt(
         args->output_block_with_size =
           make_new_string_with_size(BIN_BLOCK_SIZE);
         process_block_vcsfmt(args->input_block_with_size,
-                             args->output_block_with_size,
-                             args->is_within_orf,
-                             args->cur_orf_pos,
-                             args->current_codon_frame,
+                             args->output_block_with_size, args->is_within_orf,
+                             args->cur_orf_pos, args->current_codon_frame,
                              feof(args->input_file));
         if (feof(args->input_file)) { // if last loop
             g_mutex_lock(args->process_complete_mutex);
@@ -329,7 +312,7 @@ void concurrent_write_block_vcsfmt(
     while (!is_processing_complete_vcsfmt_concurrent(args)) {
         g_mutex_unlock(args->process_complete_mutex);
         args->active_block_with_size =
-          (string_with_size *)g_async_queue_pop(args->active_queue);
+          (string_with_size *) g_async_queue_pop(args->active_queue);
         add_to_bytes_processed(
           args->total_bytes_written,
           write_block(args->active_file, args->active_block_with_size)
@@ -339,10 +322,9 @@ void concurrent_write_block_vcsfmt(
     // get the rest left over (if any)
     for (unsigned long long queue_size =
            g_async_queue_length(args->active_queue);
-         queue_size != 0;
-         --queue_size) {
+         queue_size != 0; --queue_size) {
         args->active_block_with_size =
-          (string_with_size *)g_async_queue_pop(args->active_queue);
+          (string_with_size *) g_async_queue_pop(args->active_queue);
         add_to_bytes_processed(
           args->total_bytes_written,
           write_block(args->active_file, args->active_block_with_size)

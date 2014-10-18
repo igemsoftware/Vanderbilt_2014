@@ -5,7 +5,7 @@
     hosts all required variables and functions to implement argparse
 */
 
-#include "utilities.h"          // for GSList, bool
+#include "utilities.h" // for GSList, bool
 
 // version
 const char * argp_program_version = "darwin 0.0";
@@ -41,8 +41,7 @@ typedef struct {
     bool has_no_args;
 } dwndiff_arguments;
 // CTOR
-dwndiff_arguments
-  initialize_dwndiff_arguments(dwndiff_arguments args) {
+dwndiff_arguments initialize_dwndiff_arguments(dwndiff_arguments args) {
     args.files = NULL;
     args.preformat_loc_dir = "";
     args.is_write = false;
