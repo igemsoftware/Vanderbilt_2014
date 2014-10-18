@@ -2,74 +2,87 @@
 
 
 <html>
-  <style type="text/css">
-      body {
-              position: relative;
-                      width: 850px //100%;
-                              margin: 0;
-                                      padding: 0;
-                                              padding-bottom: 10px;
-                                                      background:url(http://parts.igem.org/wiki/images/f/f8/Special_Background.jpg);
-                                                              background-repeat: no-repeat;
-                                                                      background-attachment: fixed;
-                                                                              background-size:100% auto;
-                                                                                  }
-                                                                                      </style>
+<style type="text/css">
+    body {
+        position: relative;
+        width: 850px //100%;
+        margin: 0;
+        padding: 0;
+        padding-bottom: 10px;
+        background: url(http://parts.igem.org/wiki/images/f/f8/Special_Background.jpg);
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-size: 100% auto;
+    }
+</style>
 
 <!--main content -->
 <table width="70%" align="center">
 
-<!--navigation menu -->
-<td align="center" colspan="3">
+    <!--navigation menu -->
+    <td align="center" colspan="3">
 
-<table  width="100%">
-<tr heigth="15px"></tr>
-<tr heigth="75px">
-
-
-<td style="border:1px solid black;" align="center" height ="45px" onMouseOver="this.bgColor='#d3d3d3'" onMouseOut="this.bgColor='#e7e7e7'" bgColor=#e7e7e7>
-<a href="http://2014.igem.org/Team:Vanderbilt_Software"style="color:#000000">Home</a> </td>
+        <table width="100%">
+            <tr heigth="15px"></tr>
+            <tr heigth="75px">
 
 
+                <td style="border:1px solid black;" align="center" height="45px" onMouseOver="this.bgColor='#d3d3d3'" onMouseOut="this.bgColor='#e7e7e7'" bgColor=#e7e7e7>
+                    <a href="http://2014.igem.org/Team:Vanderbilt_Software" style="color:#000000">Home</a> </td>
 
 
-<td style="border:1px solid black;" align="center" height ="45px" onMouseOver="this.bgColor='#d3d3d3'" onMouseOut="this.bgColor='#e7e7e7'" bgColor=#e7e7e7>
-              <a href="http://2014.igem.org/Team:Vanderbilt_Software/Program"style="color:#000000">Program</a> </td>
 
 
+                <td style="border:1px solid black;" align="center" height="45px" onMouseOver="this.bgColor='#d3d3d3'" onMouseOut="this.bgColor='#e7e7e7'" bgColor=#e7e7e7>
+                    <a href="http://2014.igem.org/Team:Vanderbilt_Software/Program" style="color:#000000">Program</a> </td>
 
 
 
 
 
 
-<td align ="center"> <a href="http://2014.igem.org/Main_Page"> <img src="http://igem.org/wiki/images/6/60/Igemlogo_300px.png" width="55px"></a> </td>
-</tr>
+
+
+                <td align="center">
+                    <a href="http://2014.igem.org/Main_Page"> <img src="http://igem.org/wiki/images/6/60/Igemlogo_300px.png" width="55px">
+                    </a>
+                </td>
+            </tr>
+        </table>
+
+        </tr>
+        </tr>
+    </td>
+
+    <tr>
+        <td colspan="3" height="15px"> </td>
+    </tr>
+    <tr>
+        <td bgColor="#e7e7e7" colspan="3" height="1px">
+    </tr>
+    <tr>
+        <td colspan="3" height="5px"> </td>
+    </tr>
+
+
+
+    <!--Project content  -->
+    <tr>
+        <td>
+            <h3> Project Motivation </h3>
+        </td>
+    </tr>
+
+    <tr>
+        <td width="45%" valign="top">
+            <p>Programmers need to track even minute changes to their code exhaustively, especially as the project scales up. Without it, there'd be far too much time spent just on merging in changes from other programmers and far too little time spent actually coding. It's reasonable that an analogy exists in synthetic biology, where complicated structures are modified with the utmost of detail. But because most synthetic biologists work on relatively small logical functions in comparison to the hulking data structures programmers wield, introducing a version control system seemed like overkill. With today's exponentially-increasing complexity of synthetic life, though, it will soon be a grave mistake to not use some sort of change-tracking tool; biologists will soon get caught up in the same logical complexity that plagues professional programmers. Especially as synthetic biology grows as a field, with increasing support from government and enterprise, more people will get involved in these projects and an inability to effectively collaborate could hamper the entire industry.</p>
+
+            <p>However, no tool currently exists to support genome-scale changes in a useful way. Existing methods of tracking gene changes don't scale well, and don't incorporate the power of the version control tools programmers are used to. While programming version control tools could be used to cover DNA data, they aren't used to working with that sort of input and are extraordinarily inefficient. Darwin is a way around that. It's built off of version control tools, so it takes advantage of their strength. But it manipulates the DNA data to optimize for these tested and proven methods of version control, producing a much more efficient and secure tracking system. Darwin is completely open-source, so any security or optimization issues can be identified and solved immediately to help all users of the tool. It's also agnostic to the type of version control backend used, so it can be put into place on a massive variety of systems.</p>
+        </td>
+
+    </tr>
+
+
 </table>
 
-</tr>
-</tr>
-</td>
-
-<tr> <td colspan="3"  height="15px"> </td></tr>
-<tr><td bgColor="#e7e7e7" colspan="3" height="1px"> </tr>
-<tr> <td colspan="3"  height="5px"> </td></tr>
-
-
-
-<!--Project content  -->
-<tr><td > <h3> Project Motivation </h3></td>
-</tr>
-
-<tr>
-<td width="45%"  valign="top">
-  <p>Programmers need to track even minute changes to their code exhaustively, especially as the project scales up. Without it, there'd be far too much time spent just on merging in changes from other programmers and far too little time spent actually coding. It's reasonable that an analogy exists in synthetic biology, where complicated structures are modified with the utmost of detail. But because most synthetic biologists work on relatively small logical functions in comparison to the hulking data structures programmers wield, introducing a version control system seemed like overkill. With today's exponentially-increasing complexity of synthetic life, though, it will soon be a grave mistake to not use some sort of change-tracking tool; biologists will soon get caught up in the same logical complexity that plagues professional programmers. Especially as synthetic biology grows as a field, with increasing support from government and enterprise, more people will get involved in these projects and an inability to effectively collaborate could hamper the entire industry.</p>
-
-  <p>However, no tool currently exists to support genome-scale changes in a useful way. Existing methods of tracking gene changes don't scale well, and don't incorporate the power of the version control tools programmers are used to. While programming version control tools could be used to cover DNA data, they aren't used to working with that sort of input and are extraordinarily inefficient. Darwin is a way around that. It's built off of version control tools, so it takes advantage of their strength. But it manipulates the DNA data to optimize for these tested and proven methods of version control, producing a much more efficient and secure tracking system. Darwin is completely open-source, so any security or optimization issues can be identified and solved immediately to help all users of the tool. It's also agnostic to the type of version control backend used, so it can be put into place on a massive variety of systems.</p>
-</td>
-
-</tr>
-
-
-</table>
 </html>
