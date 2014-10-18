@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
-<category id="string_with_size" name="string_with_size" xmlns="http://jessevdk.github.com/cldoc/1.0">
-  <struct name="string_with_size" ref="string_with_size::string_with_size#string_with_size::string_with_size">
+<category id="utilities::string_with_size" name="string_with_size" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <struct name="string_with_size" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size">
     <brief> used to return a char string, along with size information</brief>
   </struct>
   <function id="make_new_string_with_size" name="make_new_string_with_size">
@@ -10,7 +10,7 @@
 </doc>
     <return>
       <doc>constructed string_with_size</doc>
-      <type name="string_with_size" qualifier="*" ref="string_with_size::string_with_size#string_with_size::string_with_size" />
+      <type name="string_with_size" qualifier="*" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size" />
     </return>
     <argument id="make_new_string_with_size::size_in_memory" name="size_in_memory">
       <doc>size of string_with_size to create</doc>
@@ -18,13 +18,16 @@
     </argument>
   </function>
   <function id="make_new_string_with_size_given_string" name="make_new_string_with_size_given_string">
-    <brief> helper function for debugging to make string_with_size from a null-terminated</brief>
-    <doc>string
+    <brief> helper function to make string_with_size from null-terminated str</brief>
+    <doc>note: does not copy over null character at end!
+
 </doc>
     <return>
-      <type name="string_with_size" qualifier="*" ref="string_with_size::string_with_size#string_with_size::string_with_size" />
+      <doc>constructed string_with_size</doc>
+      <type name="string_with_size" qualifier="*" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size" />
     </return>
     <argument id="make_new_string_with_size_given_string::null_term_str" name="null_term_str">
+      <doc>null-terminated string to copy from</doc>
       <type builtin="yes" name="char" qualifier="*" />
     </argument>
   </function>

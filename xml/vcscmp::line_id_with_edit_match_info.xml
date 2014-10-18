@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<struct anonymous="yes" id="vcscmp::line_id_with_edit_match_info" name="line_id_with_edit_match_info" typedef="yes" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <field id="vcscmp::line_id_with_edit_match_info::id" name="id">
+    <type name="line_id" qualifier="*" ref="vcscmp::line_id#vcscmp::line_id" />
+  </field>
+  <field id="vcscmp::line_id_with_edit_match_info::is_leven_found" name="is_leven_found">
+    <type builtin="yes" name="bool" />
+  </field>
+  <field id="vcscmp::line_id_with_edit_match_info::edit_matches" name="edit_matches">
+    <type name="GSList" qualifier="**" />
+  </field>
+</struct>

@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='utf-8'?>
+<struct anonymous="yes" id="vcscmp::line_id_pair" name="line_id_pair" typedef="yes" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <field id="vcscmp::line_id_pair::prev_id" name="prev_id">
+    <type name="line_id" qualifier="*" ref="vcscmp::line_id#vcscmp::line_id" />
+  </field>
+  <field id="vcscmp::line_id_pair::cur_id" name="cur_id">
+    <type name="line_id" qualifier="*" ref="vcscmp::line_id#vcscmp::line_id" />
+  </field>
+  <function id="print_levenshtein_smallest_edits_to_out_file" name="print_levenshtein_smallest_edits_to_out_file">
+    <brief>since address being taken for use in for_each, compiler will also emit</brief>
+    <doc>non-inline version</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="print_levenshtein_smallest_edits_to_out_file::arg" name="arg">
+      <type name="line_id_pair" qualifier="*" ref="vcscmp::line_id_pair#vcscmp::line_id_pair" />
+    </argument>
+    <argument id="print_levenshtein_smallest_edits_to_out_file::files_and_indices" name="files_and_indices">
+      <type name="diff_file_trio_with_indices" qualifier="*" ref="vcscmp::diff_file_trio_with_indices#vcscmp::diff_file_trio_with_indices" />
+    </argument>
+  </function>
+  <function id="print_line_id_pair" name="print_line_id_pair">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="print_line_id_pair::arg" name="arg">
+      <type name="line_id_pair" qualifier="*" ref="vcscmp::line_id_pair#vcscmp::line_id_pair" />
+    </argument>
+  </function>
+</struct>

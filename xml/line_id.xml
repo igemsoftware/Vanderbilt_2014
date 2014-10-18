@@ -1,150 +1,49 @@
 <?xml version='1.0' encoding='utf-8'?>
-<struct anonymous="yes" id="line_id" name="line_id" typedef="yes" xmlns="http://jessevdk.github.com/cldoc/1.0">
-  <brief>STRING_ID</brief>
-  <doc>TODO: javadoc</doc>
-  <field id="line_number" name="line_number">
-    <type name="mpz_t" />
-  </field>
-  <field id="str_hash" name="str_hash">
-    <brief>used because canonical djb2 uses unsigned long int</brief>
-    <type builtin="yes" name="unsigned long" />
-  </field>
-  <field id="str_length" name="str_length">
-    <type builtin="yes" name="unsigned long" />
-  </field>
-  <field id="first_k_chars" name="first_k_chars">
-    <brief>arbitrary choice of length variable bit width</brief>
-    <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
-  </field>
-  <field id="is_orf" name="is_orf">
-    <type builtin="yes" name="bool" />
-  </field>
-  <function id="clone_line_id_with_string_null" name="clone_line_id_with_string_null">
+<category id="line_id" name="line_id" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <struct name="line_id" ref="line_id::line_id#line_id::line_id">
+    <brief> aggregate structure representing the identity of a line</brief>
+  </struct>
+  <function id="make_line_id" name="make_line_id">
+    <brief> allocate and initialize a line_id</brief>
     <return>
-      <type name="line_id" qualifier="*" ref="line_id#line_id" />
+      <doc>constructed line_id</doc>
+      <type name="line_id" qualifier="*" ref="line_id::line_id#line_id::line_id" />
     </return>
-    <argument id="clone_line_id_with_string_null::base" name="base">
-      <type name="line_id" qualifier="*" ref="line_id#line_id" />
+    <argument id="make_line_id::str_hash" name="str_hash">
+      <doc>hash to begin with</doc>
+      <type builtin="yes" name="unsigned long" />
     </argument>
-  </function>
-  <function id="if_close_levenshtein_dist_add_to_list" name="if_close_levenshtein_dist_add_to_list">
-    <brief>compiler will emit a non-inline version of this too, since a pointer is taken</brief>
-    <doc>to it when g_queue_foreach is used</doc>
-    <return>
-      <type builtin="yes" name="void" />
-    </return>
-    <argument id="if_close_levenshtein_dist_add_to_list::prev_line_id" name="prev_line_id">
-      <type name="line_id" qualifier="*" ref="line_id#line_id" />
-    </argument>
-    <argument id="if_close_levenshtein_dist_add_to_list::cur_data" name="cur_data">
-      <type name="line_id_with_edit_match_info" qualifier="*" ref="line_id_with_edit_match_info#line_id_with_edit_match_info" />
-    </argument>
-  </function>
-  <function id="line_id_equal" name="line_id_equal">
-    <return>
-      <type builtin="yes" name="bool" />
-    </return>
-    <argument id="line_id_equal::a" name="a">
-      <type name="line_id" qualifier="*" ref="line_id#line_id" />
-    </argument>
-    <argument id="line_id_equal::b" name="b">
-      <type name="line_id" qualifier="*" ref="line_id#line_id" />
-    </argument>
-  </function>
-  <function id="line_id_initialize_line_number" name="line_id_initialize_line_number">
-    <return>
-      <type name="line_id" qualifier="*" ref="line_id#line_id" />
-    </return>
-    <argument id="line_id_initialize_line_number::sid" name="sid">
-      <type name="line_id" qualifier="*" ref="line_id#line_id" />
-    </argument>
-  </function>
-  <function id="line_id_set_first_k_chars" name="line_id_set_first_k_chars">
-    <return>
-      <type name="line_id" qualifier="*" ref="line_id#line_id" />
-    </return>
-    <argument id="line_id_set_first_k_chars::sid" name="sid">
-      <type name="line_id" qualifier="*" ref="line_id#line_id" />
-    </argument>
-    <argument id="line_id_set_first_k_chars::str_k_chars" name="str_k_chars">
-      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
-    </argument>
-  </function>
-  <function id="line_id_set_is_orf" name="line_id_set_is_orf">
-    <brief>OPTIMIZATION: inline everything</brief>
-    <return>
-      <type name="line_id" qualifier="*" ref="line_id#line_id" />
-    </return>
-    <argument id="line_id_set_is_orf::sid" name="sid">
-      <type name="line_id" qualifier="*" ref="line_id#line_id" />
-    </argument>
-    <argument id="line_id_set_is_orf::set_is_orf" name="set_is_orf">
-      <type builtin="yes" name="bool" />
-    </argument>
-  </function>
-  <function id="line_id_set_line_number" name="line_id_set_line_number">
-    <return>
-      <type name="line_id" qualifier="*" ref="line_id#line_id" />
-    </return>
-    <argument id="line_id_set_line_number::sid" name="sid">
-      <type name="line_id" qualifier="*" ref="line_id#line_id" />
-    </argument>
-    <argument id="line_id_set_line_number::number_to_set_to" name="number_to_set_to">
-      <type name="mpz_t" qualifier="*" />
-    </argument>
-  </function>
-  <function id="line_id_set_str_hash" name="line_id_set_str_hash">
-    <return>
-      <type name="line_id" qualifier="*" ref="line_id#line_id" />
-    </return>
-    <argument id="line_id_set_str_hash::sid" name="sid">
-      <type name="line_id" qualifier="*" ref="line_id#line_id" />
-    </argument>
-    <argument id="line_id_set_str_hash::str_hash" name="str_hash">
+    <argument id="make_line_id::str_length" name="str_length">
+      <doc>length to begin with</doc>
       <type builtin="yes" name="unsigned long" />
     </argument>
   </function>
-  <function id="line_id_set_str_length" name="line_id_set_str_length">
+  <function id="make_line_id_given_string_with_size" name="make_line_id_given_string_with_size">
+    <brief> allocate and initialize a line_id given a string_with_size argument</brief>
     <return>
-      <type name="line_id" qualifier="*" ref="line_id#line_id" />
+      <doc>constructed line_id</doc>
+      <type name="line_id" qualifier="*" ref="line_id::line_id#line_id::line_id" />
     </return>
-    <argument id="line_id_set_str_length::sid" name="sid">
-      <type name="line_id" qualifier="*" ref="line_id#line_id" />
-    </argument>
-    <argument id="line_id_set_str_length::str_length" name="str_length">
+    <argument id="make_line_id_given_string_with_size::str_hash" name="str_hash">
+      <doc>hash to begin with</doc>
       <type builtin="yes" name="unsigned long" />
     </argument>
-  </function>
-  <function id="make_line_id_pair" name="make_line_id_pair">
-    <return>
-      <type name="line_id_pair" qualifier="*" ref="line_id_pair#line_id_pair" />
-    </return>
-    <argument id="make_line_id_pair::prev" name="prev">
-      <type name="line_id" qualifier="*" ref="line_id#line_id" />
+    <argument id="make_line_id_given_string_with_size::str_length" name="str_length">
+      <doc>length to begin with</doc>
+      <type builtin="yes" name="unsigned long" />
     </argument>
-    <argument id="make_line_id_pair::cur" name="cur">
-      <type name="line_id" qualifier="*" ref="line_id#line_id" />
+    <argument id="make_line_id_given_string_with_size::str_k_chars" name="str_k_chars">
+      <doc>characters to draw from</doc>
+      <type name="string_with_size" qualifier="*" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size" />
     </argument>
   </function>
-  <function id="print_line_id_first_k_chars" name="print_line_id_first_k_chars">
+  <function id="free_line_id" name="free_line_id">
+    <brief> free memory allocated by constructing a line_id</brief>
     <return>
       <type builtin="yes" name="void" />
     </return>
-    <argument id="print_line_id_first_k_chars::sid" name="sid">
-      <type name="line_id" qualifier="*" ref="line_id#line_id" />
+    <argument id="free_line_id::arg" name="arg">
+      <type builtin="yes" name="void" qualifier="*" />
     </argument>
   </function>
-  <function id="set_bool_if_line_id_match" name="set_bool_if_line_id_match">
-    <brief>compiler will emit a non-inline version of this, since a pointer is taken</brief>
-    <doc>to it when g_queue_foreach is used</doc>
-    <return>
-      <type builtin="yes" name="void" />
-    </return>
-    <argument id="set_bool_if_line_id_match::prev_line_id" name="prev_line_id">
-      <type name="line_id" qualifier="*" ref="line_id#line_id" />
-    </argument>
-    <argument id="set_bool_if_line_id_match::bool_data_bundle" name="bool_data_bundle">
-      <type name="boolean_and_data" qualifier="*" ref="boolean_and_data#boolean_and_data" />
-    </argument>
-  </function>
-</struct>
+</category>

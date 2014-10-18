@@ -1,0 +1,155 @@
+<?xml version='1.0' encoding='utf-8'?>
+<struct anonymous="yes" id="utilities::string_with_size::string_with_size" name="string_with_size" typedef="yes" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief> used to return a char string, along with size information</brief>
+  <doc>mention that readable_bytes is used by functions like fread because while
+they will typically fill the entire memory space sometimes they do less, upon
+reaching EOF or some other ferror
+</doc>
+  <field id="utilities::string_with_size::string_with_size::string" name="string">
+    <brief>pointer to character string, NOT null-terminated!</brief>
+    <type builtin="yes" name="char" qualifier="*" />
+  </field>
+  <field id="utilities::string_with_size::string_with_size::readable_bytes" name="readable_bytes">
+    <brief>current number of useful bytes this is storing</brief>
+    <type builtin="yes" name="unsigned long long" />
+  </field>
+  <field id="utilities::string_with_size::string_with_size::size_in_memory" name="size_in_memory">
+    <brief>full size of char * in bytes</brief>
+    <type builtin="yes" name="unsigned long long" />
+  </field>
+  <function id="copy_string_with_size" name="copy_string_with_size">
+    <brief> copies data from a string_with_size into another</brief>
+    <doc>note: to_sws-&gt;size_in_memory &gt; from_sws-&gt;readable_bytes, or this will
+segfault
+
+</doc>
+    <return>
+      <doc>copied string_with_size</doc>
+      <type name="string_with_size" qualifier="*" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size" />
+    </return>
+    <argument id="copy_string_with_size::from_sws" name="from_sws">
+      <doc>string_with_size to copy from</doc>
+      <type name="string_with_size" qualifier="*" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size" />
+    </argument>
+    <argument id="copy_string_with_size::to_sws" name="to_sws">
+      <doc>string_with_size to copy to</doc>
+      <type name="string_with_size" qualifier="*" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size" />
+    </argument>
+  </function>
+  <function id="de_process_block_vcsfmt" name="de_process_block_vcsfmt">
+    <brief>TODO: javadoc this</brief>
+    <return>
+      <type name="string_with_size" qualifier="*" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size" />
+    </return>
+    <argument id="de_process_block_vcsfmt::input_block_with_size" name="input_block_with_size">
+      <type name="string_with_size" qualifier="*" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size" />
+    </argument>
+    <argument id="de_process_block_vcsfmt::output_block_with_size" name="output_block_with_size">
+      <type name="string_with_size" qualifier="*" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size" />
+    </argument>
+  </function>
+  <function id="get_levenshtein_distance" name="get_levenshtein_distance">
+    <brief>precondition: strings are same size</brief>
+    <return>
+      <type builtin="yes" name="unsigned long long" />
+    </return>
+    <argument id="get_levenshtein_distance::prev_string" name="prev_string">
+      <type name="string_with_size" qualifier="*" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size" />
+    </argument>
+    <argument id="get_levenshtein_distance::cur_string" name="cur_string">
+      <type name="string_with_size" qualifier="*" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size" />
+    </argument>
+  </function>
+  <function id="get_levenshtein_edits_and_free" name="get_levenshtein_edits_and_free">
+    <brief>http://en.wikipedia.org/wiki/Wagner%E2%80%93Fischer_algorithm</brief>
+    <doc>returns GSList * of chars inserted/deleted/substituted and at which
+positions
+NOTE: FREES STRING_WITH_SIZES GIVEN AS INPUT</doc>
+    <return>
+      <type name="GSList" qualifier="*" />
+    </return>
+    <argument id="get_levenshtein_edits_and_free::prev_string" name="prev_string">
+      <type name="string_with_size" qualifier="*" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size" />
+    </argument>
+    <argument id="get_levenshtein_edits_and_free::cur_string" name="cur_string">
+      <type name="string_with_size" qualifier="*" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size" />
+    </argument>
+  </function>
+  <function id="grow_string_with_size" name="grow_string_with_size">
+    <brief> increases size_in_memory of string_with_size if neccesary, copying over data</brief>
+    <doc>note: does nothing if growth is not required
+
+</doc>
+    <return>
+      <doc>possibly-grown string_with_size</doc>
+      <type name="string_with_size" qualifier="*" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size" />
+    </return>
+    <argument id="grow_string_with_size::sws" name="sws">
+      <doc>pointer to string_with_size to grow</doc>
+      <type name="string_with_size" qualifier="**" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size" />
+    </argument>
+    <argument id="grow_string_with_size::final_size_in_mem" name="final_size_in_mem">
+      <doc>final size to grow to</doc>
+      <type builtin="yes" name="unsigned long long" />
+    </argument>
+  </function>
+  <function id="process_block_vcsfmt" name="process_block_vcsfmt">
+    <brief>*</brief>
+    <doc>Given a continuous stream of DNA characters, this function will insert
+newline characters
+ in between genes and junk DNA. In other words, each line in the output
+will
+be either a gene
+ or junk DNA.
+
+ This function expects the input to only contain DNA characters (no new
+lines
+or anything else).
+
+ This function is also written to be able to process data in multiple
+chunks.
+If multiple calls are
+ made to this function for different chunks of the same data, the same
+parameters should be passed
+ in each call. This will let the function remember key information about
+the
+last chunk it processed.
+</doc>
+    <return>
+      <type name="string_with_size" qualifier="*" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size" />
+    </return>
+    <argument id="process_block_vcsfmt::input_block_with_size" name="input_block_with_size">
+      <type name="string_with_size" qualifier="*" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size" />
+    </argument>
+    <argument id="process_block_vcsfmt::output_block_with_size" name="output_block_with_size">
+      <type name="string_with_size" qualifier="*" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size" />
+    </argument>
+    <argument id="process_block_vcsfmt::is_within_orf" name="is_within_orf">
+      <type builtin="yes" name="bool" qualifier="*" />
+    </argument>
+    <argument id="process_block_vcsfmt::cur_orf_pos" name="cur_orf_pos">
+      <type builtin="yes" name="unsigned long long" qualifier="*" />
+    </argument>
+    <argument id="process_block_vcsfmt::current_codon_frame" name="current_codon_frame">
+      <type builtin="yes" name="char" qualifier="*" />
+    </argument>
+    <argument id="process_block_vcsfmt::is_final_block" name="is_final_block">
+      <type builtin="yes" name="bool" />
+    </argument>
+  </function>
+  <function id="set_string_with_size_readable_bytes" name="set_string_with_size_readable_bytes">
+    <brief> helper function to set readable_bytes of a string_with_size</brief>
+    <return>
+      <doc>modified string_with_size</doc>
+      <type name="string_with_size" qualifier="*" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size" />
+    </return>
+    <argument id="set_string_with_size_readable_bytes::sws" name="sws">
+      <doc>string_with_size to set</doc>
+      <type name="string_with_size" qualifier="*" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size" />
+    </argument>
+    <argument id="set_string_with_size_readable_bytes::readable_bytes" name="readable_bytes">
+      <doc>logical (not memory) size to set to</doc>
+      <type builtin="yes" name="unsigned long long" />
+    </argument>
+  </function>
+</struct>

@@ -16,32 +16,52 @@
   <variable id="doc" name="doc">
     <type name="doc" />
   </variable>
+  <category name="utilities" ref="utilities#utilities">
+    <category name="file functions" ref="utilities::file functions#utilities::file functions" />
+    <category name="string_with_size" ref="utilities::string_with_size#utilities::string_with_size">
+      <struct name="string_with_size" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size">
+        <brief> used to return a char string, along with size information</brief>
+      </struct>
+    </category>
+  </category>
   <category name="vcsfmt" ref="vcsfmt#vcsfmt" />
   <category name="fasta_preformat" ref="fasta_preformat#fasta_preformat" />
-  <function id="write_string_and_update_hash_and_line_length" name="write_string_and_update_hash_and_line_length">
+  <category name="line_id" ref="line_id#line_id">
+    <struct name="line_id" ref="line_id::line_id#line_id::line_id">
+      <brief> aggregate structure representing the identity of a line</brief>
+    </struct>
+  </category>
+  <category name="queue_processing" ref="queue_processing#queue_processing">
+    <struct name="boolean_and_data" ref="queue_processing::boolean_and_data#queue_processing::boolean_and_data">
+      <brief>helper struct used in glib for_each loops</brief>
+    </struct>
+    <struct name="line_id_pair" ref="queue_processing::line_id_pair#queue_processing::line_id_pair">
+      <brief>helper struct to carry a pair of line_ids around</brief>
+    </struct>
+    <struct name="line_id_with_edit_match_info" ref="queue_processing::line_id_with_edit_match_info#queue_processing::line_id_with_edit_match_info">
+      <brief>helper struct to carry line_id and edit matching info in glib for_each</brief>
+    </struct>
+    <struct name="diff_file_trio_with_indices" ref="queue_processing::diff_file_trio_with_indices#queue_processing::diff_file_trio_with_indices">
+      <brief>helper struct used for glib for_each</brief>
+    </struct>
+  </category>
+  <function id="write_line_number_from_file_to_file" name="write_line_number_from_file_to_file">
+    <brief>CLOBBERS FROM_LINE_NUMBER</brief>
+    <doc>i.e. sets it equal to to_line_number + 1</doc>
     <return>
       <type builtin="yes" name="void" />
     </return>
-    <argument id="write_string_and_update_hash_and_line_length::ptr_line_length" name="ptr_line_length">
-      <type builtin="yes" name="unsigned long" qualifier="*" />
+    <argument id="write_line_number_from_file_to_file::from_line_number" name="from_line_number">
+      <type name="mpz_t" qualifier="*" />
     </argument>
-    <argument id="write_string_and_update_hash_and_line_length::sws_first_chars" name="sws_first_chars">
-      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    <argument id="write_line_number_from_file_to_file::to_line_number" name="to_line_number">
+      <type name="mpz_t" qualifier="*" />
     </argument>
-    <argument id="write_string_and_update_hash_and_line_length::sws_block" name="sws_block">
-      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    <argument id="write_line_number_from_file_to_file::source_file" name="source_file">
+      <type name="FILE" qualifier="*" />
     </argument>
-    <argument id="write_string_and_update_hash_and_line_length::ptr_index" name="ptr_index">
-      <type builtin="yes" name="unsigned long long" />
-    </argument>
-    <argument id="write_string_and_update_hash_and_line_length::instantaneous_hash" name="instantaneous_hash">
-      <type builtin="yes" name="unsigned long" qualifier="*" />
-    </argument>
-    <argument id="write_string_and_update_hash_and_line_length::hash_str" name="hash_str">
-      <type builtin="yes" name="char" qualifier="*" />
-    </argument>
-    <argument id="write_string_and_update_hash_and_line_length::ptr_past_k_chars" name="ptr_past_k_chars">
-      <type builtin="yes" name="bool" qualifier="*" />
+    <argument id="write_line_number_from_file_to_file::dest_file" name="dest_file">
+      <type name="FILE" qualifier="*" />
     </argument>
   </function>
 </index>

@@ -1,0 +1,319 @@
+<?xml version='1.0' encoding='utf-8'?>
+<category id="vcscmp" name="vcscmp" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <struct name="line_id" ref="vcscmp::line_id#vcscmp::line_id">
+    <brief> aggregate structure representing the identity of a line</brief>
+  </struct>
+  <function id="make_line_id" name="make_line_id">
+    <brief> allocate and initialize a line_id</brief>
+    <return>
+      <doc>constructed line_id</doc>
+      <type name="line_id" qualifier="*" ref="vcscmp::line_id#vcscmp::line_id" />
+    </return>
+    <argument id="make_line_id::str_hash" name="str_hash">
+      <doc>hash to begin with</doc>
+      <type builtin="yes" name="unsigned long" />
+    </argument>
+    <argument id="make_line_id::str_length" name="str_length">
+      <doc>length to begin with</doc>
+      <type builtin="yes" name="unsigned long" />
+    </argument>
+  </function>
+  <function id="make_line_id_given_string_with_size" name="make_line_id_given_string_with_size">
+    <brief> allocate and initialize a line_id given a string_with_size argument</brief>
+    <return>
+      <doc>constructed line_id</doc>
+      <type name="line_id" qualifier="*" ref="vcscmp::line_id#vcscmp::line_id" />
+    </return>
+    <argument id="make_line_id_given_string_with_size::str_hash" name="str_hash">
+      <doc>hash to begin with</doc>
+      <type builtin="yes" name="unsigned long" />
+    </argument>
+    <argument id="make_line_id_given_string_with_size::str_length" name="str_length">
+      <doc>length to begin with</doc>
+      <type builtin="yes" name="unsigned long" />
+    </argument>
+    <argument id="make_line_id_given_string_with_size::str_k_chars" name="str_k_chars">
+      <doc>characters to draw from</doc>
+      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    </argument>
+  </function>
+  <function id="free_line_id" name="free_line_id">
+    <brief> free memory allocated by constructing a line_id</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="free_line_id::arg" name="arg">
+      <type builtin="yes" name="void" qualifier="*" />
+    </argument>
+  </function>
+  <struct name="boolean_and_data" ref="vcscmp::boolean_and_data#vcscmp::boolean_and_data">
+    <brief>QUEUE_PROCESSING</brief>
+  </struct>
+  <function id="is_cur_line_in_prev_queue" name="is_cur_line_in_prev_queue">
+    <brief>basically macros</brief>
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="is_cur_line_in_prev_queue::prev_file_queue" name="prev_file_queue">
+      <type name="GQueue" qualifier="*" />
+    </argument>
+    <argument id="is_cur_line_in_prev_queue::cur_file_queue" name="cur_file_queue">
+      <type name="GQueue" qualifier="*" />
+    </argument>
+  </function>
+  <struct name="line_id_pair" ref="vcscmp::line_id_pair#vcscmp::line_id_pair" />
+  <function id="free_line_id_pair" name="free_line_id_pair">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="free_line_id_pair::arg" name="arg">
+      <type builtin="yes" name="void" qualifier="*" />
+    </argument>
+  </function>
+  <struct name="line_id_with_edit_match_info" ref="vcscmp::line_id_with_edit_match_info#vcscmp::line_id_with_edit_match_info" />
+  <function id="get_if_edit_line_and_if_so_add_to_list" name="get_if_edit_line_and_if_so_add_to_list">
+    <brief>basically  macros</brief>
+    <return>
+      <type name="boolean_and_data" ref="vcscmp::boolean_and_data#vcscmp::boolean_and_data" />
+    </return>
+    <argument id="get_if_edit_line_and_if_so_add_to_list::prev_file_queue" name="prev_file_queue">
+      <type name="GQueue" qualifier="*" />
+    </argument>
+    <argument id="get_if_edit_line_and_if_so_add_to_list::cur_file_queue" name="cur_file_queue">
+      <type name="GQueue" qualifier="*" />
+    </argument>
+    <argument id="get_if_edit_line_and_if_so_add_to_list::edit_matches" name="edit_matches">
+      <type name="GSList" qualifier="**" />
+    </argument>
+  </function>
+  <function id="write_line_and_if_new_add_to_list" name="write_line_and_if_new_add_to_list">
+    <brief>CLOBBERS LINES_PROCESSED ARGUMENTS</brief>
+    <doc>i.e. sets them to their new appropriate values</doc>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="write_line_and_if_new_add_to_list::prev_file_line_ids_queue" name="prev_file_line_ids_queue">
+      <type name="GQueue" qualifier="*" />
+    </argument>
+    <argument id="write_line_and_if_new_add_to_list::cur_file_line_ids_queue" name="cur_file_line_ids_queue">
+      <type name="GQueue" qualifier="*" />
+    </argument>
+    <argument id="write_line_and_if_new_add_to_list::current_streak_of_newly_added_lines" name="current_streak_of_newly_added_lines">
+      <type builtin="yes" name="unsigned long long" qualifier="*" />
+    </argument>
+    <argument id="write_line_and_if_new_add_to_list::input_file_lines_processed_for_edits" name="input_file_lines_processed_for_edits">
+      <type name="mpz_t" qualifier="*" />
+    </argument>
+    <argument id="write_line_and_if_new_add_to_list::cur_file_lines_processed" name="cur_file_lines_processed">
+      <type name="mpz_t" qualifier="*" />
+    </argument>
+    <argument id="write_line_and_if_new_add_to_list::output_file_lines_processed" name="output_file_lines_processed">
+      <type name="mpz_t" qualifier="*" />
+    </argument>
+    <argument id="write_line_and_if_new_add_to_list::break_out_of_vcscmp" name="break_out_of_vcscmp">
+      <type builtin="yes" name="bool" qualifier="*" />
+    </argument>
+    <argument id="write_line_and_if_new_add_to_list::edit_matches" name="edit_matches">
+      <type name="GSList" qualifier="**" />
+    </argument>
+    <argument id="write_line_and_if_new_add_to_list::prev_file_used_for_edits" name="prev_file_used_for_edits">
+      <type name="FILE" qualifier="*" />
+    </argument>
+    <argument id="write_line_and_if_new_add_to_list::cur_file" name="cur_file">
+      <type name="FILE" qualifier="*" />
+    </argument>
+    <argument id="write_line_and_if_new_add_to_list::out_file" name="out_file">
+      <type name="FILE" qualifier="*" />
+    </argument>
+  </function>
+  <function id="initialize_line_id" name="initialize_line_id">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="initialize_line_id::ptr_hash" name="ptr_hash">
+      <type builtin="yes" name="unsigned long" qualifier="*" />
+    </argument>
+    <argument id="initialize_line_id::ptr_length" name="ptr_length">
+      <type builtin="yes" name="unsigned long" qualifier="*" />
+    </argument>
+    <argument id="initialize_line_id::sws" name="sws">
+      <type name="string_with_size" qualifier="**" ref="string_with_size#string_with_size" />
+    </argument>
+    <argument id="initialize_line_id::ptr_past_k_chars" name="ptr_past_k_chars">
+      <type builtin="yes" name="bool" qualifier="*" />
+    </argument>
+  </function>
+  <function id="if_within_first_section_write_to_string" name="if_within_first_section_write_to_string">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="if_within_first_section_write_to_string::ptr_line_length" name="ptr_line_length">
+      <type builtin="yes" name="unsigned long" />
+    </argument>
+    <argument id="if_within_first_section_write_to_string::sws_first_chars" name="sws_first_chars">
+      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    </argument>
+    <argument id="if_within_first_section_write_to_string::sws_block" name="sws_block">
+      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    </argument>
+    <argument id="if_within_first_section_write_to_string::ptr_index" name="ptr_index">
+      <type builtin="yes" name="unsigned long long" />
+    </argument>
+  </function>
+  <function id="write_string_and_update_hash_and_line_length" name="write_string_and_update_hash_and_line_length">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="write_string_and_update_hash_and_line_length::ptr_line_length" name="ptr_line_length">
+      <type builtin="yes" name="unsigned long" qualifier="*" />
+    </argument>
+    <argument id="write_string_and_update_hash_and_line_length::sws_first_chars" name="sws_first_chars">
+      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    </argument>
+    <argument id="write_string_and_update_hash_and_line_length::sws_block" name="sws_block">
+      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    </argument>
+    <argument id="write_string_and_update_hash_and_line_length::ptr_index" name="ptr_index">
+      <type builtin="yes" name="unsigned long long" />
+    </argument>
+    <argument id="write_string_and_update_hash_and_line_length::instantaneous_hash" name="instantaneous_hash">
+      <type builtin="yes" name="unsigned long" qualifier="*" />
+    </argument>
+    <argument id="write_string_and_update_hash_and_line_length::hash_str" name="hash_str">
+      <type builtin="yes" name="char" qualifier="*" />
+    </argument>
+    <argument id="write_string_and_update_hash_and_line_length::ptr_past_k_chars" name="ptr_past_k_chars">
+      <type builtin="yes" name="bool" qualifier="*" />
+    </argument>
+  </function>
+  <function id="check_if_past_k_chars_push_tail_and_initialize_line_id" name="check_if_past_k_chars_push_tail_and_initialize_line_id">
+    <brief>OPTIMIZATION: string probably ok to allocate in loop, but perhaps not</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="check_if_past_k_chars_push_tail_and_initialize_line_id::ptr_past_k_chars" name="ptr_past_k_chars">
+      <type builtin="yes" name="bool" qualifier="*" />
+    </argument>
+    <argument id="check_if_past_k_chars_push_tail_and_initialize_line_id::ptr_line_length" name="ptr_line_length">
+      <type builtin="yes" name="unsigned long" qualifier="*" />
+    </argument>
+    <argument id="check_if_past_k_chars_push_tail_and_initialize_line_id::ids_queue" name="ids_queue">
+      <type name="GQueue" qualifier="*" />
+    </argument>
+    <argument id="check_if_past_k_chars_push_tail_and_initialize_line_id::ptr_line_hash" name="ptr_line_hash">
+      <type builtin="yes" name="unsigned long" qualifier="*" />
+    </argument>
+    <argument id="check_if_past_k_chars_push_tail_and_initialize_line_id::first_few_chars" name="first_few_chars">
+      <type name="string_with_size" qualifier="**" ref="string_with_size#string_with_size" />
+    </argument>
+    <argument id="check_if_past_k_chars_push_tail_and_initialize_line_id::lines_processed" name="lines_processed">
+      <type name="mpz_t" qualifier="*" />
+    </argument>
+    <argument id="check_if_past_k_chars_push_tail_and_initialize_line_id::is_line_orf" name="is_line_orf">
+      <type builtin="yes" name="bool" />
+    </argument>
+  </function>
+  <function id="is_first_line_orf" name="is_first_line_orf">
+    <brief>TODO: "ironed out" as below</brief>
+    <doc>requires that string be &gt;= CODON_LENGTH chars, which needs to be ironed out
+requires that file be formatted correctly so that lines of orf and non orf
+alternate, but vcsfmt already enforces that</doc>
+    <return>
+      <type builtin="yes" name="bool" />
+    </return>
+    <argument id="is_first_line_orf::first_few_chars" name="first_few_chars">
+      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    </argument>
+  </function>
+  <function id="react_to_next_character_of_block" name="react_to_next_character_of_block">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="react_to_next_character_of_block::input_block" name="input_block">
+      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    </argument>
+    <argument id="react_to_next_character_of_block::block_index" name="block_index">
+      <type builtin="yes" name="unsigned long long" />
+    </argument>
+    <argument id="react_to_next_character_of_block::lines_processed" name="lines_processed">
+      <type name="mpz_t" qualifier="*" />
+    </argument>
+    <argument id="react_to_next_character_of_block::is_line_orf" name="is_line_orf">
+      <type builtin="yes" name="bool" qualifier="*" />
+    </argument>
+    <argument id="react_to_next_character_of_block::first_few_chars" name="first_few_chars">
+      <type name="string_with_size" qualifier="**" ref="string_with_size#string_with_size" />
+    </argument>
+    <argument id="react_to_next_character_of_block::ptr_past_k_chars" name="ptr_past_k_chars">
+      <type builtin="yes" name="bool" qualifier="*" />
+    </argument>
+    <argument id="react_to_next_character_of_block::ptr_line_length" name="ptr_line_length">
+      <type builtin="yes" name="unsigned long" qualifier="*" />
+    </argument>
+    <argument id="react_to_next_character_of_block::ids_queue" name="ids_queue">
+      <type name="GQueue" qualifier="*" />
+    </argument>
+    <argument id="react_to_next_character_of_block::ptr_line_hash" name="ptr_line_hash">
+      <type builtin="yes" name="unsigned long" qualifier="*" />
+    </argument>
+  </function>
+  <function id="add_blocks_to_queue" name="add_blocks_to_queue">
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="add_blocks_to_queue::active_file" name="active_file">
+      <type name="FILE" qualifier="*" />
+    </argument>
+    <argument id="add_blocks_to_queue::ids_queue" name="ids_queue">
+      <type name="GQueue" qualifier="*" />
+    </argument>
+    <argument id="add_blocks_to_queue::input_block" name="input_block">
+      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    </argument>
+    <argument id="add_blocks_to_queue::ptr_past_k_chars" name="ptr_past_k_chars">
+      <type builtin="yes" name="bool" qualifier="*" />
+    </argument>
+    <argument id="add_blocks_to_queue::ptr_line_length" name="ptr_line_length">
+      <type builtin="yes" name="unsigned long" qualifier="*" />
+    </argument>
+    <argument id="add_blocks_to_queue::ptr_line_hash" name="ptr_line_hash">
+      <type builtin="yes" name="unsigned long" qualifier="*" />
+    </argument>
+    <argument id="add_blocks_to_queue::first_few_chars" name="first_few_chars">
+      <type name="string_with_size" qualifier="**" ref="string_with_size#string_with_size" />
+    </argument>
+    <argument id="add_blocks_to_queue::lines_processed" name="lines_processed">
+      <type name="mpz_t" qualifier="*" />
+    </argument>
+    <argument id="add_blocks_to_queue::is_line_orf" name="is_line_orf">
+      <type builtin="yes" name="bool" qualifier="*" />
+    </argument>
+  </function>
+  <struct name="diff_file_trio_with_indices" ref="vcscmp::diff_file_trio_with_indices#vcscmp::diff_file_trio_with_indices" />
+  <function id="optimal_levenshtein_string_between_lines" name="optimal_levenshtein_string_between_lines">
+    <return>
+      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    </return>
+    <argument id="optimal_levenshtein_string_between_lines::prev_file" name="prev_file">
+      <type name="FILE" qualifier="*" />
+    </argument>
+    <argument id="optimal_levenshtein_string_between_lines::cur_file" name="cur_file">
+      <type name="FILE" qualifier="*" />
+    </argument>
+  </function>
+  <function id="vcscmp" name="vcscmp">
+    <brief>TODO: fix clang-format so that pointers are aligned correctly</brief>
+    <return>
+      <type builtin="yes" name="void" />
+    </return>
+    <argument id="vcscmp::prev_filename" name="prev_filename">
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </argument>
+    <argument id="vcscmp::cur_filename" name="cur_filename">
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </argument>
+    <argument id="vcscmp::out_filename" name="out_filename">
+      <type builtin="yes" name="char" qualifier=" const *" />
+    </argument>
+  </function>
+</category>

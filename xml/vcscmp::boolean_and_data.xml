@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<struct anonymous="yes" id="vcscmp::boolean_and_data" name="boolean_and_data" typedef="yes" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>QUEUE_PROCESSING</brief>
+  <doc>*
+</doc>
+  <field id="vcscmp::boolean_and_data::data" name="data">
+    <type builtin="yes" name="void" qualifier="*" />
+  </field>
+  <field id="vcscmp::boolean_and_data::boolean" name="boolean">
+    <type builtin="yes" name="bool" />
+  </field>
+</struct>

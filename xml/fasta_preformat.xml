@@ -21,19 +21,19 @@ Precondition: size of output in memory &gt;= the size of input in memory.
 </doc>
     <return>
       <doc>a raw block of genetic data</doc>
-      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+      <type name="string_with_size" qualifier="*" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size" />
     </return>
     <argument id="fasta_preformat::input" name="input">
       <doc>the input string of fasta data</doc>
-      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+      <type name="string_with_size" qualifier="*" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size" />
     </argument>
     <argument id="fasta_preformat::output" name="output">
       <doc>a raw string of memory to write unformatted genetic data into</doc>
-      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+      <type name="string_with_size" qualifier="*" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size" />
     </argument>
     <argument id="fasta_preformat::metadata" name="metadata">
       <doc>a string giving additional information about the fasta data</doc>
-      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+      <type name="string_with_size" qualifier="*" ref="utilities::string_with_size::string_with_size#utilities::string_with_size::string_with_size" />
     </argument>
     <argument id="fasta_preformat::in_comment" name="in_comment">
       <doc>whether or not we are currently in a fasta comment.</doc>
