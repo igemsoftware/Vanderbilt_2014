@@ -28,6 +28,7 @@ static struct argp_option options[] = {
    1},
   // TODO: make this option produce more information (stderr)
   {"verbose", 'v', 0, 0, "Produce verbose output", 2},
+  {"unzip", 'u', 0, 0, "Recover original file from vcsfmt or vcscmp file", 3},
   {0, 0, 0, 0, 0, 0}};
 
 // used to communicate with parse_opt

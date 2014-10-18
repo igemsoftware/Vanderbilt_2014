@@ -80,7 +80,7 @@ FILE * create_file_binary_write(const char * filename);
 
 /* cldoc:begin-category(utilities::string_with_size) */
 /* used to return a char string, along with size information
- * mention that readable_bytes is used by functions like fread because while
+ * readable_bytes is used by functions like fread because while
  * they will typically fill the entire memory space sometimes they do less, upon
  * reaching EOF or some other ferror
  */

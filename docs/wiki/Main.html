@@ -1,61 +1,45 @@
-{{}{CSS/Main}}
+{{CSS/Main}}
 
-
-****  Project page (SHORT):
-- proj. desc.
-- links to other parts of project at bottom
-- link to github
 
 <html>
+  <style type="text/css">
+    body {
+    position: relative;
+    width: 850px //100%;
+    margin: 0;
+    padding: 0;
+    padding-bottom: 10px;
+    background:url(http://parts.igem.org/wiki/images/f/f8/Special_Background.jpg);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size:100% auto;
+    }
+  </style>
 
   <!--main content -->
   <table width="70%" align="center">
 
-    <tr> <td colspan="3"  height="5px"> </td></tr>
-    <!-- end welcome box -->
-    <tr>
+    <!--navigation menu -->
+    <td align="center" colspan="3">
 
-      <!--navigation menu -->
-      <td align="center" colspan="3">
-
-        <table  width="100%">
-          <tr heigth="15px"></tr>
-          <tr heigth="75px">
+      <table  width="100%">
+        <tr heigth="15px"></tr>
+        <tr heigth="75px">
 
 
-            <td style="border:1px solid black;" align="center" height ="45px" onMouseOver="this.bgColor='#d3d3d3'" onMouseOut="this.bgColor='#e7e7e7'" bgColor=#e7e7e7>
-              <a href="http://2014.igem.org/Team:Vanderbilt_Software"style="color:#000000">Home</a> </td>
+          <td style="border:1px solid black;" align="center" height ="45px" onMouseOver="this.bgColor='#d3d3d3'" onMouseOut="this.bgColor='#e7e7e7'" bgColor=#e7e7e7>
+            <a href="http://2014.igem.org/Team:Vanderbilt_Software"style="color:#000000">Home</a> </td>
 
-            <td style="border:1px solid black" align="center"  height ="45px" onMouseOver="this.bgColor='#d3d3d3'" onMouseOut="this.bgColor='#e7e7e7'" bgColor=#e7e7e7>
-              <a href="http://2014.igem.org/Team:Vanderbilt_Software/Project"style="color:#000000"> Project</a></td>
-
-            <td style="border:1px solid black;" align="center" height ="45px" onMouseOver="this.bgColor='#d3d3d3'" onMouseOut="this.bgColor='#e7e7e7'" bgColor=#e7e7e7>
-              <a href="http://2014.igem.org/Team:Vanderbilt_Software/Program"style="color:#000000">Program</a> </td>
+          <td style="border:1px solid black;" align="center" height ="45px" onMouseOver="this.bgColor='#d3d3d3'" onMouseOut="this.bgColor='#e7e7e7'" bgColor=#e7e7e7>
+            <a href="http://2014.igem.org/Team:Vanderbilt_Software/Program"style="color:#000000">Program</a> </td>
 
 
-
-
-            <td style="border:1px solid black;" align="center" height ="45px" onMouseOver="this.bgColor='#d3d3d3'" onMouseOut="this.bgColor='#e7e7e7'" bgColor=#e7e7e7>
-              <a href="http://2014.igem.org/Team:Vanderbilt_Software/Team"style="color:#000000"> Team </a> </td>
-
-            <td style="border:1px solid black;" align="center"  height ="45px" onMouseOver="this.bgColor='#d3d3d3'" onMouseOut="this.bgColor='#e7e7e7'" bgColor=#e7e7e7>
-              <a href="http://2014.igem.org/Team:Vanderbilt_Software/Attributions"style="color:#000000"> Attributions </a></td>
-
-
-            <td align ="center"> <a href="http://2014.igem.org/Main_Page"> <img src="http://igem.org/wiki/images/6/60/Igemlogo_300px.png" width="55px"></a> </td>
-          </tr>
-        </table>
-
-        <!--end navigation menu -->
-    </tr>
-
+          <td align ="center"> <a href="http://2014.igem.org/Main_Page"> <img src="http://igem.org/wiki/images/6/60/Igemlogo_300px.png" width="55px"></a> </td>
+        </tr>
+      </table>
 
 </tr>
-
-
-
-
-
+</tr>
 </td>
 
 <tr> <td colspan="3"  height="15px"> </td></tr>
@@ -63,79 +47,35 @@
 <tr> <td colspan="3"  height="5px"> </td></tr>
 
 
-<!--requirements section -->
-<tr><td colspan="3"> <h3> Requirements </h3></td></tr>
+
+<!--Project content  -->
+<tr><td > <h3>Project Description</h3></td>
+  <td ></td >
+  <td > <h3>Sections</h3></td>
+</tr>
+
 <tr>
   <td width="45%"  valign="top">
+    <p>Darwin is a software package to document changes to DNA which allows for easy, standardized, and collaborative editing on DNA data up to the genome scale. It builds off of tested and proven version control software, so the entire history of the tracked data is easy to browse and transfer. But Darwin is specifically focused on DNA data, speeding up the tracking process and offering significant security improvements from any current system.</p>
 
-    <p> Please be sure to keep these links, your audience will want to find your: </p>
+    <p>Because Darwin uses existing version control systems, the majority of the heavy lifting is complete already; Darwin can be installed right on top of the existing software. Darwin's contribution is to parse and format the biological data so that it can be used more effectively with these systems. It uses a variety of heuristics to effectively split the data and granularize the changes made to produce change logging orders of magnitude more time- and space-efficient than any other method.</p>
 
-    <!-- Links to other team pages -->
-    <ul>
-      <li><a href="http://2014.igem.org/Team:Vanderbilt_Software">Home</a> </li>
-      <li><a href="http://2014.igem.org/Team:Vanderbilt_Software/Project">Project</a> </li>
-      <li><a href="http://2014.igem.org/Team:Vanderbilt_Software/Team">Team</a> </li>
-      <li><a href="http://2014.igem.org/Team:Vanderbilt_Software/Attributions">Attributions</a> </li>
 
-    </ul>
+    <h3>Current Status</h3>
+    <p>The project in its current status can be found in its <a href="http://github.com/igemsoftware/Vanderbilt_2014">repository on github</a>. Documentation on the produced software tool can be found on the <a href="http://2014.igem.org/Team:Vanderbilt_Software/Program">Program</a> page</p>
 
   </td>
 
-  <td > </td>
-  <td width="45%">
-
-    <p>There are a few wiki requirements teams must follow:</p>
-    <ul>
-      <li>All pages, images and files must be hosted on the <a href ="http://2014.igem.org/Special:Upload">  2014.igem.org server</a>. </li>
-      <li>All pages must be created under the team’s name space.</li>
-      <li>As part of your documentation, keep the links from the menu to the left. </li>
-      <li>Do not use flash in wiki code. </li>
-      <li>The <a href="http://igem.org/wiki/images/6/60/Igemlogo_300px.png"> iGEM logo </a> should be placed on the upper part of every page and should link to <a href="http://2014.igem.org/Main_Page">2014.igem.org</a>.</li>
-    </ul>
-    <p>Visit the <a href="http://2014.igem.org/Wiki_How-To"> Wiki How To page </a> for a complete list of requirements, tips and other useful information. </p>
-
+  <td></td>
+  <td  width="45%"  valign="top">
+    <h3>Motivation</h3>
+    <ol>
+      <li><a href="http://2014.igem.org/Team:Vanderbilt_Software/Motivation">Motivation</a></li>
+    </ol>
   </td>
+
 </tr>
 
 
-<tr> <td colspan="3"  height="15px"> </td></tr>
-<tr><td bgColor="#e7e7e7" colspan="3" height="1"> </tr>
-
-
-<!--tips  -->
-<tr><td colspan="3" > <h3> Tips  </h3></td></tr>
-
-<tr>
-  <td width="45%" valign="top">
-    <p>We are currently working on providing teams with some easy to use design templates.
-      <br> In the meantime you can also view other team wikis for inspiration! Here are some very good examples</p>
-
-    <ul>
-      <li> <a href="http://2013.igem.org/Team:SDU-Denmark/"> 2013 SDU Denmark </a> </li>
-      <li> <a href="http://2013.igem.org/Team:SYSU-China">2013 SYSU China</a> </li>
-      <li> <a href="http://2013.igem.org/Team:Shenzhen_BGIC_ATCG"> 2013 Shenxhen BGIG ATCG </a></li>
-      <li> <a href="http://2013.igem.org/Team:Colombia_Uniandes">2013 Colombia Unianades </a></li>
-      <li> <a href="http://2013.igem.org/Team:Lethbridge">2013 Lethbridge</a></li>
-    </ul>
-
-    <p>For a full wiki list, you can visit <a href="http://igem.org/Team_Wikis?year=2013">iGEM 2013 web sites </a> and <a href="http://igem.org/Team_Wikis?year=2012">iGEM 2012 web sites</a>  lists. </p>
-  </td>
-
-  <td> </td>
-  <td width="45%">
-
-    <p>This wiki will be your team’s first interaction with the rest of the world, so here are a few tips to help you get started: </p>
-
-    <ul>
-      <li>State your accomplishments! Tell people what you have achieved from the start. </li>
-      <li>Be clear about what you are doing and what you plan to do.</li>
-      <li>You have a global audience! Consider the different backgrounds that your users come from.</li>
-      <li>Make sure information is easy to find; nothing should be more than 3 clicks away.  </li>
-      <li>Avoid using very small fonts and low contrast colors; information should be easy to read.  </li>
-      <li>Start documenting your project as early as possible; don’t leave anything to the last minute before the Wiki Freeze. For a complete list of deadlines visit the <a href="">iGEM 2013 calendar</a> </li>
-      <li>Have lots of fun! </li>
-    </ul>
-    </br>
-  </td>
-</tr>
 </table>
+</html>

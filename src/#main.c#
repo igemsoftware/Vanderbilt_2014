@@ -35,12 +35,12 @@ int main(int argc, char **argv) {
     }
   }
 
+  vcsfmt("ape_0");
   vcsfmt("ape_1");
-  vcsfmt("ape_2");
 
   // de_vcsfmt("500_lines_of_dna_minus_lines.fasta.vcsfmt");
 
-  vcscmp("ape_1.vcsfmt",
-         "ape_2.vcsfmt",
+  vcscmp("ape_0.vcsfmt",
+         "ape_1q.vcsfmt",
          "WEIRD_OUTPUT_FILE.vcscmp");
 }
