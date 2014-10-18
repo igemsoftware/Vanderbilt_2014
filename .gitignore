@@ -1,6 +1,3 @@
-# keep random downloaded info out of it
-infos/
-# keep large files meant for testing out of it
 # mvp_testing/
 mvp_testing/homo_sapiens_chromosome_7.fasta
 # don't add generated object files
