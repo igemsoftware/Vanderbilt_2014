@@ -1,0 +1,120 @@
+{{CSS/Main}}
+
+
+<html>
+  <style type="text/css">
+      body {
+              position: relative;
+                      width: 850px //100%;
+                              margin: 0;
+                                      padding: 0;
+                                              padding-bottom: 10px;
+                                                      background:url(http://parts.igem.org/wiki/images/f/f8/Special_Background.jpg);
+                                                              background-repeat: no-repeat;
+                                                                      background-attachment: fixed;
+                                                                              background-size:100% auto;
+                                                                                  }
+                                                                                      </style>
+
+  <!--main content -->
+  <table width="70%" align="center">
+
+    <!--navigation menu -->
+    <td align="center" colspan="3">
+
+      <table  width="100%">
+        <tr heigth="15px"></tr>
+        <tr heigth="75px">
+
+
+          <td style="border:1px solid black;" align="center" height ="45px" onMouseOver="this.bgColor='#d3d3d3'" onMouseOut="this.bgColor='#e7e7e7'" bgColor=#e7e7e7>
+            <a href="http://2014.igem.org/Team:Vanderbilt_Software"style="color:#000000">Home</a> </td>
+
+
+
+
+          <td style="border:1px solid black;" align="center" height ="45px" onMouseOver="this.bgColor='#d3d3d3'" onMouseOut="this.bgColor='#e7e7e7'" bgColor=#e7e7e7>
+            <a href="http://2014.igem.org/Team:Vanderbilt_Software/Program"style="color:#000000">Program</a> </td>
+
+
+
+
+
+
+
+
+          <td align ="center"> <a href="http://2014.igem.org/Main_Page"> <img src="http://igem.org/wiki/images/6/60/Igemlogo_300px.png" width="55px"></a> </td>
+        </tr>
+      </table>
+
+</tr>
+</tr>
+</td>
+
+<tr> <td colspan="3"  height="15px"> </td></tr>
+<tr><td bgColor="#e7e7e7" colspan="3" height="1px"> </tr>
+<tr> <td colspan="3"  height="5px"> </td></tr>
+
+
+
+<!--Project content  -->
+<tr>
+  <td><h3>User Guide</h3></td>
+</tr>
+
+<tr>
+  <td width="45%"  valign="top">
+    <p>It's important to understand the difference between the software <em>darwin</em> and the utility <em>dwndiff</em>. Over the summer, the team produced <em>dwndiff</em>, which is a command-line utility for producing what are called "diff" files suitable for use with genomic data. <em>darwin</em>, on the other hand, is the overall vision of the software team: to produce a solution for tracking changes to all sorts of genomic data. Given input files in FASTA, GenBank, or ApE format, the dwndiff utility can speedily produce output files which can be used with an external version control system much more easily. Examples of such version control systems include <a href="http://git-scm.com/">git</a>, <a href="http://subversion.apache.org">svn</a>, and <a href="mercurial.selenic.com/">hg</a>.</p>
+    <p>Using dwndiff is somewhat complex at first, but let's start with the most obvious solution: the "help" command:</p>
+    <pre>$ dwndiff --help
+      Usage: dwndiff [OPTION...] FILE...
+      dwndiff is a command-line tool to format DNA sequences for use in version
+      control systems. It is intended to be used as a backend for version control
+      tools which act upon biological data. It defaults to 'format' mode, where it
+      formats a given DNA sequence (through stdin, or the given files) to a special
+      format, appending the '.vcsfmt' suffix. If given the '-c' option, however, it
+      will take two files, convert them to .vcsfmt format if necessary, and produce a
+      .vcscmp file which can be used in version control software.
+
+      -p, --preformat_loc=DIR    Location of pre-existing .vcsfmt files for given
+      input DNA
+      -w, --write                Write output to file(s) instead of stdout
+      -c, --compare              If two files given, produce unix diff-compatible
+      comparison .vcscmp file
+      -v, --verbose              Produce verbose output
+      -?, --help                 Give this help list
+      --usage                Give a short usage message
+      -V, --version              Print program version
+
+      Mandatory or optional arguments to long options are also mandatory or optional
+      for any corresponding short options.
+    </pre>
+
+    <p>Let's break this down into multiple cases:</p>
+    <ol>
+      <li>Given a genomic file, convert it to a version-controllable format, which we call vcsfmt.</li>
+      <li>Given two vcsfmt files, find the difference between them and produce a file to be put under version control, which we call vcscmp.</li>
+      <li>Reproduce the original input file from a vcsfmt or vcscmp file.</li>
+    </ol>
+    <h4>Convert genomic file to version-controllable format (vcsfmt)</h4>
+    <p>Run dwndiff as follows:</p>
+    <pre>dwndiff &lt;file&gt; [-w]</pre>
+    <p>This produces a specially-formatted file which preserves the information of the original genomic file: the input file can be completely restructured from the output. The important point about the specially-formatted file is that it applies a variety of optimizations to run more quickly under most normal version control systems. If the '-w' option is specified, then dwndiff writes out the output file to a file named the same as the original, but with ".vcsfmt" appended to the end of the filename. Otherwise, it will write the output to stdout. If '-w' is given as an option, then multiple files can be given as input, and dwndiff will produce vcsfmt versions of all of them.</p>
+
+    <h4>Take two vcsfmt files and produce vcscmp "diff"</h4>
+    <p>Run dwndiff as follows:</p>
+    <pre>dwndiff &lt;file1&gt; &lt;file2&gt; -c [-w -p]</pre>
+    <p>As before, this takes in files and produces an output, which can be written to file or stdout. If written to file, it will have the ".vcscmp" suffix. The difference between this and the previous command is that dwndiff can only have two input files for this mode of operation, and the input files must already have been preformatted by dwndiff. The resulting output, whether sent to stdout or to the specified file, will be the difference between the two, which, when reviewed by a version control system such as git or svn, will appear extremely small.</p>
+
+    <h4>Recover original file from vcsfmt or vcscmp file</h4>
+    <p>Run dwndiff as follows:</p>
+    <pre>dwndiff &lt;file&gt; -u</pre>
+    <p>This faithfully reconstructs the original genomic file from the specially-formatted version dwndiff had previously reproduced. The file is produced in the same directory as the input file, with the ".vcsfmt" or ".vcscmp" suffix removed, as appropriate.</p>
+
+    <h3>Using this in a Version Control System</h3>
+    <p>The dwndiff utility still leaves a lot of work for the user to do. The user must scan in the file to track to produce a vcsfmt file, then track that using an external version control system (many suuch options are noted above). The user must then perform the same operation on that file whenever it is changed to produce a vcsfmt file, and then run dwndiff again to produce a .vcscmp file which will be tracked, and so on for each successive iteration. When another user wishes to use the changed file, they must obtain the vcscmp file from the version control system, then run dwndiff with the "unzip" option to obtain the original file. Future versions will automate this nonsense and reduce the hassle.</p>
+</td></tr>
+
+
+</table>
+</html>
