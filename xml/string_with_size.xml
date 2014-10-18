@@ -1,0 +1,139 @@
+<?xml version='1.0' encoding='utf-8'?>
+<struct anonymous="yes" id="string_with_size" name="string_with_size" typedef="yes" xmlns="http://jessevdk.github.com/cldoc/1.0">
+  <brief>STRUCTS AND FUNCTIONS TO MANIPULATE THEM</brief>
+  <doc>STRING_WITH_SIZE
+used to return a char string, along with size information
+TODO: mention that readable_bytes is used by functions like fread because
+while they will typically fill the entire memory space sometimes they do
+less, upon reaching EOF or some other ferror</doc>
+  <field id="string" name="string">
+    <type builtin="yes" name="char" qualifier="*" />
+  </field>
+  <field id="readable_bytes" name="readable_bytes">
+    <brief>NOT null-terminated by default!</brief>
+    <type builtin="yes" name="unsigned long long" />
+  </field>
+  <field id="size_in_memory" name="size_in_memory">
+    <brief>current number of useful bytes this is storing</brief>
+    <type builtin="yes" name="unsigned long long" />
+  </field>
+  <function id="copy_string_with_size" name="copy_string_with_size">
+    <brief>TODO: javadoc</brief>
+    <return>
+      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    </return>
+    <argument id="copy_string_with_size::from_sws" name="from_sws">
+      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    </argument>
+    <argument id="copy_string_with_size::to_sws" name="to_sws">
+      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    </argument>
+  </function>
+  <function id="de_process_block_vcsfmt" name="de_process_block_vcsfmt">
+    <brief>TODO: javadoc this</brief>
+    <return>
+      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    </return>
+    <argument id="de_process_block_vcsfmt::input_block_with_size" name="input_block_with_size">
+      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    </argument>
+    <argument id="de_process_block_vcsfmt::output_block_with_size" name="output_block_with_size">
+      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    </argument>
+  </function>
+  <function id="get_levenshtein_distance" name="get_levenshtein_distance">
+    <brief>precondition: strings are same size</brief>
+    <return>
+      <type builtin="yes" name="unsigned long long" />
+    </return>
+    <argument id="get_levenshtein_distance::prev_string" name="prev_string">
+      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    </argument>
+    <argument id="get_levenshtein_distance::cur_string" name="cur_string">
+      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    </argument>
+  </function>
+  <function id="get_levenshtein_edits_and_free" name="get_levenshtein_edits_and_free">
+    <brief>http://en.wikipedia.org/wiki/Wagner%E2%80%93Fischer_algorithm</brief>
+    <doc>returns GSList * of chars inserted/deleted/substituted and at which
+positions
+NOTE: FREES STRING_WITH_SIZES GIVEN AS INPUT</doc>
+    <return>
+      <type name="GSList" qualifier="*" />
+    </return>
+    <argument id="get_levenshtein_edits_and_free::prev_string" name="prev_string">
+      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    </argument>
+    <argument id="get_levenshtein_edits_and_free::cur_string" name="cur_string">
+      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    </argument>
+  </function>
+  <function id="grow_string_with_size" name="grow_string_with_size">
+    <brief>TODO: javadoc</brief>
+    <return>
+      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    </return>
+    <argument id="grow_string_with_size::sws" name="sws">
+      <type name="string_with_size" qualifier="**" ref="string_with_size#string_with_size" />
+    </argument>
+    <argument id="grow_string_with_size::final_size_in_mem" name="final_size_in_mem">
+      <type builtin="yes" name="unsigned long long" />
+    </argument>
+  </function>
+  <function id="process_block_vcsfmt" name="process_block_vcsfmt">
+    <brief>*</brief>
+    <doc>Given a continuous stream of DNA characters, this function will insert
+newline characters
+ in between genes and junk DNA. In other words, each line in the output
+will
+be either a gene
+ or junk DNA.
+
+ This function expects the input to only contain DNA characters (no new
+lines
+or anything else).
+
+ This function is also written to be able to process data in multiple
+chunks.
+If multiple calls are
+ made to this function for different chunks of the same data, the same
+parameters should be passed
+ in each call. This will let the function remember key information about
+the
+last chunk it processed.
+</doc>
+    <return>
+      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    </return>
+    <argument id="process_block_vcsfmt::input_block_with_size" name="input_block_with_size">
+      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    </argument>
+    <argument id="process_block_vcsfmt::output_block_with_size" name="output_block_with_size">
+      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    </argument>
+    <argument id="process_block_vcsfmt::is_within_orf" name="is_within_orf">
+      <type builtin="yes" name="bool" qualifier="*" />
+    </argument>
+    <argument id="process_block_vcsfmt::cur_orf_pos" name="cur_orf_pos">
+      <type builtin="yes" name="unsigned long long" qualifier="*" />
+    </argument>
+    <argument id="process_block_vcsfmt::current_codon_frame" name="current_codon_frame">
+      <type builtin="yes" name="char" qualifier="*" />
+    </argument>
+    <argument id="process_block_vcsfmt::is_final_block" name="is_final_block">
+      <type builtin="yes" name="bool" />
+    </argument>
+  </function>
+  <function id="set_string_with_size_readable_bytes" name="set_string_with_size_readable_bytes">
+    <brief>TODO: javadoc</brief>
+    <return>
+      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    </return>
+    <argument id="set_string_with_size_readable_bytes::sws" name="sws">
+      <type name="string_with_size" qualifier="*" ref="string_with_size#string_with_size" />
+    </argument>
+    <argument id="set_string_with_size_readable_bytes::readable_bytes" name="readable_bytes">
+      <type builtin="yes" name="unsigned long long" />
+    </argument>
+  </function>
+</struct>
