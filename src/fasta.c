@@ -198,7 +198,7 @@ void fasta_de_vcsfmt(char * filename) {
   long bytes_read = 0, lines_written = 0;
 
   // Keep track of where we are within the metadata block.
-  long metadata_block_pos = 0;
+  int metadata_block_pos = 0;
 
   // Keep reading until we get to the metadata location.
   while (bytes_read < metadata_location && !ferror(input_file) &&
@@ -224,25 +224,24 @@ void fasta_de_vcsfmt(char * filename) {
       metadata_block_pos = 0;
     }
 
-    // TODO - finish this.
-  }
-
-  // cleanup mem
-  free(output_file_name);
-  free_string_with_size(input_block_with_size);
-  free_string_with_size(output_block_with_size);
-  if (ferror(input_file) && !feof(input_file)) {
-    PRINT_ERROR("Error in reading from input file.");
-  } else if (ferror(output_file) && !feof(input_file)) {
-    PRINT_ERROR("Error in writing to output file.");
-  } else if (feof(input_file)) {
-    PRINT_ERROR("de_vcsfmt completed successfully");
-  } else {
-    PRINT_ERROR("Unknown error in de_vcsfmt");
-  }
-  // close open handles
-  fclose(input_file);
-  fclose(output_file);
+    // cleanup mem
+    free(output_file_name);
+    free_string_with_size(input_block_with_size);
+    free_string_with_size(output_block_with_size);
+    free_string_with_size(metadata_block_with_size);
+    if (ferror(input_file) && !feof(input_file)) {
+        PRINT_ERROR("Error in reading from input file.");
+    } else if (ferror(output_file) && !feof(input_file)) {
+        PRINT_ERROR("Error in writing to output file.");
+    } else if (feof(input_file)) {
+        PRINT_ERROR("de_vcsfmt completed successfully");
+    } else {
+        PRINT_ERROR("Unknown error in de_vcsfmt");
+    }
+    // close open handles
+    fclose(input_file);
+    fclose(output_file);
+    fclose(metadata_file);
 }
 
 string_with_size * fasta_preformat(string_with_size * input,
@@ -363,3 +362,4 @@ int write_annotation(char * output, int line_number) {
 
   return written + 2;
 }
+
