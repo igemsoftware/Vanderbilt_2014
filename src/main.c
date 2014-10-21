@@ -4,10 +4,12 @@
 #include "vcsfmt.h"         // for file processing and I/O
 #include "vcscmp.h"         // for producing diff-compatible output
 
+#ifdef DEBUG
 // example function used for g_slist_foreach
 void print_list_string(char * input_str) {
     printf("%s\n", input_str);
 }
+#endif
 
 int main(int argc, char ** argv) {
 

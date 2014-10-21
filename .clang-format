@@ -1,5 +1,6 @@
 # options documented in http://clang.llvm.org/docs/ClangFormatStyleOptions.html
 
+Language: Cpp # used for C as well, not just C++
 AlignEscapedNewlinesLeft: true
 AlignTrailingComments: true
 AllowAllParametersOfDeclarationOnNextLine: true
@@ -13,15 +14,14 @@ BreakBeforeBinaryOperators: false
 BreakBeforeBraces: Attach
 BreakBeforeTernaryOperators: true
 ColumnLimit: 80
-ContinuationIndentWidth: 2 # to differentiate from normal lines
+ContinuationIndentWidth: 4 # to differentiate from normal lines
 DerivePointerAlignment: false
 DisableFormat: false
 ExperimentalAutoDetectBinPacking: false
 IndentCaseLabels: false
-IndentWidth: 4 # spaces not tabs
+IndentWidth: 2 # spaces not tabs
 IndentWrappedFunctionNames: true
 KeepEmptyLinesAtTheStartOfBlocks: true
-Language: Cpp # used for C as well, not just C++
 MaxEmptyLinesToKeep: 1
 PointerAlignment: Middle
 SpaceBeforeAssignmentOperators: true
