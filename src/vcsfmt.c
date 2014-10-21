@@ -159,9 +159,7 @@ void vcsfmt(char * filename) {
     free_string_with_size(output_block_with_size);
     free_string_with_size(preformatted_block_with_size);
     free_string_with_size(metadata_block_with_size);
-
 #endif
-
     // close open handles
     fclose(input_file);
     fclose(output_file);
