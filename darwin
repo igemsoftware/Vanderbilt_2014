@@ -30,13 +30,13 @@ timestamp() {
 # zips files to .vcsfmt format
 # $@: files to zip
 zip_fasta() {
-    dwndiff -z -o $DARWIN_FOLDER -i "$@"
+    dwndiff -z -o $DARWIN_FOLDER "$@"
 }
 
 # unzips files from vcsfmt format
 # $@: files to unzip
 unzip_fasta() {
-    dwndiff -u -i "$@" -o .
+    dwndiff -u -o . "$@"
 }
 
 ERROR_ROLLBACK="false"
@@ -172,6 +172,7 @@ else
 
         # backend-dependent
         if [ "$BACKEND_VCS_TYPE" = "git" ]; then
+            cd "$DARWIN_FOLDER"
             upon_error_set_rollback git add "${@:2}"
         fi
 
@@ -179,18 +180,21 @@ else
 
         # backend-dependent
         # "BACKEND_VCS_TYPE" = "git"
+        cd "$DARWIN_FOLDER"
         upon_error_set_rollback git commit "${@:2}"
 
     elif [ "$1" = "push" ]; then
 
         # backend-dependent
         # "$BACKEND_VCS_TYPE" = "git"
+        cd "$DARWIN_FOLDER"
         upon_error_set_rollback git push "${@:2}"
 
     elif [ "$1" = "pull" ]; then
 
         # backend-dependent
         # "$BACKEND_VCS_TYPE" = "git"
+        cd "$DARWIN_FOLDER"
         upon_error_set_rollback git pull "${@:2}"
         while read -r file_extension; do
             upon_error_set_rollback unzip_vcsfmt "*.$file_extension.vcsfmt"
@@ -200,12 +204,14 @@ else
 
         # backend-dependent
         # "$BACKEND_VCS_TYPE" = "git"
+        cd "$DARWIN_FOLDER"
         upon_error_set_rollback git status "${@:2}" | sed -e "s/\.vcsfmt//g"
 
     elif [ "$1" = "rm" ]; then
 
         # backend-dependent
         # "$BACKEND_VCS_TYPE" = "git"
+        cd "$DARWIN_FOLDER"
         upon_error_set_rollback git rm "${@:2}"
         upon_error_set_rollback rm "${@:2}"
 
@@ -219,6 +225,7 @@ else
 
         # backend-dependent
         # "$BACKEND_VCS_TYPE" = "git"
+        cd "$DARWIN_FOLDER"
         upon_error_set_rollback git diff "${@:2}"
 
 
@@ -227,6 +234,7 @@ else
 
         # backend-dependent
         # "$BACKEND_VCS_TYPE" = "git"
+        cd "$DARWIN_FOLDER"
         upon_error_set_rollback git "$@"
 
     else

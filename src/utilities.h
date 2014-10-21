@@ -41,20 +41,24 @@
 #define PRINT_ERROR_SIZE_T_NO_NEWLINE(num) fprintf(stderr, "%zu", (num))
 
 #define PRINT_ERROR_UNSIGNED_LONG_LONG_NO_NEWLINE(num) \
-    fprintf(stderr, "%llu", (num))
+  fprintf(stderr, "%llu", (num))
 
 #define PRINT_ERROR_MPZ_T_NO_NEWLINE(bignum) mpz_out_str(stderr, 10, (bignum))
 
+#define PRINT_ERROR_AND_RETURN(str) \
+  PRINT_ERROR(str);                 \
+  return;
+
 #define PRINT_ERROR_AND_RETURN_IF_NULL(ptr, str) \
-    if (NULL == (ptr)) {                         \
-        PRINT_ERROR((str));                      \
-        return;                                  \
-    }
+  if (NULL == (ptr)) {                           \
+    PRINT_ERROR((str));                          \
+    return;                                      \
+  }
 
 #define PRINT_ERROR_DIVIDER_LINE() fprintf(stderr, "%s\n", "------------");
 
 #define PRINT_ERROR_STRING_FIXED_LENGTH_NO_NEWLINE(str, len) \
-    fprintf(stderr, "%.*s", (int) len, str)
+  fprintf(stderr, "%.*s", (int) len, str)
 
 // x is vertical (downwards), y is horizontal (rightwards)
 // parentheses required because of distributivity
@@ -85,12 +89,12 @@ FILE * create_file_binary_write(const char * filename);
  * reaching EOF or some other ferror
  */
 typedef struct {
-    /* pointer to character string, NOT null-terminated! */
-    char * string;
-    /* current number of useful bytes this is storing */
-    unsigned long long readable_bytes;
-    /* full size of char * in bytes */
-    unsigned long long size_in_memory;
+  /* pointer to character string, NOT null-terminated! */
+  char * string;
+  /* current number of useful bytes this is storing */
+  unsigned long long readable_bytes;
+  /* full size of char * in bytes */
+  unsigned long long size_in_memory;
 } string_with_size;
 
 /* constructs new string_with_size of given size_in_memory
@@ -118,8 +122,8 @@ string_with_size * make_new_string_with_size_given_string(char * null_term_str);
  * @return modified string_with_size
  */
 string_with_size *
-  set_string_with_size_readable_bytes(string_with_size * sws,
-                                      unsigned long long readable_bytes);
+ set_string_with_size_readable_bytes(string_with_size * sws,
+                                     unsigned long long readable_bytes);
 /* copies data from a string_with_size into another
  * @from_sws string_with_size to copy from
  * @to_sws string_with_size to copy to

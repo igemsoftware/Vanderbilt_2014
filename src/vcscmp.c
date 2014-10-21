@@ -265,7 +265,7 @@ void write_line_and_if_new_add_to_list(
              // #ifdef DEBUG
              //             PRINT_ERROR("JOHN TRAVOLTA");
              // #endif
-      write_current_line_of_file(cur_file_lines_processed, cur_file, out_file);
+      write_current_line_of_file_incf_index(cur_file_lines_processed, cur_file, out_file);
       ++*current_streak_of_newly_added_lines;
       if (*current_streak_of_newly_added_lines > QUEUE_HASH_CRITICAL_SIZE) {
         *break_out_of_vcscmp = true;

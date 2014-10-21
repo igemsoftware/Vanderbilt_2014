@@ -16,5 +16,6 @@ bool is_start_codon(char * codon);
 // TODO: javadoc
 extern const char * stop_codons[];
 bool is_stop_codon(char * codon);
+bool is_comment_in_codon(char * codon);
 
 #endif /*___SEQUENCE_PROCESSING_H___*/
