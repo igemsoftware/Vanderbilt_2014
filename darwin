@@ -9,7 +9,9 @@
 # has newline at start
 RECOGNIZED_VCS="git"
 
-RECOGNIZED_FILE_EXTENSIONS="fasta"
+RECOGNIZED_FILE_EXTENSIONS="fasta
+fas
+fna"
 
 INITIAL_DIR="$(pwd)"
 
@@ -41,7 +43,7 @@ ERROR_ROLLBACK="false"
 
 # if command fails, set rollback to true
 # $@: command to run, and arguments
-if_error_set_rollback() {
+upon_error_set_rollback() {
     "$@"
     if [ $? -ne 0 ]; then
         ERROR_ROLLBACK="true"
@@ -72,25 +74,25 @@ display_help(){
     This project's page is at http://github.com/igemsoftware/Vanderbilt_2014.
     Report bugs to <danieldmcclanahan@gmail.com>.
     "
-
 }
 
 # display help
-if [ "$1" = "help" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$1" = "" ]; then
+if [ "$1" = "help" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ] || \
+    [ "$1" = "" ]; then
 
     display_help
 
-# the parser
+    # the parser
 elif [ "$1" = "init" ]; then
 
     # setup
-    if_error_set_rollback rm -rf "$DARWIN_FOLDER"
-    if_error_set_rollback mkdir "$DARWIN_FOLDER"
-    if_error_set_rollback cd "$DARWIN_FOLDER"
+    upon_error_set_rollback rm -rf "$DARWIN_FOLDER"
+    upon_error_set_rollback mkdir "$DARWIN_FOLDER"
+    upon_error_set_rollback cd "$DARWIN_FOLDER"
 
     # backend-dependent
     if [ "$2" = "git"  ]; then
-        if_error_set_rollback git init "${@:3}"
+        upon_error_set_rollback git init "${@:3}"
     else
         echo "Version control backend $2 not recognized. Recognized systems
     include: $RECOGNIZED_VCS" 1>&2
@@ -109,25 +111,25 @@ elif [ "$1" = "init" ]; then
 elif [ "$1" = "clone" ]; then
 
     # setup
-    if_error_set_rollback cd "/tmp"
-    TMP_FOLDER_NAME="$DARWIN_FOLDER-$(if_error_set_rollback timestamp)"
-    if_error_set_rollback mkdir "$TMP_FOLDER_NAME"
-    if_error_set_rollback cd "$TMP_FOLDER_NAME"
+    upon_error_set_rollback cd "/tmp"
+    TMP_FOLDER_NAME="$DARWIN_FOLDER-$(upon_error_set_rollback timestamp)"
+    upon_error_set_rollback mkdir "$TMP_FOLDER_NAME"
+    upon_error_set_rollback cd "$TMP_FOLDER_NAME"
 
     # backend-dependent
     if [ "$2" = "git" ]; then
-        if_error_set_rollback git clone "${@:3}"
+        upon_error_set_rollback git clone "${@:3}"
     else
         echo "Version control backend $2 not recognized. Recognized systems
     include: $RECOGNIZED_VCS" 1>&2
         ERROR_ROLLBACK="true"
     fi
 
-    if_error_set_rollback cd ..
-    if_error_set_rollback mv "$TMP_FOLDER_NAME" "$INITIAL_DIR"
-    if_error_set_rollback cd "$INITIAL_DIR"
-    if_error_set_rollback mv "$TMP_FOLDER_NAME" "$DARWIN_FOLDER"
-    if_error_set_rollback unzip_vcsfmt "$DARWIN_FOLDER/*.vcsfmt"
+    upon_error_set_rollback cd ..
+    upon_error_set_rollback mv "$TMP_FOLDER_NAME" "$INITIAL_DIR"
+    upon_error_set_rollback cd "$INITIAL_DIR"
+    upon_error_set_rollback mv "$TMP_FOLDER_NAME" "$DARWIN_FOLDER"
+    upon_error_set_rollback unzip_vcsfmt "$DARWIN_FOLDER/*.vcsfmt"
 
     # teardown
     if [ "$ERROR_ROLLBACK" = "true" ]; then
@@ -153,7 +155,8 @@ else
         if [ -d ".git" ]; then
             BACKEND_VCS_TYPE="git"
         else
-            echo "Error: incorrectly initialized repository. Try checking out again." 1>&2
+            echo "Error: incorrectly initialized repository." 1>&2
+            echo "Try checking out again." 1>&2
             exit -1
         fi
         echo -n "$BACKEND_VCS_TYPE" > "$DARWIN_FOLDER/$DARWIN_BACKEND_FILE"
@@ -164,59 +167,59 @@ else
 
         # setup
         while read -r file_extension; do
-            if_error_set_rollback zip_vcsfmt "*.$file_extension"
+            upon_error_set_rollback zip_vcsfmt "*.$file_extension"
         done <<< "$RECOGNIZED_FILE_EXTENSIONS"
 
         # backend-dependent
         if [ "$BACKEND_VCS_TYPE" = "git" ]; then
-            if_error_set_rollback git add "${@:2}"
+            upon_error_set_rollback git add "${@:2}"
         fi
 
     elif [ "$1" = "commit" ]; then
 
         # backend-dependent
         # "BACKEND_VCS_TYPE" = "git"
-        if_error_set_rollback git commit "${@:2}"
+        upon_error_set_rollback git commit "${@:2}"
 
     elif [ "$1" = "push" ]; then
 
         # backend-dependent
         # "$BACKEND_VCS_TYPE" = "git"
-        if_error_set_rollback git push "${@:2}"
+        upon_error_set_rollback git push "${@:2}"
 
     elif [ "$1" = "pull" ]; then
 
         # backend-dependent
         # "$BACKEND_VCS_TYPE" = "git"
-        if_error_set_rollback git pull "${@:2}"
+        upon_error_set_rollback git pull "${@:2}"
         while read -r file_extension; do
-            if_error_set_rollback unzip_vcsfmt "*.$file_extension.vcsfmt"
+            upon_error_set_rollback unzip_vcsfmt "*.$file_extension.vcsfmt"
         done <<< "$RECOGNIZED_FILE_EXTENSIONS"
 
     elif [ "$1" = "status" ]; then
 
         # backend-dependent
         # "$BACKEND_VCS_TYPE" = "git"
-        if_error_set_rollback git status "${@:2}" | sed -e "s/\.vcsfmt//g"
+        upon_error_set_rollback git status "${@:2}" | sed -e "s/\.vcsfmt//g"
 
     elif [ "$1" = "rm" ]; then
 
         # backend-dependent
         # "$BACKEND_VCS_TYPE" = "git"
-        if_error_set_rollback git rm "${@:2}"
-        if_error_set_rollback rm "${@:2}"
+        upon_error_set_rollback git rm "${@:2}"
+        upon_error_set_rollback rm "${@:2}"
 
     elif [ "$1" = "log" ]; then
 
         # backend-dependent
         # "$BACKEND_VCS_TYPE" = "git"
-        if_error_set_rollback git log "${@:2}"
+        upon_error_set_rollback git log "${@:2}"
 
     elif [ "$1" = "diff" ]; then
 
         # backend-dependent
         # "$BACKEND_VCS_TYPE" = "git"
-        if_error_set_rollback git diff "${@:2}"
+        upon_error_set_rollback git diff "${@:2}"
 
 
     elif [ "cat $WORKING_DIR/all_possible_git_commands | grep $1" != "" ]; then
@@ -224,7 +227,7 @@ else
 
         # backend-dependent
         # "$BACKEND_VCS_TYPE" = "git"
-        if_error_set_rollback git "$@"
+        upon_error_set_rollback git "$@"
 
     else
 

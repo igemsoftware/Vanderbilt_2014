@@ -1,0 +1,162 @@
+This file last updated 17 April 2006. See the end of the file for the revision history
+
+The files provided in this release:
+
+na_armX.dmel.RELEASE5
+na_arm2L.dmel.RELEASE5
+na_arm2R.dmel.RELEASE5
+na_arm3L.dmel.RELEASE5
+na_arm3R.dmel.RELEASE5
+na_arm4.dmel.RELEASE5
+na_XHet.dmel.RELEASE5
+na_YHet.dmel.RELEASE5
+na_2LHet.dmel.RELEASE5
+na_2RHet.dmel.RELEASE5
+na_3LHet.dmel.RELEASE5
+na_3RHet.dmel.RELEASE5
+na_armU.dmel.RELEASE5
+na_armUextra.dmel.RELEASE5
+gb_acc.dmel.RELEASE5
+mapping.sql
+README.RELEASE5
+
+Euchromatic Sequence
+
+The first six files are fasta files for the assembled euchromatic arms
+of D. melanogaster. This sequence is the result of a combination of BAC
+and whole genome shotgun data and is all finished to high quality. All
+sequence has been compared to the restriction digest fingerprints in
+multiple enzymes for validity. The details of this analysis will be
+described in a forthcoming publication.
+
+The chromosome arm sequences represent all of the euchromatin and parts of
+the centric heterochromatin. They extend into the centric heterochromatin
+on arms X, 2L, 2R, 3L and 3R by a combined total of 4.7 Mb.
+
+
+Table 1: Release 5 Statisics
+
+Arm      Length  Gaps   Major difference compared to Release 4
+X      22422827     3   8kb added to the distal end, gaps filled
+                        in regions 1-11
+2L     23011544     2   591kb added to the proximal end of the arm.
+2R     21146708     1   380kb added to the proximal end.
+3L     24543557     1   16kb added on distal end, 718kb added to
+                        proximal end, other gaps filled.
+3R     27905053     0   None
+4       1351857     1   70kbp added to the distal end
+
+Gaps of unknown size are denoted by 100 N's in the fasta files. There
+are two sized gaps on X that have estimates for their size. There are
+6 other gaps in the genome which are not sized.
+
+In addition to the major changes, all arms except for 3R had minor
+sequence changes in regions where the fingerprint digest showed evidence
+of missassembly, or in regions that required quality improvements.
+
+Each of the fasta file consists of a simple header for the arm identifier,
+the assembly date, and an md5 checksum of the sequence.
+
+Heterochromatic Sequence
+
+The next seven files are fasta files for sequence scaffolds that lie
+in heterochromatic regions of the genome. Within each scaffold, we have
+attempted to order and orient the contigs in a way consistent with
+BAC end alignment and/or STS mapping. Intervals between scaffolds is
+denoted by 100 N's, and the order and orientation of the scaffolds with
+respect to one another is not known. The details of this analysis and
+finishing techniques will be in forthcoming publications. Scaffolds
+that map genetically or cytologically to particular chromosomes are in
+the respective file; scaffolds which either cannot be localized or have
+conflicting localization data are in na_armU.dmel.RELEASE5.
+
+The most recent version of na_armU.dmel.RELEASE5 dated 13 April 2006 has
+had four scaffolds removed from the version dated 29 March 2006. The
+initial version was discovered to have scaffolds that are part of
+X included.
+
+The sequence in the heterochromatic files was generated starting with the
+whole genome shotgun assembly provided by Celera in 2001 and improved by
+gap closure, quality improvement, and joining scaffolds. The primary focus
+in this release has been scaffolds from the shotgun assembly which were
+larger than 40kb. Smaller scaffolds have not been targeting for finishing
+in this release except in cases where they joined with larger scaffolds.
+We have attempted to keep these seven files nonredundant with one another
+and with the euchromatic arms.
+
+The file na_armUextra.dmel.RELEASE5 contains 34,630 small scaffolds
+produced by the Celera shotgun assembler which could not be consistently
+joined with larger scaffolds. This data has not been previously
+released. The majority consists of short sequence - 32,804 are less than
+1000 bp long and 31,656 were generated with fewer than 10 traces. We have
+attempted to remove redundant scaffolds in which the data for a scaffold
+was used in the assembly of a finished region, but we have not excluded
+scaffolds which may be redundant with euchromatic or other heterochromatic
+regions. Nor can we exclude the possibility of contaminations from other
+organisms. We are making this data available as a resource for analysis
+of region which cannot be assembled well, such as satelites or simple
+repeats. Since some of this data is low quality, researchers are encouraged
+to contact either BDGP or DHGP for further details on this resource.
+
+GenBank Accession Numbers
+
+Individual components - either separate BACs or whole genome scaffolds - 
+are submitted to GenBank as part of the public release. The file
+gb_acc.dmel.RELEASE5 is a listing of the GenBank accession numbers and
+coordinates for each constituent. The accession numbers in this file
+have 3 types, ACNNNNNN, CPNNNNNN, and AABUNNNNNNNN. The first numbers are
+for BACs, the second is for finished or improved WGS scaffolds, and the
+third is for unimproved WGS scaffolds. In addition, there are some regions
+marked with internal identifiers DNNNN or 2110000222NNNNN. The first of
+these are new submissions to GenBank which we do not yet have accession
+numbers. The regions labeled with 2110000222NNNNN identifiers are all
+part of 'aumUextra' and are not likely to be submitted to submitted to
+GenBank in the immediate future. Regions marked with internal identifiers
+will be submitted to GenBank soon and the coordinate file updated as
+they become available.
+
+The sequence of the BAC in GenBank is not necessarily in the same
+orientation as it is on the chromosome. Also, there are cases of
+polymorphisms in overlap regions in which the sequence of the BAC does
+not match the assembled arm. Some BAC sequences have been submitted to
+GenBank as composites of two adjacent BACs. Please see the GenBank record
+for the coordinates of the individual BACs within these submissions.
+
+The coordinates in this file are '1' based.
+
+Release 4 Mapping
+
+The final file, mapping.sql, is a table that can be used to generate
+mappings from Release 4 euchromatin to Release 5. The file contains the PostgreSQL
+commands that can be used for finding a coordinate on a Release 5 arm
+corresponding to Release 4. Load the data with the command:
+
+           psql -h db_server db_name < mapping.sql
+
+Then an example query to find the coordinate on Release 5 corresponding
+to 32415 on Release 4 is:
+
+           db_name=# select r4_map('2R',32415);
+            r4_map
+           --------
+            412533
+           (1 row)
+
+and the converse to find the Release 4 coordinate corresponding to a
+Release 5 location is:
+
+           db_name=# select r5_map('2R',412533);
+            r5_map
+           --------
+             32415
+           (1 row)
+
+The file may need to be modified to suit the requirements of a particular
+site.
+
+
+Revision History:
+
+29 March 2006	Initial version
+17 April 2006	Added GenBank Accession number listing; removed redundant scaffold in armU
+20 October 2006	Added GenBank accession numbers for now entries

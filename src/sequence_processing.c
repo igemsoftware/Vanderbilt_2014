@@ -18,18 +18,18 @@ const char * start_codons[ NUMBER_OF_START_CODONS ] = {"ATG"};
 #elif defined POPULAR_CODONS
 #define NUMBER_OF_START_CODONS 3
 const char * start_codons[ NUMBER_OF_START_CODONS ] = {
-  "ATG", // AUG (83% prevalence)
-  "GTG", // GUG (14% prevalence)
-  "TTG"  // UUG (3% prevalence)
+    "ATG", // AUG (83% prevalence)
+    "GTG", // GUG (14% prevalence)
+    "TTG"  // UUG (3% prevalence)
 };
 #else
 #define NUMBER_OF_START_CODONS 5
 const char * start_codons[ NUMBER_OF_START_CODONS ] = {
-  "ATG", // AUG (83% prevalence)
-  "GTG", // GUG (14% prevalence)
-  "TTG", // UUG (3% prevalence)
-  "ATT", // AUU (very small)
-  "CTG"  // CUG (very small)
+    "ATG", // AUG (83% prevalence)
+    "GTG", // GUG (14% prevalence)
+    "TTG", // UUG (3% prevalence)
+    "ATT", // AUU (very small)
+    "CTG"  // CUG (very small)
 };
 #endif
 
@@ -46,23 +46,21 @@ const char * start_codons[ NUMBER_OF_START_CODONS ] = {"ATG"};
 const char * stop_codons[ NUMBER_OF_STOP_CODONS ] = {"TAA", "TAG", "TGA"};
 
 bool is_start_codon(char * codon) {
-    for (unsigned long long start_codon_index = 0;
-         start_codon_index < NUMBER_OF_START_CODONS; ++start_codon_index) {
-        if (strncmp(codon, start_codons[ start_codon_index ], CODON_LENGTH) ==
-            0) {
-            return true;
-        }
+  for (unsigned long long start_codon_index = 0;
+       start_codon_index < NUMBER_OF_START_CODONS; ++start_codon_index) {
+    if (strncmp(codon, start_codons[ start_codon_index ], CODON_LENGTH) == 0) {
+      return true;
     }
-    return false;
+  }
+  return false;
 }
 
 bool is_stop_codon(char * codon) {
-    for (unsigned long long stop_codon_index = 0;
-         stop_codon_index < NUMBER_OF_STOP_CODONS; ++stop_codon_index) {
-        if (strncmp(codon, stop_codons[ stop_codon_index ], CODON_LENGTH) ==
-            0) {
-            return true;
-        }
+  for (unsigned long long stop_codon_index = 0;
+       stop_codon_index < NUMBER_OF_STOP_CODONS; ++stop_codon_index) {
+    if (strncmp(codon, stop_codons[ stop_codon_index ], CODON_LENGTH) == 0) {
+      return true;
     }
-    return false;
+  }
+  return false;
 }
