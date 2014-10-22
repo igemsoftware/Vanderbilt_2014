@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# $1: type of operation
+# $2: where to move the files when finished
+# $3: files to operate on
+
+if [ "$1" == "unzip" ] || [ "$1" = "unzip-changes" ]; then
+    result=$(echo -n $3 | sed -e "s/\.vcsfmt//g")
+    dwndiff -o . -u "$3"
+else
+    result=$(echo -n $3; echo -n ".vcsfmt")
+    dwndiff -o . -z "$3"
+fi
+
+if [ "$1" = "unzip-changes" ]; then
+    mv $result "$result.new-file"
+    mv "$result.new-file" "$2"
+else
+    mv $result "$2"
+fi

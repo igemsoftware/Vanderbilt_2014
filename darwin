@@ -28,15 +28,16 @@ timestamp() {
 }
 
 # zips files to .vcsfmt format
-# $@: files to zip
+# $1: output directory
 zip_fasta() {
-    dwndiff -z -o $DARWIN_FOLDER "$@"
+    dwndiff -o "$1" -z "${@:2}"
 }
 
-# unzips files from vcsfmt format
-# $@: files to unzip
+# unzips files from vcsfmt format to working dir from .dwn dir
+# $1: output directory
+# $2-@: file(s) to unzip
 unzip_fasta() {
-    dwndiff -u -o . "$@"
+    dwndiff -o "$1" -u "${@:2}"
 }
 
 ERROR_ROLLBACK="false"
@@ -69,7 +70,7 @@ display_help(){
 
     Darwin is a tool built on top of git, and as a result defaults to using
     git's syntax and commands outside of the overridden functions above. Git
-    documentation can be viewed at git-scm.com.
+    documentation can be viewed at http://git-scm.com.
 
     This project's page is at http://github.com/igemsoftware/Vanderbilt_2014.
     Report bugs to <danieldmcclanahan@gmail.com>.
@@ -86,58 +87,76 @@ if [ "$1" = "help" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ] || \
 elif [ "$1" = "init" ]; then
 
     # setup
-    upon_error_set_rollback rm -rf "$DARWIN_FOLDER"
-    upon_error_set_rollback mkdir "$DARWIN_FOLDER"
-    upon_error_set_rollback cd "$DARWIN_FOLDER"
-
-    # backend-dependent
-    if [ "$2" = "git"  ]; then
-        upon_error_set_rollback git init "${@:3}"
+    if [ -d "$DARWIN_FOLDER" ]; then
+        echo "A darwin repository already exists!" 1>&2
     else
-        echo "Version control backend $2 not recognized. Recognized systems
-    include: $RECOGNIZED_VCS" 1>&2
-        ERROR_ROLLBACK="true"
-    fi
+        upon_error_set_rollback mkdir "$DARWIN_FOLDER"
+        upon_error_set_rollback cd "$DARWIN_FOLDER"
 
-    # teardown
-    if [ "$ERROR_ROLLBACK" = "true" ]; then
-        cd "$INITIAL_DIR"
-        rm -rf "$DARWIN_FOLDER"
-    else
-        # store type of backend used
-        echo -n "$2" > "$DARWIN_BACKEND_FILE"
+        # backend-dependent
+        if [ "$2" = "git"  ]; then
+            upon_error_set_rollback git init "${@:3}"
+        elif [ "$2" = "" ]; then
+            echo "Version control backend required in command, e.g.:
+        darwin init <backend>
+Recognized systems include: $RECOGNIZED_VCS" 1>&2
+            ERROR_ROLLBACK="true"
+        else
+            echo "Version control backend $2 not recognized. Recognized systems
+        include: $RECOGNIZED_VCS" 1>&2
+            ERROR_ROLLBACK="true"
+        fi
+
+        # teardown
+        if [ "$ERROR_ROLLBACK" = "true" ]; then
+            cd "$INITIAL_DIR"
+            rm -rf "$DARWIN_FOLDER"
+        else
+            # store type of backend used
+            echo -n "$2" > "$DARWIN_BACKEND_FILE"
+            git add $DARWIN_BACKEND_FILE
+        fi
+
     fi
 
 elif [ "$1" = "clone" ]; then
 
-    # setup
-    upon_error_set_rollback cd "/tmp"
-    TMP_FOLDER_NAME="$DARWIN_FOLDER-$(upon_error_set_rollback timestamp)"
-    upon_error_set_rollback mkdir "$TMP_FOLDER_NAME"
-    upon_error_set_rollback cd "$TMP_FOLDER_NAME"
-
-    # backend-dependent
-    if [ "$2" = "git" ]; then
-        upon_error_set_rollback git clone "${@:3}"
+    if [ -d "$DARWIN_FOLDER" ]; then
+        echo "A darwin repository already exists!" 1>&2
     else
-        echo "Version control backend $2 not recognized. Recognized systems
-    include: $RECOGNIZED_VCS" 1>&2
-        ERROR_ROLLBACK="true"
-    fi
+        # setup
+        upon_error_set_rollback cd "/tmp"
+        TMP_FOLDER_NAME="$DARWIN_FOLDER-$(upon_error_set_rollback timestamp)"
+        upon_error_set_rollback mkdir "$TMP_FOLDER_NAME"
+        upon_error_set_rollback cd "$TMP_FOLDER_NAME"
 
-    upon_error_set_rollback cd ..
-    upon_error_set_rollback mv "$TMP_FOLDER_NAME" "$INITIAL_DIR"
-    upon_error_set_rollback cd "$INITIAL_DIR"
-    upon_error_set_rollback mv "$TMP_FOLDER_NAME" "$DARWIN_FOLDER"
-    upon_error_set_rollback unzip_vcsfmt "$DARWIN_FOLDER/*.vcsfmt"
+        # backend-dependent
+        if [ "$2" = "git" ]; then
+            upon_error_set_rollback git clone "$3" "$DARWIN_FOLDER"
+        else
+            echo "Version control backend $2 not recognized. Recognized systems
+include: $RECOGNIZED_VCS" 1>&2
+            ERROR_ROLLBACK="true"
+        fi
 
-    # teardown
-    if [ "$ERROR_ROLLBACK" = "true" ]; then
-        cd "$INITIAL_DIR"
-        rm -rf "$DARWIN_FOLDER"
-    else
-        # store type of backend used
-        echo -n "$2" > "$DARWIN_FOLDER/$DARWIN_BACKEND_FILE"
+        upon_error_set_rollback mv "$DARWIN_FOLDER" "$INITIAL_DIR"
+        upon_error_set_rollback cd ..
+        upon_error_set_rollback rm -rf "$TMP_FOLDER_NAME"
+        upon_error_set_rollback cd "$INITIAL_DIR"
+        dwndiff_helper unzip . $DARWIN_FOLDER/*.vcsfmt
+
+        # teardown
+        if [ "$ERROR_ROLLBACK" = "true" ]; then
+            cd "$INITIAL_DIR"
+            rm -rf "$DARWIN_FOLDER"
+            rm -rf "/tmp/$TMP_FOLDER_NAME"
+        else
+            # store type of backend used
+            cd $DARWIN_FOLDER
+            echo -n "$2" > "$DARWIN_BACKEND_FILE"
+            git add $DARWIN_BACKEND_FILE
+        fi
+
     fi
 
 else
@@ -167,21 +186,28 @@ else
 
         # setup
         while read -r file_extension; do
-            upon_error_set_rollback zip_vcsfmt "*.$file_extension"
+            dwndiff_helper zip "$DARWIN_FOLDER" *.$file_extension
         done <<< "$RECOGNIZED_FILE_EXTENSIONS"
 
         # backend-dependent
         if [ "$BACKEND_VCS_TYPE" = "git" ]; then
             cd "$DARWIN_FOLDER"
-            upon_error_set_rollback git add "${@:2}"
+            upon_error_set_rollback git add "$2.vcsfmt"
         fi
 
     elif [ "$1" = "commit" ]; then
 
-        # backend-dependent
-        # "BACKEND_VCS_TYPE" = "git"
-        cd "$DARWIN_FOLDER"
-        upon_error_set_rollback git commit "${@:2}"
+        if [ "$2" = "" ]; then
+            echo "Enter a message describing your changes, e.g.:"
+            echo "    darwin commit \"slightly modified GFP sector\""
+            exit -1
+        else
+            # backend-dependent
+            # "BACKEND_VCS_TYPE" = "git"
+            cd "$DARWIN_FOLDER"
+            upon_error_set_rollback git commit -m "$2" \
+                | grep -v "$DARWIN_BACKEND_FILE"
+        fi
 
     elif [ "$1" = "push" ]; then
 
@@ -196,38 +222,33 @@ else
         # "$BACKEND_VCS_TYPE" = "git"
         cd "$DARWIN_FOLDER"
         upon_error_set_rollback git pull "${@:2}"
-        while read -r file_extension; do
-            upon_error_set_rollback unzip_vcsfmt "*.$file_extension.vcsfmt"
-        done <<< "$RECOGNIZED_FILE_EXTENSIONS"
+        exist_changes="no"
+        git diff --name-only HEAD | while read changed_file; do
+            exist_changes="yes"
+            dwndiff_helper unzip-changes .. $changed_file
+        done
+
+        if [ "$exist-changes" != "" ]; then
+            echo "Changes were made upstream. You'll have to manually merge the
+files with the extension .new-file."
+        fi
 
     elif [ "$1" = "status" ]; then
 
         # backend-dependent
         # "$BACKEND_VCS_TYPE" = "git"
         cd "$DARWIN_FOLDER"
-        upon_error_set_rollback git status "${@:2}" | sed -e "s/\.vcsfmt//g"
+        upon_error_set_rollback git status "${@:2}" | sed -e "s/\.vcsfmt//g" \
+            | grep -v "$DARWIN_BACKEND_FILE"
 
     elif [ "$1" = "rm" ]; then
 
         # backend-dependent
         # "$BACKEND_VCS_TYPE" = "git"
         cd "$DARWIN_FOLDER"
-        upon_error_set_rollback git rm "${@:2}"
-        upon_error_set_rollback rm "${@:2}"
-
-    elif [ "$1" = "log" ]; then
-
-        # backend-dependent
-        # "$BACKEND_VCS_TYPE" = "git"
-        upon_error_set_rollback git log "${@:2}"
-
-    elif [ "$1" = "diff" ]; then
-
-        # backend-dependent
-        # "$BACKEND_VCS_TYPE" = "git"
-        cd "$DARWIN_FOLDER"
-        upon_error_set_rollback git diff "${@:2}"
-
+        upon_error_set_rollback git rm "$2.vcsfmt"
+        cd "$INITIAL_DIR"
+        upon_error_set_rollback rm "$2"
 
     elif [ "cat $WORKING_DIR/all_possible_git_commands | grep $1" != "" ]; then
         # if command is git command

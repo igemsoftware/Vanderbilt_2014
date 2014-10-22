@@ -49,13 +49,6 @@ FILE * advance_file_to_line(FILE * file, mpz_t * cur_line, mpz_t * final_line,
   if (!less_than_mpz_t(cur_line, final_line)) {
     // if final_line < cur_line
     if (!equal_to_mpz_t(cur_line, final_line)) {
-#ifdef DEBUG
-      PRINT_ERROR_MPZ_T_NO_NEWLINE(*cur_line);
-      PRINT_ERROR_NO_NEWLINE(",");
-      PRINT_ERROR_MPZ_T_NO_NEWLINE(*final_line);
-      PRINT_ERROR_NEWLINE();
-      PRINT_ERROR("REWINDING FILE!!!!!!!");
-#endif
       rewind(file); // IFFY: this will DESTROY concurrent access
       mpz_set_ui(*cur_line, 1);
       return advance_file_to_line(file, cur_line, final_line, block_size);
@@ -145,10 +138,6 @@ string_with_size * get_current_line_of_file(FILE * source_file) {
                            current_offset);
     for (unsigned long long current_slot_in_sws = current_offset;
          current_slot_in_sws < BIN_BLOCK_SIZE; ++current_slot_in_sws) {
-      // #ifdef DEBUG
-      //             fprintf(stderr, "%c",
-      //             io_block->string[current_slot_in_sws]);
-      // #endif
       if (NEWLINE == io_block->string[ current_slot_in_sws ]) {
         fseek(source_file, -((long) io_block->readable_bytes), SEEK_CUR);
         // +1 to include newline
@@ -159,9 +148,6 @@ string_with_size * get_current_line_of_file(FILE * source_file) {
     }
     current_offset = io_block->readable_bytes;
     grow_string_with_size(&io_block, current_offset + BIN_BLOCK_SIZE);
-    // #ifdef DEBUG
-    //         fprintf(stderr, "%p,", (void *)io_block->string);
-    // #endif
   }
   return io_block;
 }
@@ -198,9 +184,6 @@ string_with_size * process_block_vcsfmt(string_with_size * input_block,
         output_block->string[ output_block->readable_bytes ] =
          current_codon_frame[ 0 ];
         ++output_block->readable_bytes;
-#ifdef DEBUG
-        fprintf(stderr, "%llu\n", codon_index);
-#endif
       } else if (NEWLINE == current_codon_frame[ 0 ]) {
         // do nothing
       } else if (*is_within_orf) {

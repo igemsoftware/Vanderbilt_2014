@@ -4,7 +4,10 @@
 // VCSFMT
 void vcsfmt(char * filename, char * output_directory) {
   FILE * input_file = open_file_read(filename);
-  PRINT_ERROR_AND_RETURN_IF_NULL(input_file, "Error in creating input file.");
+  if (NULL == input_file) {
+    printf("Error in creating input file.\n");
+    return;
+  }
 
   // create output filename
   char * output_file_name =
@@ -113,7 +116,10 @@ void vcsfmt(char * filename, char * output_directory) {
 // DE_VCSFMT
 void de_vcsfmt(char * filename, char * output_directory) {
   FILE * input_file = open_file_read(filename);
-  PRINT_ERROR_AND_RETURN_IF_NULL(input_file, "Error in creating input file.");
+  if (NULL == input_file) {
+    printf("Error in creating input file.\n");
+    return;
+  }
   // create filename long enough to concatenate filename and suffix
   // assume filename ends in .vcsfmt (7 chars)
   char * output_file_name =

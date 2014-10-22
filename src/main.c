@@ -6,13 +6,6 @@
 
 dwndiff_arguments args;
 
-#ifdef DEBUG
-// example function used for g_slist_foreach
-void print_list_string(char * input_str) {
-  printf("%s\n", input_str);
-}
-#endif
-
 void format_file_arg(char * filename) {
   if (args.is_zip) {
     vcsfmt(filename, args.output_file_location);
@@ -35,7 +28,6 @@ int main(int argc, char ** argv) {
       FASTA_LINE_LENGTH = args.width;
     }
     if (args.output_file_location) {
-      printf("%s\n", args.output_file_location);
       if (NULL != args.files) {
         g_slist_foreach(args.files, (GFunc) format_file_arg, NULL);
       } else {
