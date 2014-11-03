@@ -1,6 +1,9 @@
 darwin
 ======
 
+# THIS PROJECT IS FROZEN AS OF 2014-11-02
+# VISIT https://github.com/cosmicexplorer/darwin for the current version
+
 Track changes as a genome evolves over time (hence the name).
 
 #### Build
